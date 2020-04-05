@@ -1,6 +1,6 @@
 # urawai_pos
 
-A new Flutter project.
+Aplikasi Penjualan untuk Usaha kecil dan menengah.
 
 ## Getting Started
 
