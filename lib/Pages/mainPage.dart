@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:urawai_pos/Pages/Models/orderList.dart';
+import 'package:urawai_pos/Pages/Models/postedOrder.dart';
 import 'package:urawai_pos/Pages/Models/products.dart';
+import 'package:uuid/uuid.dart';
 import 'constans/utils.dart';
 
 class MainPage extends StatefulWidget {
@@ -9,7 +12,13 @@ class MainPage extends StatefulWidget {
 }
 
 class _MainPageState extends State<MainPage> {
+  final _formatCurrency = NumberFormat("#,##0", "en_US");
+  final _uuid = Uuid();
+
   bool isDrawerShow = true;
+  String orderID = '';
+  String orderDate = '';
+  List<PostedOrder> postedOrder = [];
 
   List<Product> products = [
     Product(
@@ -52,9 +61,31 @@ class _MainPageState extends State<MainPage> {
       isRecommended: true,
       category: 1,
     ),
+    Product(
+      id: 6,
+      name: 'Pizza Double Cheese',
+      image: 'assets/images/pizza_cheese.png',
+      price: 80000,
+      isRecommended: false,
+      category: 1,
+    ),
+    Product(
+      id: 7,
+      name: 'Es Kopi Susu',
+      image: 'assets/images/eskopi_susu.jpg',
+      price: 22000,
+      isRecommended: true,
+      category: 1,
+    ),
   ];
 
   List<OrderList> orderLists = [];
+
+  void _resetOrder() {
+    orderID = '';
+    orderDate = '';
+    orderLists.clear();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -143,42 +174,46 @@ class _MainPageState extends State<MainPage> {
 
                                 return Dismissible(
                                   key: ValueKey(itemKey),
-                                  background: Container(color: Colors.red),
+                                  background: Container(
+                                    alignment: Alignment.center,
+                                    color: Colors.red,
+                                    child: Text(
+                                      'Hapus',
+                                      style: TextStyle(
+                                          color: Colors.white,
+                                          fontSize: 35,
+                                          fontWeight: FontWeight.bold),
+                                    ),
+                                  ),
                                   onDismissed: (direction) {
-                                    setState(() {
-                                      orderLists.removeAt(index);
-                                    });
+                                    setState(() => orderLists.removeAt(index));
                                   },
                                   child: _detailItemOrder(
-                                    productName: orderLists[index].productName,
-                                    price: orderLists[index].price,
-                                    quantity: orderLists[index].quantity,
-                                    onLongPress: () {
-                                      print(orderLists[index].productName);
-                                    },
-                                  ),
+                                      productName:
+                                          orderLists[index].productName,
+                                      price: orderLists[index].price,
+                                      quantity: orderLists[index].quantity,
+                                      onLongPress: () {
+                                        print(orderLists[index].productName);
+                                      },
+                                      onMinusButtonTap: () {
+                                        if (orderLists[index].quantity > 1)
+                                          setState(() =>
+                                              orderLists[index].quantity--);
+                                      },
+                                      onPlusButtonTap: () {
+                                        if (orderLists[index].quantity <= 999)
+                                          setState(() =>
+                                              orderLists[index].quantity++);
+                                      }),
                                 );
-
-                                // return _detailItemOrder(
-                                //     productName: orderLists[index].productName,
-                                //     price: orderLists[index].price,
-                                //     quantity: orderLists[index].quantity,
-                                //     keyIndex: itemKey,
-                                //     onLongPress: () {
-                                //       print(orderLists[index].productName);
-                                //     },
-                                //     onDismiss: (direction) {
-                                //       setState(() {
-                                //         orderLists.removeAt(index);
-                                //       });
-                                //     });
                               }),
                         ),
                       ),
                     ),
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.end,
-                      children: <Widget>[_footerOrderList()],
+                      children: <Widget>[_footerOrderList(orderLists)],
                     ),
                   ],
                 ),
@@ -192,49 +227,130 @@ class _MainPageState extends State<MainPage> {
     );
   }
 
-  Widget _footerOrderList() {
-    return Column(
-      children: <Widget>[
-        Divider(thickness: 3),
-        SizedBox(height: 8),
-        _bottomInfo(title: 'Subtotal', value: 'Rp. 177,247,-'),
-        SizedBox(height: 8),
-        _bottomInfo(title: 'Diskon (0%)', value: 'Rp. 0,-'),
-        SizedBox(height: 8),
-        _bottomInfo(title: 'Pajak (10%)', value: 'Rp. 17,724,-'),
-        SizedBox(height: 8),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: <Widget>[
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: <Widget>[
-                _bottomButton(icon: Icons.save, title: 'Simpan'),
-                _bottomButton(icon: Icons.disc_full, title: 'Diskon'),
-                _bottomButton(
-                    icon: Icons.check_box_outline_blank, title: 'Split Bill'),
-              ],
-            ),
-            Expanded(
-              child: RaisedButton(
-                  padding: EdgeInsets.all(0),
-                  child: Container(
-                      alignment: Alignment.center,
-                      height: 60,
-                      color: Color(0xFF408be5),
-                      child: Text(
-                        'BAYAR',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 25,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      )),
-                  onPressed: null),
-            )
-          ],
-        ),
-      ],
+  Widget _footerOrderList(Iterable<OrderList> orderList) {
+    double _grandTotal = 0;
+    double _tax = 0;
+    double _subtotal = 0;
+
+    orderList.forEach((order) {
+      _subtotal = order.quantity * order.price;
+      _grandTotal = _grandTotal + _subtotal;
+    });
+    _subtotal = _grandTotal;
+
+    _tax = _subtotal * 0.1;
+    _grandTotal = _subtotal + _tax;
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 8.0),
+      child: Column(
+        children: <Widget>[
+          Divider(thickness: 3),
+          SizedBox(height: 8),
+          _bottomInfo(
+              title: 'Subtotal',
+              value: 'Rp. ${_formatCurrency.format(_subtotal)},-'),
+          SizedBox(height: 8),
+          _bottomInfo(title: 'Diskon (0%)', value: 'Rp. 0,-'),
+          SizedBox(height: 8),
+          _bottomInfo(
+              title: 'Pajak (10%)',
+              value: 'Rp. ${_formatCurrency.format(_tax)},-'),
+          SizedBox(height: 8),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: <Widget>[
+              Text(
+                'Total',
+                style: TextStyle(fontSize: 25, fontWeight: FontWeight.bold),
+              ),
+              Text(
+                'Rp. ${_formatCurrency.format(_grandTotal)} ,-',
+                style: TextStyle(fontSize: 25, fontWeight: FontWeight.bold),
+              ),
+            ],
+          ),
+          SizedBox(height: 8),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: <Widget>[
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                children: <Widget>[
+                  _bottomButton(
+                      icon: Icons.save,
+                      title: 'Simpan',
+                      onTap: () {
+                        if (orderID.isNotEmpty && orderLists.isNotEmpty) {
+                          postedOrder.add(PostedOrder(
+                            id: orderID,
+                            orderDate: orderDate,
+                            orderList: orderLists.toList(),
+                          ));
+
+                          showDialog(
+                            barrierDismissible: false,
+                            child: AlertDialog(
+                              title: Text('Informasi Pesanan'),
+                              content: Row(
+                                children: <Widget>[
+                                  Icon(
+                                    Icons.info,
+                                    size: 40,
+                                    color: Colors.blue,
+                                  ),
+                                  SizedBox(width: 10),
+                                  Text('Pesanan sudah disimpan.'),
+                                ],
+                              ),
+                              actions: <Widget>[
+                                FlatButton(
+                                    onPressed: () {
+                                      Navigator.pop(context);
+                                      setState(() {
+                                        _resetOrder();
+                                      });
+                                    },
+                                    child: Text('OK'))
+                              ],
+                            ),
+                            context: context,
+                          );
+                        }
+                      }),
+                  _bottomButton(icon: Icons.disc_full, title: 'Diskon'),
+                  _bottomButton(
+                      icon: Icons.check_box_outline_blank,
+                      title: 'Split Bill',
+                      onTap: () {
+                        print('PostedOrder Length ' +
+                            postedOrder.length.toString());
+                        for (var data in postedOrder)
+                          print(data.orderList[0].productName);
+                      }),
+                ],
+              ),
+              Expanded(
+                child: RaisedButton(
+                    padding: EdgeInsets.all(0),
+                    child: Container(
+                        alignment: Alignment.center,
+                        height: 60,
+                        color: Color(0xFF408be5),
+                        child: Text(
+                          'BAYAR',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 25,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        )),
+                    onPressed: null),
+              )
+            ],
+          ),
+        ],
+      ),
     );
   }
 
@@ -250,9 +366,20 @@ class _MainPageState extends State<MainPage> {
               'Pesanan (${orderLists.length})',
               style: TextStyle(fontSize: 25, fontWeight: FontWeight.bold),
             ),
-            Icon(
-              Icons.add,
-              size: 35,
+            IconButton(
+              icon: Icon(Icons.add),
+              iconSize: 35,
+              onPressed: () {
+                orderLists.clear();
+                orderID = '';
+                orderDate = '';
+                setState(() {
+                  orderID = _uuid.v1().substring(0, 8);
+
+                  orderDate =
+                      DateFormat.yMEd().add_jms().format(DateTime.now());
+                });
+              },
             ),
           ],
         ),
@@ -263,18 +390,22 @@ class _MainPageState extends State<MainPage> {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceAround,
           children: <Widget>[
-            Text(
-              'Order List #1',
-              style: TextStyle(
-                color: priceColor,
-                fontSize: 18,
-              ),
-            ),
-            Text('Kamis, 4 April 2020 | 17:20:01',
+            Expanded(
+              child: Text(
+                'Order List #' + orderID.toString(),
                 style: TextStyle(
                   color: priceColor,
                   fontSize: 18,
-                )),
+                ),
+              ),
+            ),
+            Expanded(
+              child: Text(orderDate,
+                  style: TextStyle(
+                    color: priceColor,
+                    fontSize: 16,
+                  )),
+            ),
           ],
         ),
         Divider(
@@ -285,44 +416,44 @@ class _MainPageState extends State<MainPage> {
     );
   }
 
-  Widget _bottomButton({String title, IconData icon}) {
-    return Container(
-      width: 60,
-      height: 60,
-      margin: EdgeInsets.all(8),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(8),
-        color: greyColor,
+  Widget _bottomButton({String title, IconData icon, Function onTap}) {
+    return GestureDetector(
+      child: Container(
+        width: 60,
+        height: 60,
+        margin: EdgeInsets.all(8),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(8),
+          color: greyColor,
+        ),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: <Widget>[
+            Icon(icon),
+            Text(
+              title,
+              style: TextStyle(color: Colors.black),
+            )
+          ],
+        ),
       ),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: <Widget>[
-          Icon(icon),
-          Text(
-            title,
-            style: TextStyle(color: Colors.black),
-          )
-        ],
-      ),
+      onTap: onTap,
     );
   }
 
   Widget _bottomInfo({String title, String value}) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 8.0),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: <Widget>[
-          Text(
-            title,
-            style: priceTextStyle,
-          ),
-          Text(
-            value,
-            style: priceTextStyle,
-          ),
-        ],
-      ),
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: <Widget>[
+        Text(
+          title,
+          style: priceTextStyle,
+        ),
+        Text(
+          value,
+          style: priceTextStyle,
+        ),
+      ],
     );
   }
 
@@ -331,11 +462,15 @@ class _MainPageState extends State<MainPage> {
     double price,
     int quantity,
     Function onLongPress,
+    Function onMinusButtonTap,
+    Function onPlusButtonTap,
   }) {
     return Column(
       children: <Widget>[
         GestureDetector(
-          child: Container(
+          child: AnimatedContainer(
+            duration: Duration(milliseconds: 700),
+            curve: Curves.bounceOut,
             child: Padding(
               padding: const EdgeInsets.all(8.0),
               child: Row(
@@ -351,7 +486,7 @@ class _MainPageState extends State<MainPage> {
                       ),
                       SizedBox(height: 5),
                       Text(
-                        'Rp. ' + price.toString(),
+                        'Rp. ' + _formatCurrency.format(price),
                         style: priceTextStyle,
                       ),
                       SizedBox(height: 8),
@@ -372,14 +507,17 @@ class _MainPageState extends State<MainPage> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceAround,
                     children: <Widget>[
-                      Container(
-                        width: 35,
-                        height: 35,
-                        color: greyColor,
-                        child: Icon(
-                          Icons.remove,
-                          color: Colors.white,
+                      GestureDetector(
+                        child: Container(
+                          width: 35,
+                          height: 35,
+                          color: greyColor,
+                          child: Icon(
+                            Icons.remove,
+                            color: Colors.white,
+                          ),
                         ),
+                        onTap: onMinusButtonTap,
                       ),
                       Container(
                         alignment: Alignment.center,
@@ -391,14 +529,17 @@ class _MainPageState extends State<MainPage> {
                           style: bodyTextStyle,
                         ),
                       ),
-                      Container(
-                        width: 35,
-                        height: 35,
-                        color: greyColor,
-                        child: Icon(
-                          Icons.add,
-                          color: Colors.white,
+                      GestureDetector(
+                        child: Container(
+                          width: 35,
+                          height: 35,
+                          color: greyColor,
+                          child: Icon(
+                            Icons.add,
+                            color: Colors.white,
+                          ),
                         ),
+                        onTap: onPlusButtonTap,
                       ),
                     ],
                   ),
@@ -468,21 +609,23 @@ class _MainPageState extends State<MainPage> {
             ),
             SizedBox(height: 5),
             Text(
-              'Rp. ' + productPrice.toString(),
+              'Rp. ' + _formatCurrency.format(productPrice),
               style: priceTextStyle,
             ),
           ],
         ),
       ),
       onDoubleTap: () {
-        print(productName);
-        orderLists.add(OrderList(
-          productName: productName,
-          price: productPrice,
-          dateTime: DateTime.now(),
-          quantity: 1,
-        ));
-        setState(() {});
+        if (orderID.isNotEmpty) {
+          orderLists.add(OrderList(
+            id: _uuid.v1(),
+            productName: productName,
+            price: productPrice,
+            dateTime: DateTime.now(),
+            quantity: 1,
+          ));
+          setState(() {});
+        }
       },
     );
   }

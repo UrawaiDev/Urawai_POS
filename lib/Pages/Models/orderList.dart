@@ -1,5 +1,5 @@
 class OrderList {
-  int id;
+  String id;
   String productName;
   double price;
   int quantity;
