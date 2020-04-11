@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:provider/provider.dart';
+import 'package:urawai_pos/Provider/general_provider.dart';
+import 'package:urawai_pos/Provider/orderList_provider.dart';
 
 import 'Pages/mainPage.dart';
 
@@ -14,14 +17,20 @@ class MyApp extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Urawai POS',
-      theme: ThemeData(
-          fontFamily: 'Sen',
-          primaryColor: Color(0xFF408be5),
-          scaffoldBackgroundColor: Color(0xFFfbfcfe),
-          textTheme: TextTheme(body1: TextStyle(color: Color(0xFF435c72)))),
-      home: MainPage(),
+    return MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (context) => OrderListProvider()),
+        ChangeNotifierProvider(create: (context) => GeneralProvider()),
+      ],
+      child: MaterialApp(
+        title: 'Urawai POS',
+        theme: ThemeData(
+            fontFamily: 'Sen',
+            primaryColor: Color(0xFF408be5),
+            scaffoldBackgroundColor: Color(0xFFfbfcfe),
+            textTheme: TextTheme(body1: TextStyle(color: Color(0xFF435c72)))),
+        home: MainPage(),
+      ),
     );
   }
 }
