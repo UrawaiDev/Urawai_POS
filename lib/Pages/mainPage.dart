@@ -1,15 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
-import 'package:urawai_pos/Pages/Models/orderList.dart';
-import 'package:urawai_pos/Pages/Models/postedOrder.dart';
-import 'package:urawai_pos/Pages/Models/products.dart';
-import 'package:urawai_pos/Pages/Widgets/costum_DialogBox.dart';
+import 'package:urawai_pos/Models/orderList.dart';
+import 'package:urawai_pos/Models/products.dart';
+import 'package:urawai_pos/Pages/postedOrderList.dart';
+
 import 'package:urawai_pos/Provider/general_provider.dart';
 import 'package:urawai_pos/Provider/orderList_provider.dart';
+import 'package:urawai_pos/Widgets/costum_DialogBox.dart';
+import 'package:urawai_pos/Widgets/footer_OrderList.dart';
+import 'package:urawai_pos/constans/utils.dart';
 import 'package:uuid/uuid.dart';
-import 'Widgets/footer_OrderList.dart';
-import 'constans/utils.dart';
 
 class MainPage extends StatefulWidget {
   @override
@@ -19,9 +20,6 @@ class MainPage extends StatefulWidget {
 class _MainPageState extends State<MainPage> {
   final _formatCurrency = NumberFormat("#,##0", "en_US");
   final _uuid = Uuid();
-
-  List<PostedOrder> postedOrder = [];
-  // bool isDrawerShow = true;
 
   List<Product> products = [
     Product(
@@ -88,6 +86,7 @@ class _MainPageState extends State<MainPage> {
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
     final screenHeight = MediaQuery.of(context).size.height;
+    var orderlistState = Provider.of<OrderListProvider>(context, listen: false);
 
     return SafeArea(
       child: Scaffold(
@@ -162,67 +161,86 @@ class _MainPageState extends State<MainPage> {
                       children: <Widget>[_headerOrderList()],
                     ),
                     //ORDERED ITEM LIST
+                    orderlistState.orderlist.isEmpty
+                        ? Expanded(
+                            child: Container(
+                              alignment: Alignment.center,
+                              child: Text(
+                                'Tidak Ada Pesanan',
+                                style: priceTextStyle,
+                              ),
+                            ),
+                          )
+                        : Expanded(
+                            child: Padding(
+                              padding:
+                                  const EdgeInsets.symmetric(vertical: 5.0),
+                              child: Container(
+                                child: Consumer<OrderListProvider>(
+                                  builder: (context, orderlistState, _) =>
+                                      ListView.builder(
+                                          itemCount:
+                                              orderlistState.orderlist.length,
+                                          itemBuilder: (context, index) {
+                                            var currentOrderList =
+                                                orderlistState.orderlist;
+                                            final itemKey =
+                                                currentOrderList[index];
 
-                    Expanded(
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 5.0),
-                        child: Container(
-                          child: Consumer<OrderListProvider>(
-                            builder: (context, orderlistState, _) =>
-                                ListView.builder(
-                                    itemCount: orderlistState.orderlist.length,
-                                    itemBuilder: (context, index) {
-                                      var currentOrderList =
-                                          orderlistState.orderlist;
-                                      final itemKey = currentOrderList[index];
-
-                                      return Dismissible(
-                                        key: ValueKey(itemKey),
-                                        background: Container(
-                                          alignment: Alignment.center,
-                                          color: Colors.red,
-                                          child: Text(
-                                            'Hapus',
-                                            style: TextStyle(
-                                                color: Colors.white,
-                                                fontSize: 35,
-                                                fontWeight: FontWeight.bold),
-                                          ),
-                                        ),
-                                        onDismissed: (direction) {
-                                          orderlistState.removeFromList(index);
-                                        },
-                                        child: _detailItemOrder(
-                                            productName: currentOrderList[index]
-                                                .productName,
-                                            price:
-                                                currentOrderList[index].price,
-                                            quantity: currentOrderList[index]
-                                                .quantity,
-                                            onLongPress: () {
-                                              print(currentOrderList[index]
-                                                  .productName);
-                                            },
-                                            onMinusButtonTap: () {
-                                              if (currentOrderList[index]
-                                                      .quantity >
-                                                  1)
+                                            return Dismissible(
+                                              key: ValueKey(itemKey),
+                                              background: Container(
+                                                alignment: Alignment.center,
+                                                color: Colors.red,
+                                                child: Text(
+                                                  'Hapus',
+                                                  style: TextStyle(
+                                                      color: Colors.white,
+                                                      fontSize: 35,
+                                                      fontWeight:
+                                                          FontWeight.bold),
+                                                ),
+                                              ),
+                                              onDismissed: (direction) {
                                                 orderlistState
-                                                    .decrementQuantity(index);
-                                            },
-                                            onPlusButtonTap: () {
-                                              if (currentOrderList[index]
-                                                      .quantity <=
-                                                  999)
-                                                orderlistState
-                                                    .incrementQuantity(index);
-                                            }),
-                                      );
-                                    }),
+                                                    .removeFromList(index);
+                                              },
+                                              child: _detailItemOrder(
+                                                  productName:
+                                                      currentOrderList[index]
+                                                          .productName,
+                                                  price: currentOrderList[index]
+                                                      .price,
+                                                  quantity:
+                                                      currentOrderList[index]
+                                                          .quantity,
+                                                  onLongPress: () {
+                                                    print(
+                                                        currentOrderList[index]
+                                                            .productName);
+                                                  },
+                                                  onMinusButtonTap: () {
+                                                    if (currentOrderList[index]
+                                                            .quantity >
+                                                        1)
+                                                      orderlistState
+                                                          .decrementQuantity(
+                                                              index);
+                                                  },
+                                                  onPlusButtonTap: () {
+                                                    if (currentOrderList[index]
+                                                            .quantity <=
+                                                        999)
+                                                      orderlistState
+                                                          .incrementQuantity(
+                                                              index);
+                                                  }),
+                                            );
+                                          }),
+                                ),
+                              ),
+                            ),
                           ),
-                        ),
-                      ),
-                    ),
 
                     Container(
                       child: FooterOrderList(),
@@ -248,7 +266,14 @@ class _MainPageState extends State<MainPage> {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: <Widget>[
-            Icon(Icons.restaurant_menu, size: 35),
+            IconButton(
+              icon: Icon(Icons.restaurant_menu),
+              iconSize: 35,
+              onPressed: () {
+                Navigator.push(context,
+                    MaterialPageRoute(builder: (context) => PostedOrderList()));
+              },
+            ),
             Consumer<OrderListProvider>(
               builder: (_, orderlistState, __) => Text(
                 'Pesanan (${orderlistState.orderlist.length})',
@@ -487,7 +512,7 @@ class _MainPageState extends State<MainPage> {
             id: _uuid.v1(),
             productName: productName,
             price: productPrice,
-            dateTime: DateTime.now(),
+            dateTime: DateTime.now().toIso8601String(),
             quantity: 1,
           ));
         }

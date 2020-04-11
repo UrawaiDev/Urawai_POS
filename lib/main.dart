@@ -1,15 +1,33 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:hive/hive.dart';
 import 'package:provider/provider.dart';
+import 'package:urawai_pos/Models/orderList.dart';
+import 'package:urawai_pos/Models/postedOrder.dart';
+import 'package:urawai_pos/Pages/postedOrderList.dart';
 import 'package:urawai_pos/Provider/general_provider.dart';
 import 'package:urawai_pos/Provider/orderList_provider.dart';
+import 'package:path_provider/path_provider.dart' as path;
 
 import 'Pages/mainPage.dart';
 
-void main() {
+const String postedOrderBox = "Posted_Order";
+
+void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   SystemChrome.setPreferredOrientations(
       [DeviceOrientation.landscapeLeft, DeviceOrientation.landscapeRight]);
+
+  var appPath = await path.getApplicationDocumentsDirectory();
+  var dbPath = await Directory(appPath.path + '/database').create();
+  Hive.init(dbPath.path);
+  Hive.registerAdapter<PostedOrder>(PostedOrderAdapter());
+  Hive.registerAdapter<PaidStatus>(PaidStatusAdapter());
+  Hive.registerAdapter<OrderList>(OrderListAdapter());
+  await Hive.openBox<PostedOrder>(postedOrderBox);
+
   runApp(MyApp());
 }
 
@@ -23,14 +41,16 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider(create: (context) => GeneralProvider()),
       ],
       child: MaterialApp(
-        title: 'Urawai POS',
-        theme: ThemeData(
-            fontFamily: 'Sen',
-            primaryColor: Color(0xFF408be5),
-            scaffoldBackgroundColor: Color(0xFFfbfcfe),
-            textTheme: TextTheme(body1: TextStyle(color: Color(0xFF435c72)))),
-        home: MainPage(),
-      ),
+          title: 'Urawai POS',
+          theme: ThemeData(
+              fontFamily: 'Sen',
+              primaryColor: Color(0xFF408be5),
+              scaffoldBackgroundColor: Color(0xFFfbfcfe),
+              textTheme: TextTheme(body1: TextStyle(color: Color(0xFF435c72)))),
+          home: MainPage(),
+          routes: {
+            '/postedOrderList ': (context) => PostedOrderList(),
+          }),
     );
   }
 }

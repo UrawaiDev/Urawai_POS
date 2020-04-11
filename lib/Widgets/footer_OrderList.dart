@@ -1,11 +1,16 @@
 import 'package:flutter/material.dart';
+import 'package:hive/hive.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
-import 'package:urawai_pos/Pages/constans/utils.dart';
+import 'package:urawai_pos/Models/postedOrder.dart';
 import 'package:urawai_pos/Provider/orderList_provider.dart';
+import 'package:urawai_pos/constans/utils.dart';
 
 class FooterOrderList extends StatelessWidget {
   final _formatCurrency = NumberFormat("#,##0", "en_US");
+  static const String postedOrderBox = "Posted_Order";
+
+  // final orderBox = Hive.box(postedOrderBox);
 
   @override
   Widget build(BuildContext context) {
@@ -70,15 +75,20 @@ class FooterOrderList extends StatelessWidget {
                           print(
                               'save ${orderlistProvider.orderlist.length} Item(s) to DB');
 
-                          //TODO: Save Order to DB
-                          // PostedOrder(
-                          //   id: orderlistProvider.orderID,
-                          //   orderDate: orderlistProvider.orderDate,
-                          //   subtotal: _subtotal,
-                          //   discount: 0,
-                          //   grandTotal: _grandTotal,
-                          //   orderList: orderlistProvider.orderlist.toList(),
-                          // );
+                          var orderBox = Hive.box<PostedOrder>(postedOrderBox);
+
+                          var hiveValue = PostedOrder(
+                            id: orderlistProvider.orderID,
+                            orderDate: orderlistProvider.orderDate,
+                            subtotal: _subtotal,
+                            discount: 0,
+                            grandTotal: _grandTotal,
+                            orderList: orderlistProvider.orderlist.toList(),
+                            paidStatus: PaidStatus.UnPaid,
+                          );
+
+                          //SAVE TO DATABASE
+                          orderBox.put(orderlistProvider.orderID, hiveValue);
 
                           showDialog(
                             barrierDismissible: false,

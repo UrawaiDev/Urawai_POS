@@ -1,10 +1,21 @@
+import 'package:hive/hive.dart';
+
+part 'orderList.g.dart';
+
+@HiveType(typeId: 2)
 class OrderList {
+  @HiveField(0)
   String id;
+  @HiveField(1)
   String productName;
+  @HiveField(2)
   double price;
+  @HiveField(3)
   int quantity;
+  @HiveField(4)
   String note;
-  DateTime dateTime;
+  @HiveField(5)
+  String dateTime;
 
   OrderList(
       {this.id,
