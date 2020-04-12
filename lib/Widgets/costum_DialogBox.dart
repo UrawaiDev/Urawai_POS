@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 class CostumDialogBox {
-  Future<void> showCostumDialogBox({
+  static Future<void> showCostumDialogBox({
     BuildContext context,
     String title,
     String contentString,
@@ -15,7 +15,10 @@ class CostumDialogBox {
         context: context,
         barrierDismissible: false,
         child: AlertDialog(
-          title: Text(title),
+          title: Text(
+            title,
+            style: TextStyle(fontSize: 22),
+          ),
           content: Row(
             children: <Widget>[
               Icon(
@@ -24,16 +27,27 @@ class CostumDialogBox {
                 color: iconColor,
               ),
               SizedBox(width: 20),
-              Text(contentString),
+              Expanded(
+                child: Text(
+                  contentString,
+                  style: TextStyle(fontSize: 22),
+                ),
+              ),
             ],
           ),
           actions: <Widget>[
             FlatButton(
-              child: Text('Batal'),
+              child: Text(
+                'Batal',
+                style: TextStyle(fontSize: 22),
+              ),
               onPressed: onCancelPressed,
             ),
             FlatButton(
-              child: Text(confirmButtonTitle),
+              child: Text(
+                confirmButtonTitle,
+                style: TextStyle(fontSize: 22),
+              ),
               onPressed: onConfirmPressed,
             )
           ],

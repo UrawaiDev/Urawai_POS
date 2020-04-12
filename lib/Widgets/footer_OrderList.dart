@@ -9,26 +9,17 @@ import 'package:urawai_pos/constans/utils.dart';
 class FooterOrderList extends StatelessWidget {
   final _formatCurrency = NumberFormat("#,##0", "en_US");
   static const String postedOrderBox = "Posted_Order";
+  final double subtotal;
+  final double grandTotal;
+  final double dicount;
+  final double tax;
 
-  // final orderBox = Hive.box(postedOrderBox);
+  FooterOrderList({this.grandTotal, this.subtotal, this.dicount, this.tax});
 
   @override
   Widget build(BuildContext context) {
     final orderlistProvider =
         Provider.of<OrderListProvider>(context, listen: false);
-
-    double _grandTotal = 0;
-    double _tax = 0;
-    double _subtotal = 0;
-
-    orderlistProvider.orderlist.forEach((order) {
-      _subtotal = order.quantity * order.price;
-      _grandTotal = _grandTotal + _subtotal;
-    });
-    _subtotal = _grandTotal;
-
-    _tax = _subtotal * 0.1;
-    _grandTotal = _subtotal + _tax;
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 8.0),
@@ -38,13 +29,15 @@ class FooterOrderList extends StatelessWidget {
           SizedBox(height: 8),
           _bottomInfo(
               title: 'Subtotal',
-              value: 'Rp. ${_formatCurrency.format(_subtotal)},-'),
+              value: 'Rp. ${_formatCurrency.format(subtotal)},-'),
           SizedBox(height: 8),
-          _bottomInfo(title: 'Diskon (0%)', value: 'Rp. 0,-'),
+          _bottomInfo(
+              title: 'Diskon (0%)',
+              value: 'Rp. ${_formatCurrency.format(dicount)},-'),
           SizedBox(height: 8),
           _bottomInfo(
               title: 'Pajak (10%)',
-              value: 'Rp. ${_formatCurrency.format(_tax)},-'),
+              value: 'Rp. ${_formatCurrency.format(subtotal * tax)},-'),
           SizedBox(height: 8),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -54,97 +47,12 @@ class FooterOrderList extends StatelessWidget {
                 style: TextStyle(fontSize: 25, fontWeight: FontWeight.bold),
               ),
               Text(
-                'Rp. ${_formatCurrency.format(_grandTotal)} ,-',
+                'Rp. ${_formatCurrency.format(grandTotal)} ,-',
                 style: TextStyle(fontSize: 25, fontWeight: FontWeight.bold),
               ),
             ],
           ),
           SizedBox(height: 8),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: <Widget>[
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceAround,
-                children: <Widget>[
-                  _bottomButton(
-                      icon: Icons.save,
-                      title: 'Simpan',
-                      onTap: () {
-                        if (orderlistProvider.orderID.isNotEmpty &&
-                            orderlistProvider.orderlist.isNotEmpty) {
-                          print(
-                              'save ${orderlistProvider.orderlist.length} Item(s) to DB');
-
-                          var orderBox = Hive.box<PostedOrder>(postedOrderBox);
-
-                          var hiveValue = PostedOrder(
-                            id: orderlistProvider.orderID,
-                            orderDate: orderlistProvider.orderDate,
-                            subtotal: _subtotal,
-                            discount: 0,
-                            grandTotal: _grandTotal,
-                            orderList: orderlistProvider.orderlist.toList(),
-                            paidStatus: PaidStatus.UnPaid,
-                          );
-
-                          //SAVE TO DATABASE
-                          orderBox.put(orderlistProvider.orderID, hiveValue);
-
-                          showDialog(
-                            barrierDismissible: false,
-                            child: AlertDialog(
-                              title: Text('Informasi Pesanan'),
-                              content: Row(
-                                children: <Widget>[
-                                  Icon(
-                                    Icons.info,
-                                    size: 40,
-                                    color: Colors.blue,
-                                  ),
-                                  SizedBox(width: 10),
-                                  Text('Pesanan sudah disimpan.'),
-                                ],
-                              ),
-                              actions: <Widget>[
-                                FlatButton(
-                                    onPressed: () {
-                                      Navigator.pop(context);
-
-                                      orderlistProvider.resetOrderList();
-                                    },
-                                    child: Text('OK'))
-                              ],
-                            ),
-                            context: context,
-                          );
-                        }
-                      }),
-                  _bottomButton(icon: Icons.disc_full, title: 'Diskon'),
-                  _bottomButton(
-                      icon: Icons.check_box_outline_blank,
-                      title: 'Split Bill',
-                      onTap: () {}),
-                ],
-              ),
-              Expanded(
-                child: RaisedButton(
-                    padding: EdgeInsets.all(0),
-                    child: Container(
-                        alignment: Alignment.center,
-                        height: 60,
-                        color: Color(0xFF408be5),
-                        child: Text(
-                          'BAYAR',
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 25,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        )),
-                    onPressed: null),
-              )
-            ],
-          ),
         ],
       ),
     );
@@ -163,31 +71,6 @@ class FooterOrderList extends StatelessWidget {
           style: priceTextStyle,
         ),
       ],
-    );
-  }
-
-  Widget _bottomButton({String title, IconData icon, Function onTap}) {
-    return GestureDetector(
-      child: Container(
-        width: 60,
-        height: 60,
-        margin: EdgeInsets.all(8),
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(8),
-          color: greyColor,
-        ),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            Icon(icon),
-            Text(
-              title,
-              style: TextStyle(color: Colors.black),
-            )
-          ],
-        ),
-      ),
-      onTap: onTap,
     );
   }
 }

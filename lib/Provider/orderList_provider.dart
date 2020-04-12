@@ -47,13 +47,17 @@ class OrderListProvider with ChangeNotifier {
   }
 
   void incrementQuantity(int index) {
-    orderlist[index].quantity++;
-    notifyListeners();
+    if (orderlist[index].quantity <= 999) {
+      orderlist[index].quantity++;
+      notifyListeners();
+    }
   }
 
   void decrementQuantity(int index) {
-    orderlist[index].quantity--;
-    notifyListeners();
+    if (orderlist[index].quantity > 1) {
+      orderlist[index].quantity--;
+      notifyListeners();
+    }
   }
 
   void createNewOrder() {
@@ -67,5 +71,32 @@ class OrderListProvider with ChangeNotifier {
     orderID = '';
     orderDate = '';
     notifyListeners();
+  }
+
+  double getGrandTotal() {
+    double _grandTotal = 0;
+    double _tax = 0;
+    double _subtotal = 0;
+
+    orderlist.forEach((order) {
+      _subtotal = order.quantity * order.price;
+      _grandTotal = _grandTotal + _subtotal;
+    });
+    _subtotal = _grandTotal;
+
+    _tax = _subtotal * 0.1;
+    _grandTotal = _subtotal + _tax;
+    return _grandTotal;
+  }
+
+  double getSubtotal() {
+    double _total = 0;
+    double _subtotal = 0;
+
+    orderlist.forEach((order) {
+      _total = order.quantity * order.price;
+      _subtotal = _subtotal + _total;
+    });
+    return _subtotal;
   }
 }

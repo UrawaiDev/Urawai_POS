@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:hive/hive.dart';
@@ -10,6 +8,7 @@ import 'package:urawai_pos/Pages/postedOrderList.dart';
 import 'package:urawai_pos/Provider/general_provider.dart';
 import 'package:urawai_pos/Provider/orderList_provider.dart';
 import 'package:path_provider/path_provider.dart' as path;
+import 'package:urawai_pos/Provider/postedOrder_provider.dart';
 
 import 'Pages/mainPage.dart';
 
@@ -21,8 +20,7 @@ void main() async {
       [DeviceOrientation.landscapeLeft, DeviceOrientation.landscapeRight]);
 
   var appPath = await path.getApplicationDocumentsDirectory();
-  var dbPath = await Directory(appPath.path + '/database').create();
-  Hive.init(dbPath.path);
+  Hive.init(appPath.path);
   Hive.registerAdapter<PostedOrder>(PostedOrderAdapter());
   Hive.registerAdapter<PaidStatus>(PaidStatusAdapter());
   Hive.registerAdapter<OrderList>(OrderListAdapter());
@@ -39,6 +37,7 @@ class MyApp extends StatelessWidget {
       providers: [
         ChangeNotifierProvider(create: (context) => OrderListProvider()),
         ChangeNotifierProvider(create: (context) => GeneralProvider()),
+        ChangeNotifierProvider(create: (context) => PostedOrderProvider()),
       ],
       child: MaterialApp(
           title: 'Urawai POS',
@@ -50,6 +49,7 @@ class MyApp extends StatelessWidget {
           home: MainPage(),
           routes: {
             '/postedOrderList ': (context) => PostedOrderList(),
+            // '/paymentScreen': (context) => PaymentScreen(),
           }),
     );
   }

@@ -1,15 +1,20 @@
 import 'package:flutter/material.dart';
+import 'package:hive/hive.dart';
+import 'package:hive_flutter/hive_flutter.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:urawai_pos/Models/orderList.dart';
+import 'package:urawai_pos/Models/postedOrder.dart';
 import 'package:urawai_pos/Models/products.dart';
-import 'package:urawai_pos/Pages/postedOrderList.dart';
+import 'package:urawai_pos/Pages/payment_screen.dart';
 
 import 'package:urawai_pos/Provider/general_provider.dart';
 import 'package:urawai_pos/Provider/orderList_provider.dart';
 import 'package:urawai_pos/Widgets/costum_DialogBox.dart';
+import 'package:urawai_pos/Widgets/detail_itemOrder.dart';
 import 'package:urawai_pos/Widgets/footer_OrderList.dart';
 import 'package:urawai_pos/constans/utils.dart';
+import 'package:urawai_pos/main.dart';
 import 'package:uuid/uuid.dart';
 
 class MainPage extends StatefulWidget {
@@ -20,6 +25,8 @@ class MainPage extends StatefulWidget {
 class _MainPageState extends State<MainPage> {
   final _formatCurrency = NumberFormat("#,##0", "en_US");
   final _uuid = Uuid();
+
+  static const postedBoxName = "posted_order";
 
   List<Product> products = [
     Product(
@@ -79,8 +86,6 @@ class _MainPageState extends State<MainPage> {
       category: 1,
     ),
   ];
-
-  // List<OrderList> orderLists = [];
 
   @override
   Widget build(BuildContext context) {
@@ -149,6 +154,7 @@ class _MainPageState extends State<MainPage> {
                           )),
                     ),
                   )),
+              //RIGHT SIDE MENU ORDER LIST
               Expanded(
                   child: Container(
                 color: Colors.white,
@@ -205,36 +211,29 @@ class _MainPageState extends State<MainPage> {
                                                 orderlistState
                                                     .removeFromList(index);
                                               },
-                                              child: _detailItemOrder(
-                                                  productName:
-                                                      currentOrderList[index]
-                                                          .productName,
-                                                  price: currentOrderList[index]
-                                                      .price,
-                                                  quantity:
-                                                      currentOrderList[index]
-                                                          .quantity,
-                                                  onLongPress: () {
-                                                    print(
-                                                        currentOrderList[index]
-                                                            .productName);
-                                                  },
-                                                  onMinusButtonTap: () {
-                                                    if (currentOrderList[index]
-                                                            .quantity >
-                                                        1)
-                                                      orderlistState
-                                                          .decrementQuantity(
-                                                              index);
-                                                  },
-                                                  onPlusButtonTap: () {
-                                                    if (currentOrderList[index]
-                                                            .quantity <=
-                                                        999)
-                                                      orderlistState
-                                                          .incrementQuantity(
-                                                              index);
-                                                  }),
+                                              child: DetailItemOrder(
+                                                productName:
+                                                    currentOrderList[index]
+                                                        .productName,
+                                                price: currentOrderList[index]
+                                                    .price,
+                                                quantity:
+                                                    currentOrderList[index]
+                                                        .quantity,
+                                                onLongPress: () {
+                                                  print(currentOrderList[index]
+                                                      .productName);
+                                                },
+                                                onMinusButtonTap: () =>
+                                                    orderlistState
+                                                        .decrementQuantity(
+                                                            index),
+                                                onPlusButtonTap: () =>
+                                                    orderlistState
+                                                        .incrementQuantity(
+                                                            index),
+                                                childWidget: Container(),
+                                              ),
                                             );
                                           }),
                                 ),
@@ -242,8 +241,109 @@ class _MainPageState extends State<MainPage> {
                             ),
                           ),
 
-                    Container(
-                      child: FooterOrderList(),
+                    Column(
+                      children: <Widget>[
+                        Container(
+                          child: FooterOrderList(
+                            dicount: 0,
+                            grandTotal: orderlistState.getGrandTotal(),
+                            subtotal: orderlistState.getSubtotal(),
+                            tax: 0.1,
+                          ),
+                        ),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: <Widget>[
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceAround,
+                              children: <Widget>[
+                                _bottomButton(
+                                    icon: Icons.save,
+                                    title: 'Simpan',
+                                    onTap: () {
+                                      if (orderlistState.orderID.isNotEmpty &&
+                                          orderlistState.orderlist.isNotEmpty) {
+                                        print(
+                                            'save ${orderlistState.orderlist.length} Item(s) to DB');
+
+                                        var orderBox = Hive.box<PostedOrder>(
+                                            postedOrderBox);
+
+                                        var hiveValue = PostedOrder(
+                                          id: orderlistState.orderID,
+                                          orderDate: orderlistState.orderDate,
+                                          subtotal:
+                                              orderlistState.getSubtotal(),
+                                          discount: 0,
+                                          grandTotal:
+                                              orderlistState.getSubtotal(),
+                                          orderList:
+                                              orderlistState.orderlist.toList(),
+                                          paidStatus: PaidStatus.UnPaid,
+                                        );
+
+                                        //SAVE TO DATABASE
+                                        orderBox.put(
+                                            orderlistState.orderID, hiveValue);
+
+                                        showDialog(
+                                          barrierDismissible: false,
+                                          child: AlertDialog(
+                                            title: Text('Informasi Pesanan'),
+                                            content: Row(
+                                              children: <Widget>[
+                                                Icon(
+                                                  Icons.info,
+                                                  size: 40,
+                                                  color: Colors.blue,
+                                                ),
+                                                SizedBox(width: 10),
+                                                Text('Pesanan sudah disimpan.'),
+                                              ],
+                                            ),
+                                            actions: <Widget>[
+                                              FlatButton(
+                                                  onPressed: () {
+                                                    Navigator.pop(context);
+
+                                                    orderlistState
+                                                        .resetOrderList();
+                                                  },
+                                                  child: Text('OK'))
+                                            ],
+                                          ),
+                                          context: context,
+                                        );
+                                      }
+                                    }),
+                                _bottomButton(
+                                    icon: Icons.disc_full, title: 'Diskon'),
+                                _bottomButton(
+                                    icon: Icons.check_box_outline_blank,
+                                    title: 'Split Bill',
+                                    onTap: () {}),
+                              ],
+                            ),
+                            Expanded(
+                              child: RaisedButton(
+                                  padding: EdgeInsets.all(0),
+                                  child: Container(
+                                      alignment: Alignment.center,
+                                      height: 60,
+                                      color: Color(0xFF408be5),
+                                      child: Text(
+                                        'BAYAR',
+                                        style: TextStyle(
+                                          color: Colors.white,
+                                          fontSize: 25,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      )),
+                                  onPressed: null),
+                            )
+                          ],
+                        ),
+                      ],
                     ),
                   ],
                 ),
@@ -266,13 +366,116 @@ class _MainPageState extends State<MainPage> {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: <Widget>[
-            IconButton(
-              icon: Icon(Icons.restaurant_menu),
-              iconSize: 35,
-              onPressed: () {
-                Navigator.push(context,
-                    MaterialPageRoute(builder: (context) => PostedOrderList()));
-              },
+            WatchBoxBuilder(
+              box: Hive.box<PostedOrder>(postedOrderBox),
+              builder: (context, boxOrder) => Stack(
+                children: <Widget>[
+                  IconButton(
+                    icon: Icon(Icons.restaurant_menu),
+                    iconSize: 35,
+                    onPressed: () {
+                      showDialog(
+                        context: context,
+                        child: Dialog(
+                          child: Container(
+                            width: 500,
+                            height: 500,
+                            child: Padding(
+                              padding: const EdgeInsets.all(10.0),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: <Widget>[
+                                  Row(
+                                    children: <Widget>[
+                                      Icon(
+                                        Icons.format_list_bulleted,
+                                        color: Colors.blue,
+                                        size: 35,
+                                      ),
+                                      SizedBox(width: 10),
+                                      Text('Daftar Pesanan yang tersimpan.',
+                                          style: TextStyle(fontSize: 22)),
+                                    ],
+                                  ),
+                                  SizedBox(height: 15),
+                                  Expanded(
+                                      child: Container(
+                                    // color: Colors.yellow,
+                                    child: ListView.builder(
+                                        itemCount: boxOrder.length,
+                                        itemBuilder: (context, index) {
+                                          var item = boxOrder.getAt(index)
+                                              as PostedOrder;
+                                          return ListTile(
+                                            contentPadding: EdgeInsets.all(8),
+                                            leading: CircleAvatar(
+                                              child:
+                                                  Text((index + 1).toString()),
+                                            ),
+                                            title: Text(item.id,
+                                                style: TextStyle(fontSize: 22)),
+                                            subtitle: Column(
+                                              crossAxisAlignment:
+                                                  CrossAxisAlignment.start,
+                                              children: <Widget>[
+                                                Text(
+                                                    'Jumlah Pesanan : ${item.orderList.length}',
+                                                    style: TextStyle(
+                                                        fontSize: 22)),
+                                                Text(
+                                                    'Total Bayar ' +
+                                                        'Rp. ' +
+                                                        _formatCurrency.format(
+                                                            item.grandTotal),
+                                                    style: TextStyle(
+                                                        fontSize: 22)),
+                                              ],
+                                            ),
+                                            trailing: Icon(
+                                              Icons.play_arrow,
+                                              size: 35,
+                                              color: Colors.blue,
+                                            ),
+                                            onLongPress: () {
+                                              // TODO: Load to OrderList
+                                              Navigator.pop(context);
+                                              Navigator.push(
+                                                  context,
+                                                  MaterialPageRoute(
+                                                      builder: (context) =>
+                                                          PaymentScreen(item)));
+                                            },
+                                          );
+                                        }),
+                                  )),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+                  //Notification PostedOrder
+                  boxOrder.length != 0
+                      ? Positioned(
+                          top: 0,
+                          right: 0,
+                          child: CircleAvatar(
+                            maxRadius: 13,
+                            backgroundColor: Colors.red,
+                            child: Text(
+                              boxOrder.length.toString(),
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
+                        )
+                      : Container(),
+                ],
+              ),
             ),
             Consumer<OrderListProvider>(
               builder: (_, orderlistState, __) => Text(
@@ -287,13 +490,11 @@ class _MainPageState extends State<MainPage> {
                 if (orderlistProvider.orderlist.isEmpty) {
                   orderlistProvider.createNewOrder();
                 } else if (orderlistProvider.orderlist.isNotEmpty) {
-                  CostumDialogBox myDialog = CostumDialogBox();
-
-                  myDialog.showCostumDialogBox(
+                  CostumDialogBox.showCostumDialogBox(
                     context: context,
                     title: 'Information',
                     contentString:
-                        'Orderlist Sebelumnya belum disimpan, Apakah akan tetap dibuatkan order List Baru?',
+                        'Orderlist Sebelumnya belum disimpan, \nApakah akan tetap dibuatkan order List Baru?',
                     icon: Icons.info,
                     iconColor: Colors.blue,
                     confirmButtonTitle: 'Ya',
@@ -340,103 +541,6 @@ class _MainPageState extends State<MainPage> {
           thickness: 3,
           color: greyColor,
         ),
-      ],
-    );
-  }
-
-  Widget _detailItemOrder({
-    String productName,
-    double price,
-    int quantity,
-    Function onLongPress,
-    Function onMinusButtonTap,
-    Function onPlusButtonTap,
-  }) {
-    return Column(
-      children: <Widget>[
-        GestureDetector(
-          child: AnimatedContainer(
-            duration: Duration(milliseconds: 700),
-            curve: Curves.bounceOut,
-            child: Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: <Widget>[
-                  // Item Detail
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: <Widget>[
-                      Text(
-                        productName,
-                        style: bodyTextStyle,
-                      ),
-                      SizedBox(height: 5),
-                      Text(
-                        'Rp. ' + _formatCurrency.format(price),
-                        style: priceTextStyle,
-                      ),
-                      SizedBox(height: 8),
-                      Row(
-                        children: <Widget>[
-                          Icon(Icons.note),
-                          SizedBox(width: 5),
-                          Text(
-                            'Catatan',
-                            style: noteTextStyle,
-                          )
-                        ],
-                      )
-                    ],
-                  ),
-
-                  //Button plus & minus
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceAround,
-                    children: <Widget>[
-                      GestureDetector(
-                        child: Container(
-                          width: 35,
-                          height: 35,
-                          color: greyColor,
-                          child: Icon(
-                            Icons.remove,
-                            color: Colors.white,
-                          ),
-                        ),
-                        onTap: onMinusButtonTap,
-                      ),
-                      Container(
-                        alignment: Alignment.center,
-                        width: 50,
-                        height: 35,
-                        color: Colors.white,
-                        child: Text(
-                          quantity.toString(),
-                          style: bodyTextStyle,
-                        ),
-                      ),
-                      GestureDetector(
-                        child: Container(
-                          width: 35,
-                          height: 35,
-                          color: greyColor,
-                          child: Icon(
-                            Icons.add,
-                            color: Colors.white,
-                          ),
-                        ),
-                        onTap: onPlusButtonTap,
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-          ),
-          onLongPress: onLongPress,
-        ),
-        Divider(),
       ],
     );
   }
@@ -517,6 +621,31 @@ class _MainPageState extends State<MainPage> {
           ));
         }
       },
+    );
+  }
+
+  Widget _bottomButton({String title, IconData icon, Function onTap}) {
+    return GestureDetector(
+      child: Container(
+        width: 60,
+        height: 60,
+        margin: EdgeInsets.all(8),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(8),
+          color: greyColor,
+        ),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: <Widget>[
+            Icon(icon),
+            Text(
+              title,
+              style: TextStyle(color: Colors.black),
+            )
+          ],
+        ),
+      ),
+      onTap: onTap,
     );
   }
 

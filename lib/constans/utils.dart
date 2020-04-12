@@ -8,6 +8,11 @@ TextStyle bodyTextStyle = TextStyle(
   fontSize: 22,
 );
 
+TextStyle headerTextStyle = TextStyle(
+  fontWeight: FontWeight.bold,
+  fontSize: 25,
+);
+
 TextStyle priceTextStyle = TextStyle(
   fontSize: 20,
   color: priceColor,
