@@ -1,6 +1,10 @@
-# urawai_pos
+# Urawai POS (Masih Dalam Tahap Pengerjaan)
 
-Aplikasi Penjualan untuk Usaha kecil dan menengah.
+Aplikasi Penjualan untuk UMKM.
+
+Design terinspirasi dari Design @AriaKepo di [Dribble.com](https://dribbble.com/shots/3946677-Point-of-Sales) 
+
+
 
 ## Getting Started
 
