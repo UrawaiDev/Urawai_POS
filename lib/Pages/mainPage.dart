@@ -6,7 +6,8 @@ import 'package:provider/provider.dart';
 import 'package:urawai_pos/Models/orderList.dart';
 import 'package:urawai_pos/Models/postedOrder.dart';
 import 'package:urawai_pos/Models/products.dart';
-import 'package:urawai_pos/Pages/payment_screen.dart';
+import 'package:urawai_pos/Pages/payment_screen_draftOrder.dart';
+import 'package:urawai_pos/Pages/payment_success.dart';
 
 import 'package:urawai_pos/Provider/general_provider.dart';
 import 'package:urawai_pos/Provider/orderList_provider.dart';
@@ -20,13 +21,16 @@ import 'package:uuid/uuid.dart';
 class MainPage extends StatefulWidget {
   @override
   _MainPageState createState() => _MainPageState();
+  static const postedBoxName = "posted_order";
 }
 
 class _MainPageState extends State<MainPage> {
-  final _formatCurrency = NumberFormat("#,##0", "en_US");
+  final _formatCurrency = NumberFormat.currency(
+    symbol: 'Rp.',
+    locale: 'en_US',
+    decimalDigits: 0,
+  );
   final _uuid = Uuid();
-
-  static const postedBoxName = "posted_order";
 
   List<Product> products = [
     Product(
@@ -173,7 +177,7 @@ class _MainPageState extends State<MainPage> {
                               alignment: Alignment.center,
                               child: Text(
                                 'Tidak Ada Pesanan',
-                                style: priceTextStyle,
+                                style: kPriceTextStyle,
                               ),
                             ),
                           )
@@ -258,7 +262,7 @@ class _MainPageState extends State<MainPage> {
                               mainAxisAlignment: MainAxisAlignment.spaceAround,
                               children: <Widget>[
                                 _bottomButton(
-                                    icon: Icons.save,
+                                    icon: Icon(Icons.save, color: Colors.blue),
                                     title: 'Simpan',
                                     onTap: () {
                                       if (orderlistState.orderID.isNotEmpty &&
@@ -276,7 +280,7 @@ class _MainPageState extends State<MainPage> {
                                               orderlistState.getSubtotal(),
                                           discount: 0,
                                           grandTotal:
-                                              orderlistState.getSubtotal(),
+                                              orderlistState.getGrandTotal(),
                                           orderList:
                                               orderlistState.orderlist.toList(),
                                           paidStatus: PaidStatus.UnPaid,
@@ -289,7 +293,8 @@ class _MainPageState extends State<MainPage> {
                                         showDialog(
                                           barrierDismissible: false,
                                           child: AlertDialog(
-                                            title: Text('Informasi Pesanan'),
+                                            title: Text('Informasi Pesanan',
+                                                style: kDialogTextStyle),
                                             content: Row(
                                               children: <Widget>[
                                                 Icon(
@@ -298,7 +303,8 @@ class _MainPageState extends State<MainPage> {
                                                   color: Colors.blue,
                                                 ),
                                                 SizedBox(width: 10),
-                                                Text('Pesanan sudah disimpan.'),
+                                                Text('Pesanan sudah disimpan.',
+                                                    style: kDialogTextStyle),
                                               ],
                                             ),
                                             actions: <Widget>[
@@ -309,7 +315,8 @@ class _MainPageState extends State<MainPage> {
                                                     orderlistState
                                                         .resetOrderList();
                                                   },
-                                                  child: Text('OK'))
+                                                  child: Text('OK',
+                                                      style: kDialogTextStyle))
                                             ],
                                           ),
                                           context: context,
@@ -317,11 +324,30 @@ class _MainPageState extends State<MainPage> {
                                       }
                                     }),
                                 _bottomButton(
-                                    icon: Icons.disc_full, title: 'Diskon'),
+                                    icon: Icon(Icons.disc_full),
+                                    title: 'Diskon'),
                                 _bottomButton(
-                                    icon: Icons.check_box_outline_blank,
-                                    title: 'Split Bill',
-                                    onTap: () {}),
+                                    icon: Icon(Icons.delete, color: Colors.red),
+                                    title: 'Hapus',
+                                    onTap: () {
+                                      if (orderlistState.orderlist.isNotEmpty) {
+                                        CostumDialogBox.showCostumDialogBox(
+                                            context: context,
+                                            title: 'Konfirmasi',
+                                            contentString:
+                                                'List Order akan di Hapus',
+                                            icon: Icons.delete,
+                                            iconColor: Colors.red,
+                                            onCancelPressed: () =>
+                                                Navigator.pop(context),
+                                            confirmButtonTitle: 'Hapus',
+                                            onConfirmPressed: () {
+                                              orderlistState.orderlist.clear();
+                                              orderlistState.resetOrderList();
+                                              Navigator.pop(context);
+                                            });
+                                      }
+                                    }),
                               ],
                             ),
                             Expanded(
@@ -339,7 +365,17 @@ class _MainPageState extends State<MainPage> {
                                           fontWeight: FontWeight.bold,
                                         ),
                                       )),
-                                  onPressed: null),
+                                  onPressed: () {
+                                    //SEMENTARA
+                                    if (orderlistState.orderlist.isNotEmpty)
+                                      Navigator.push(
+                                          context,
+                                          MaterialPageRoute(
+                                              builder: (context) =>
+                                                  PaymentSuccess(
+                                                      itemList: orderlistState
+                                                          .orderlist)));
+                                  }),
                             )
                           ],
                         ),
@@ -412,7 +448,7 @@ class _MainPageState extends State<MainPage> {
                                               child:
                                                   Text((index + 1).toString()),
                                             ),
-                                            title: Text(item.id,
+                                            title: Text(item.id ?? '-',
                                                 style: TextStyle(fontSize: 22)),
                                             subtitle: Column(
                                               crossAxisAlignment:
@@ -424,7 +460,6 @@ class _MainPageState extends State<MainPage> {
                                                         fontSize: 22)),
                                                 Text(
                                                     'Total Bayar ' +
-                                                        'Rp. ' +
                                                         _formatCurrency.format(
                                                             item.grandTotal),
                                                     style: TextStyle(
@@ -437,13 +472,13 @@ class _MainPageState extends State<MainPage> {
                                               color: Colors.blue,
                                             ),
                                             onLongPress: () {
-                                              // TODO: Load to OrderList
                                               Navigator.pop(context);
                                               Navigator.push(
                                                   context,
                                                   MaterialPageRoute(
                                                       builder: (context) =>
-                                                          PaymentScreen(item)));
+                                                          PaymentScreenDraftOrder(
+                                                              item)));
                                             },
                                           );
                                         }),
@@ -600,12 +635,12 @@ class _MainPageState extends State<MainPage> {
             SizedBox(height: 10),
             Text(
               productName,
-              style: bodyTextStyle,
+              style: kHeaderTextStyle,
             ),
             SizedBox(height: 5),
             Text(
-              'Rp. ' + _formatCurrency.format(productPrice),
-              style: priceTextStyle,
+              _formatCurrency.format(productPrice),
+              style: kPriceTextStyle,
             ),
           ],
         ),
@@ -624,7 +659,7 @@ class _MainPageState extends State<MainPage> {
     );
   }
 
-  Widget _bottomButton({String title, IconData icon, Function onTap}) {
+  Widget _bottomButton({String title, Icon icon, Function onTap}) {
     return GestureDetector(
       child: Container(
         width: 60,
@@ -637,7 +672,7 @@ class _MainPageState extends State<MainPage> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
-            Icon(icon),
+            icon,
             Text(
               title,
               style: TextStyle(color: Colors.black),

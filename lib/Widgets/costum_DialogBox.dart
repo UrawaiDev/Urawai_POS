@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:urawai_pos/constans/utils.dart';
 
 class CostumDialogBox {
   static Future<void> showCostumDialogBox({
@@ -17,7 +18,7 @@ class CostumDialogBox {
         child: AlertDialog(
           title: Text(
             title,
-            style: TextStyle(fontSize: 22),
+            style: kDialogTextStyle,
           ),
           content: Row(
             children: <Widget>[
@@ -30,7 +31,7 @@ class CostumDialogBox {
               Expanded(
                 child: Text(
                   contentString,
-                  style: TextStyle(fontSize: 22),
+                  style: kDialogTextStyle,
                 ),
               ),
             ],
@@ -39,14 +40,14 @@ class CostumDialogBox {
             FlatButton(
               child: Text(
                 'Batal',
-                style: TextStyle(fontSize: 22),
+                style: kDialogTextStyle,
               ),
               onPressed: onCancelPressed,
             ),
             FlatButton(
               child: Text(
                 confirmButtonTitle,
-                style: TextStyle(fontSize: 22),
+                style: kDialogTextStyle,
               ),
               onPressed: onConfirmPressed,
             )

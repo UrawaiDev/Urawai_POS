@@ -7,7 +7,11 @@ import 'package:urawai_pos/Provider/orderList_provider.dart';
 import 'package:urawai_pos/constans/utils.dart';
 
 class FooterOrderList extends StatelessWidget {
-  final _formatCurrency = NumberFormat("#,##0", "en_US");
+  final _formatCurrency = NumberFormat.currency(
+    symbol: 'Rp.',
+    locale: 'en_US',
+    decimalDigits: 0,
+  );
   static const String postedOrderBox = "Posted_Order";
   final double subtotal;
   final double grandTotal;
@@ -28,16 +32,14 @@ class FooterOrderList extends StatelessWidget {
           Divider(thickness: 3),
           SizedBox(height: 8),
           _bottomInfo(
-              title: 'Subtotal',
-              value: 'Rp. ${_formatCurrency.format(subtotal)},-'),
+              title: 'Subtotal', value: _formatCurrency.format(subtotal)),
           SizedBox(height: 8),
           _bottomInfo(
-              title: 'Diskon (0%)',
-              value: 'Rp. ${_formatCurrency.format(dicount)},-'),
+              title: 'Diskon (0%)', value: _formatCurrency.format(dicount)),
           SizedBox(height: 8),
           _bottomInfo(
               title: 'Pajak (10%)',
-              value: 'Rp. ${_formatCurrency.format(subtotal * tax)},-'),
+              value: _formatCurrency.format(subtotal * tax)),
           SizedBox(height: 8),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -47,7 +49,7 @@ class FooterOrderList extends StatelessWidget {
                 style: TextStyle(fontSize: 25, fontWeight: FontWeight.bold),
               ),
               Text(
-                'Rp. ${_formatCurrency.format(grandTotal)} ,-',
+                _formatCurrency.format(grandTotal),
                 style: TextStyle(fontSize: 25, fontWeight: FontWeight.bold),
               ),
             ],
@@ -64,11 +66,11 @@ class FooterOrderList extends StatelessWidget {
       children: <Widget>[
         Text(
           title,
-          style: priceTextStyle,
+          style: kPriceTextStyle,
         ),
         Text(
           value,
-          style: priceTextStyle,
+          style: kPriceTextStyle,
         ),
       ],
     );

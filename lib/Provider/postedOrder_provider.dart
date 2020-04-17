@@ -4,16 +4,42 @@ import 'package:urawai_pos/Models/postedOrder.dart';
 
 class PostedOrderProvider with ChangeNotifier {
   PostedOrder _postedOrder;
-  double _subTotal;
+  String _totalPayment = '';
+  double _finalPayment = 0;
+  double _change = 0;
 
-  get postedOrder => _postedOrder;
-  set postedOrder(PostedOrder newValue) {
+  PostedOrder get postedOrder => _postedOrder;
+  set postedorder(PostedOrder newValue) {
     _postedOrder = newValue;
+  }
+
+  double get finalPayment => _finalPayment;
+  set finalPayment(double newValue) {
+    _finalPayment = newValue;
+    notifyListeners();
+  }
+
+  String get totalPayment => _totalPayment;
+  set totalPayment(String newValue) {
+    _totalPayment = newValue;
+    notifyListeners();
+  }
+
+  get change => _change;
+  set change(double newValue) {
+    _change = newValue;
+    notifyListeners();
   }
 
   addItem(PostedOrder pOrder, OrderList orderList) {
     pOrder.orderList.add(orderList);
     notifyListeners();
+  }
+
+  resetFinalPayment() {
+    _totalPayment = '';
+    _finalPayment = 0;
+    //notifyListeners();
   }
 
   removeItemFromList(int index) {

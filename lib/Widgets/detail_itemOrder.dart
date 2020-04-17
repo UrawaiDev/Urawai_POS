@@ -40,12 +40,12 @@ class DetailItemOrder extends StatelessWidget {
                     children: <Widget>[
                       Text(
                         productName,
-                        style: bodyTextStyle,
+                        style: kBodyTextStyle,
                       ),
                       SizedBox(height: 5),
                       Text(
                         'Rp. ' + _formatCurrency.format(price),
-                        style: priceTextStyle,
+                        style: kPriceTextStyle,
                       ),
                       SizedBox(height: 8),
                       Row(
@@ -54,7 +54,7 @@ class DetailItemOrder extends StatelessWidget {
                           SizedBox(width: 5),
                           Text(
                             'Catatan',
-                            style: noteTextStyle,
+                            style: kNoteTextStyle,
                           )
                         ],
                       ),
@@ -86,7 +86,7 @@ class DetailItemOrder extends StatelessWidget {
                             color: Colors.white,
                             child: Text(
                               quantity.toString(),
-                              style: bodyTextStyle,
+                              style: kBodyTextStyle,
                             ),
                           ),
                           GestureDetector(
