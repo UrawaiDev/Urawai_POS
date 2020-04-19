@@ -4,6 +4,7 @@ import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:urawai_pos/Models/orderList.dart';
 import 'package:urawai_pos/Models/postedOrder.dart';
+import 'package:urawai_pos/Models/transaction.dart';
 import 'package:urawai_pos/Pages/mainPage.dart';
 import 'package:urawai_pos/Pages/payment_success.dart';
 import 'package:urawai_pos/Provider/postedOrder_provider.dart';
@@ -15,6 +16,7 @@ import 'package:urawai_pos/constans/utils.dart';
 class PaymentScreenDraftOrder extends StatelessWidget {
   final PostedOrder postedOrder;
   static const String postedOrderBox = "Posted_Order";
+  static const String routeName = "PaymentScreenDraftOrder";
 
   final _formatCurrency = NumberFormat.currency(
     symbol: 'Rp.',
@@ -30,7 +32,6 @@ class PaymentScreenDraftOrder extends StatelessWidget {
         Provider.of<PostedOrderProvider>(context, listen: false);
 
     postedOrderProvider.postedorder = postedOrder;
-    var change;
 
     return WillPopScope(
       onWillPop: () => Future.value(false),
@@ -157,8 +158,6 @@ class PaymentScreenDraftOrder extends StatelessWidget {
                                                 title: 'Konfirmasi',
                                                 contentString:
                                                     'Pesanan ${item.productName} akan diHapus?',
-                                                onCancelPressed: () =>
-                                                    Navigator.pop(context),
                                                 confirmButtonTitle: 'Hapus',
                                                 onConfirmPressed: () {
                                                   postedOrderProvider
@@ -216,8 +215,6 @@ class PaymentScreenDraftOrder extends StatelessWidget {
                                           icon: Icons.delete,
                                           iconColor: Colors.red,
                                           title: 'Konfirmasi',
-                                          onCancelPressed: () =>
-                                              Navigator.pop(context),
                                           contentString:
                                               'Anda akan menghapus transaksi ini?',
                                           confirmButtonTitle: 'Hapus',
@@ -403,280 +400,14 @@ class PaymentScreenDraftOrder extends StatelessWidget {
                                               ),
                                             ),
                                           ),
-                                          Padding(
-                                            padding: const EdgeInsets.symmetric(
-                                                vertical: 8.0),
-                                            child: Container(
-                                                color: Color(0xFFf5f6f7),
-                                                // color: Colors.blue,
-                                                height: MediaQuery.of(context)
-                                                        .size
-                                                        .height *
-                                                    0.46,
-                                                width: MediaQuery.of(context)
-                                                        .size
-                                                        .width *
-                                                    0.65,
-                                                child: Row(
-                                                  mainAxisAlignment:
-                                                      MainAxisAlignment
-                                                          .spaceBetween,
-                                                  children: <Widget>[
-                                                    Consumer<
-                                                        PostedOrderProvider>(
-                                                      builder:
-                                                          (context, state, _) =>
-                                                              Column(
-                                                        mainAxisAlignment:
-                                                            MainAxisAlignment
-                                                                .center,
-                                                        children: <Widget>[
-                                                          Row(
-                                                            children: <Widget>[
-                                                              SizedBox(
-                                                                  width: 10),
-                                                              _keypadCard(
-                                                                  '1',
-                                                                  () => _keyPadNumber(
-                                                                      '1',
-                                                                      state)),
-                                                              SizedBox(
-                                                                  width: 10),
-                                                              _keypadCard(
-                                                                  '2',
-                                                                  () => _keyPadNumber(
-                                                                      '2',
-                                                                      state)),
-                                                              SizedBox(
-                                                                  width: 10),
-                                                              _keypadCard(
-                                                                  '3',
-                                                                  () => _keyPadNumber(
-                                                                      '3',
-                                                                      state)),
-                                                              SizedBox(
-                                                                  width: 10),
-                                                            ],
-                                                          ),
-                                                          SizedBox(height: 10),
-                                                          Row(
-                                                            children: <Widget>[
-                                                              SizedBox(
-                                                                  width: 10),
-                                                              _keypadCard(
-                                                                  '4',
-                                                                  () => _keyPadNumber(
-                                                                      '4',
-                                                                      state)),
-                                                              SizedBox(
-                                                                  width: 10),
-                                                              _keypadCard(
-                                                                  '5',
-                                                                  () => _keyPadNumber(
-                                                                      '5',
-                                                                      state)),
-                                                              SizedBox(
-                                                                  width: 10),
-                                                              _keypadCard(
-                                                                  '6',
-                                                                  () => _keyPadNumber(
-                                                                      '6',
-                                                                      state)),
-                                                              SizedBox(
-                                                                  width: 10),
-                                                            ],
-                                                          ),
-                                                          SizedBox(height: 10),
-                                                          Row(
-                                                            children: <Widget>[
-                                                              SizedBox(
-                                                                  width: 10),
-                                                              _keypadCard(
-                                                                  '7',
-                                                                  () => _keyPadNumber(
-                                                                      '7',
-                                                                      state)),
-                                                              SizedBox(
-                                                                  width: 10),
-                                                              _keypadCard(
-                                                                  '8',
-                                                                  () => _keyPadNumber(
-                                                                      '8',
-                                                                      state)),
-                                                              SizedBox(
-                                                                  width: 10),
-                                                              _keypadCard(
-                                                                  '9',
-                                                                  () => _keyPadNumber(
-                                                                      '9',
-                                                                      state)),
-                                                              SizedBox(
-                                                                  width: 10),
-                                                            ],
-                                                          ),
-                                                          SizedBox(height: 10),
-                                                          Row(
-                                                            children: <Widget>[
-                                                              SizedBox(
-                                                                  width: 10),
-                                                              GestureDetector(
-                                                                onTap: () {
-                                                                  if (state
-                                                                      .totalPayment
-                                                                      .isNotEmpty) {
-                                                                    var result = state
-                                                                        .totalPayment
-                                                                        .substring(
-                                                                            0,
-                                                                            state.totalPayment.length -
-                                                                                1);
-                                                                    state.totalPayment =
-                                                                        result;
-                                                                    if (result
-                                                                        .isNotEmpty) {
-                                                                      state.finalPayment =
-                                                                          double.parse(
-                                                                              result);
-                                                                    } else
-                                                                      state.finalPayment =
-                                                                          0;
-                                                                  }
-                                                                },
-                                                                child:
-                                                                    Container(
-                                                                  padding:
-                                                                      EdgeInsets
-                                                                          .all(
-                                                                              8),
-                                                                  alignment:
-                                                                      Alignment
-                                                                          .center,
-                                                                  decoration:
-                                                                      BoxDecoration(
-                                                                    borderRadius:
-                                                                        BorderRadius.circular(
-                                                                            10),
-                                                                    color: Colors
-                                                                            .grey[
-                                                                        400],
-                                                                  ),
-                                                                  width: 150,
-                                                                  height: 80,
-                                                                  child: Icon(Icons
-                                                                      .backspace),
-                                                                ),
-                                                              ),
-                                                              SizedBox(
-                                                                  width: 10),
-                                                              _keypadCard(
-                                                                  '0',
-                                                                  () => _keyPadNumber(
-                                                                      '0',
-                                                                      state)),
-                                                              SizedBox(
-                                                                  width: 10),
-                                                              _keypadCard('C',
-                                                                  () {
-                                                                state.totalPayment =
-                                                                    '';
-                                                                state.finalPayment =
-                                                                    0;
-                                                                print(state
-                                                                    .finalPayment);
-                                                              }),
-                                                              SizedBox(
-                                                                  width: 10),
-                                                            ],
-                                                          )
-                                                        ],
-                                                      ),
-                                                    ),
-                                                    //Right Side
-                                                    Consumer<
-                                                        PostedOrderProvider>(
-                                                      builder:
-                                                          (context, state, _) =>
-                                                              Column(
-                                                        mainAxisAlignment:
-                                                            MainAxisAlignment
-                                                                .center,
-                                                        children: <Widget>[
-                                                          _buttonPayment(
-                                                              // text: _formatCurrency
-                                                              //     .format(state
-                                                              //         .getGrandTotal()),
-                                                              text: Text(
-                                                                'Uang Pas',
-                                                                style:
-                                                                    kButtonPaymentTextStyle,
-                                                              ),
-                                                              color: Colors
-                                                                  .grey[300],
-                                                              onTap: () {
-                                                                state.finalPayment =
-                                                                    state
-                                                                        .getGrandTotal();
-                                                              }),
-                                                          Row(
-                                                            children: <Widget>[
-                                                              _buttonPaymentSuggestion(
-                                                                text: '50K',
-                                                                onTap: () =>
-                                                                    state.finalPayment =
-                                                                        50000,
-                                                              ),
-                                                              _buttonPaymentSuggestion(
-                                                                text: '100K',
-                                                                onTap: () =>
-                                                                    state.finalPayment =
-                                                                        100000,
-                                                              ),
-                                                              _buttonPaymentSuggestion(
-                                                                text: '300K',
-                                                                onTap: () =>
-                                                                    state.finalPayment =
-                                                                        300000,
-                                                              ),
-                                                            ],
-                                                          ),
-                                                          _buttonPayment(
-                                                              color:
-                                                                  Colors.blue,
-                                                              text: Text(
-                                                                'BAYAR',
-                                                                style:
-                                                                    TextStyle(
-                                                                  fontSize: 30,
-                                                                  color: Colors
-                                                                      .white,
-                                                                  fontWeight:
-                                                                      FontWeight
-                                                                          .bold,
-                                                                ),
-                                                              ),
-                                                              onTap: () {
-                                                                // TODO: Record ke Database Transaksi
-                                                                Navigator.push(
-                                                                    context,
-                                                                    MaterialPageRoute(
-                                                                        builder: (context) =>
-                                                                            PaymentSuccess(
-                                                                              itemList: state.postedOrder.orderList,
-                                                                              cashierName: 'Mbak Nita',
-                                                                              date: state.postedOrder.orderDate,
-                                                                              orderID: state.postedOrder.id,
-                                                                              pembayaran: state.finalPayment,
-                                                                              kembali: state.finalPayment - state.getGrandTotal(),
-                                                                            )));
-                                                              }),
-                                                        ],
-                                                      ),
-                                                    )
-                                                  ],
-                                                )),
-                                          ),
+                                          // keyPadArea(context),
                                         ],
-                                      )
+                                      ),
+                                      Expanded(
+                                        child: Container(
+                                          child: keyPadArea(context),
+                                        ),
+                                      ),
                                     ],
                                   ),
                                 ),
@@ -694,12 +425,206 @@ class PaymentScreenDraftOrder extends StatelessWidget {
     );
   }
 
+  Padding keyPadArea(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8.0),
+      child: Container(
+          // color: Color(0xFFf5f6f7),
+
+          child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: <Widget>[
+          Consumer<PostedOrderProvider>(
+            builder: (context, state, _) => Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: <Widget>[
+                Expanded(
+                  child: Row(
+                    children: <Widget>[
+                      SizedBox(width: 10),
+                      _keypadCard('1', () => _keyPadNumber('1', state)),
+                      SizedBox(width: 10),
+                      _keypadCard('2', () => _keyPadNumber('2', state)),
+                      SizedBox(width: 10),
+                      _keypadCard('3', () => _keyPadNumber('3', state)),
+                      SizedBox(width: 10),
+                    ],
+                  ),
+                ),
+                SizedBox(height: 10),
+                Expanded(
+                  child: Row(
+                    children: <Widget>[
+                      SizedBox(width: 10),
+                      _keypadCard('4', () => _keyPadNumber('4', state)),
+                      SizedBox(width: 10),
+                      _keypadCard('5', () => _keyPadNumber('5', state)),
+                      SizedBox(width: 10),
+                      _keypadCard('6', () => _keyPadNumber('6', state)),
+                      SizedBox(width: 10),
+                    ],
+                  ),
+                ),
+                SizedBox(height: 10),
+                Expanded(
+                  child: Row(
+                    children: <Widget>[
+                      SizedBox(width: 10),
+                      _keypadCard('7', () => _keyPadNumber('7', state)),
+                      SizedBox(width: 10),
+                      _keypadCard('8', () => _keyPadNumber('8', state)),
+                      SizedBox(width: 10),
+                      _keypadCard('9', () => _keyPadNumber('9', state)),
+                      SizedBox(width: 10),
+                    ],
+                  ),
+                ),
+                SizedBox(height: 10),
+                Expanded(
+                  child: Row(
+                    children: <Widget>[
+                      SizedBox(width: 10),
+                      GestureDetector(
+                        onTap: () {
+                          if (state.totalPayment.isNotEmpty) {
+                            var result = state.totalPayment
+                                .substring(0, state.totalPayment.length - 1);
+                            state.totalPayment = result;
+                            if (result.isNotEmpty) {
+                              state.finalPayment = double.parse(result);
+                            } else
+                              state.finalPayment = 0;
+                          }
+                        },
+                        child: Container(
+                          padding: EdgeInsets.all(8),
+                          alignment: Alignment.center,
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(10),
+                            color: Colors.grey[400],
+                          ),
+                          width: 150,
+                          height: 80,
+                          child: Icon(Icons.backspace),
+                        ),
+                      ),
+                      SizedBox(width: 10),
+                      _keypadCard('0', () => _keyPadNumber('0', state)),
+                      SizedBox(width: 10),
+                      _keypadCard('C', () {
+                        state.totalPayment = '';
+                        state.finalPayment = 0;
+                      }),
+                      SizedBox(width: 10),
+                    ],
+                  ),
+                )
+              ],
+            ),
+          ),
+          //Right Side
+          Consumer<PostedOrderProvider>(
+            builder: (context, state, _) => Expanded(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: <Widget>[
+                  Expanded(
+                    child: _buttonPayment(
+                        text: Text(
+                          'Uang Pas',
+                          style: kProductNameSmallScreenTextStyle,
+                        ),
+                        color: Colors.grey[300],
+                        onTap: () {
+                          state.finalPayment = state.getGrandTotal();
+                        }),
+                  ),
+                  Expanded(
+                    flex: 2,
+                    child: Row(
+                      children: <Widget>[
+                        _buttonPaymentSuggestion(
+                          text: '50K',
+                          context: context,
+                          onTap: () => state.finalPayment = 50000,
+                        ),
+                        _buttonPaymentSuggestion(
+                          text: '100K',
+                          context: context,
+                          onTap: () => state.finalPayment = 100000,
+                        ),
+                        // _buttonPaymentSuggestion(
+                        //   text: '300K',
+                        //   context: context,
+                        //   onTap: () => state.finalPayment = 300000,
+                        // ),
+                      ],
+                    ),
+                  ),
+                  _buttonPayment(
+                      color: Colors.blue,
+                      text: Text(
+                        'BAYAR',
+                        style: TextStyle(
+                          fontSize: 30,
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      onTap: () {
+                        CostumDialogBox.showCostumDialogBox(
+                          context: context,
+                          title: 'Konfirmasi',
+                          icon: Icons.receipt,
+                          iconColor: Colors.blue,
+                          contentString:
+                              'Pembayaran telah dilakukan dan Cetak Kwitansi, Lanjutkan?',
+                          confirmButtonTitle: 'Proses',
+                          onConfirmPressed: () {
+                            try {
+                              var boxTransaction = Hive.box<TransactionOrder>(
+                                  MainPage.transactionBoxName);
+                              var boxValue = TransactionOrder(
+                                id: state.postedOrder.id,
+                                cashierName: 'Soneta',
+                                date: state.postedOrder.orderDate,
+                                grandTotal: state.postedOrder.grandTotal,
+                                referenceOrder: 'Meja 1',
+                                paymentStatus: PaymentStatus.COMPLETED,
+                                paymentType: PaymentType.CASH,
+                                itemList: state.postedOrder.orderList,
+                              );
+                              // add new Trasaction Order to DB
+                              boxTransaction.put(
+                                  state.postedOrder.id, boxValue);
+
+                              //delete Posted Order
+                              var boxPostedOrder =
+                                  Hive.box<PostedOrder>(MainPage.postedBoxName);
+                              boxPostedOrder.delete(state.postedOrder.id);
+                            } catch (e) {
+                              throw Exception(e.toString());
+                            } finally {
+                              Navigator.pushNamed(
+                                  context, PaymentSuccess.routeName,
+                                  arguments: state);
+                            }
+                          },
+                        );
+                      }),
+                ],
+              ),
+            ),
+          )
+        ],
+      )),
+    );
+  }
+
   void _keyPadNumber(String inputValue, PostedOrderProvider state) {
     var currentValue = state.totalPayment;
     state.totalPayment = currentValue + inputValue;
     state.finalPayment = double.parse(state.totalPayment);
-
-    print(_formatCurrency.format(state.finalPayment));
   }
 
   Padding _buttonPayment({Text text, Color color, Function onTap}) {
@@ -721,24 +646,27 @@ class PaymentScreenDraftOrder extends StatelessWidget {
     );
   }
 
-  Padding _buttonPaymentSuggestion({String text, Function onTap}) {
-    return Padding(
-      padding: const EdgeInsets.all(8.0),
-      child: GestureDetector(
-        onTap: onTap,
-        child: Container(
-          alignment: Alignment.center,
-          width: 80,
-          height: 100,
-          decoration: BoxDecoration(
-            color: Colors.grey[300],
-            borderRadius: BorderRadius.circular(10),
-          ),
-          child: Text(
-            text,
-            style: TextStyle(
-              fontWeight: FontWeight.bold,
-              fontSize: 27,
+  Widget _buttonPaymentSuggestion(
+      {String text, Function onTap, BuildContext context}) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    return Expanded(
+      child: Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: GestureDetector(
+          onTap: onTap,
+          child: Container(
+            alignment: Alignment.center,
+            width: 80,
+            height: 100,
+            decoration: BoxDecoration(
+              color: Colors.grey[300],
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: Text(
+              text,
+              style: screenWidth > 1024
+                  ? kProductNameBigScreenTextStyle
+                  : kProductNameSmallScreenTextStyle,
             ),
           ),
         ),
@@ -768,29 +696,32 @@ class PaymentScreenDraftOrder extends StatelessWidget {
   }
 
   Widget _paymentMethodCard(String title, IconData icon, Color color) {
-    return Container(
-      alignment: Alignment.center,
-      width: 250,
-      height: 100,
-      decoration: BoxDecoration(
-          color: color,
-          borderRadius: BorderRadius.circular(10),
-          border: Border.all(
-            color: Colors.grey,
-          )),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: <Widget>[
-          Icon(
-            icon,
-            size: 40,
+    return Expanded(
+      child: Padding(
+        padding: const EdgeInsets.all(5.0),
+        child: Container(
+          alignment: Alignment.center,
+          decoration: BoxDecoration(
+              color: color,
+              borderRadius: BorderRadius.circular(10),
+              border: Border.all(
+                color: Colors.grey,
+              )),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: <Widget>[
+              Icon(
+                icon,
+                size: 35,
+              ),
+              SizedBox(width: 10),
+              Text(
+                title,
+                style: TextStyle(fontSize: 20),
+              )
+            ],
           ),
-          SizedBox(width: 10),
-          Text(
-            title,
-            style: TextStyle(fontSize: 25),
-          )
-        ],
+        ),
       ),
     );
   }

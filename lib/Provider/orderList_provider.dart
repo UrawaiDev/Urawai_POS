@@ -73,6 +73,7 @@ class OrderListProvider with ChangeNotifier {
     notifyListeners();
   }
 
+  // TODO:Rounded ke bawah saat nilai desimal
   double getGrandTotal() {
     double _grandTotal = 0;
     double _tax = 0;

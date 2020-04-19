@@ -4,15 +4,17 @@ import 'package:hive/hive.dart';
 import 'package:provider/provider.dart';
 import 'package:urawai_pos/Models/orderList.dart';
 import 'package:urawai_pos/Models/postedOrder.dart';
-import 'package:urawai_pos/Pages/postedOrderList.dart';
+
 import 'package:urawai_pos/Provider/general_provider.dart';
 import 'package:urawai_pos/Provider/orderList_provider.dart';
 import 'package:path_provider/path_provider.dart' as path;
 import 'package:urawai_pos/Provider/postedOrder_provider.dart';
+import 'package:urawai_pos/functions/routeGenerator.dart';
 
-import 'Pages/mainPage.dart';
+import 'Models/transaction.dart';
 
 const String postedOrderBox = "Posted_Order";
+const String transactionBoxName = "TransactionOrder";
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -24,7 +26,11 @@ void main() async {
   Hive.registerAdapter<PostedOrder>(PostedOrderAdapter());
   Hive.registerAdapter<PaidStatus>(PaidStatusAdapter());
   Hive.registerAdapter<OrderList>(OrderListAdapter());
+  Hive.registerAdapter<TransactionOrder>(TransactionOrderAdapter());
+  Hive.registerAdapter<PaymentStatus>(PaymentStatusAdapter());
+  Hive.registerAdapter<PaymentType>(PaymentTypeAdapter());
   await Hive.openBox<PostedOrder>(postedOrderBox);
+  await Hive.openBox<TransactionOrder>(transactionBoxName);
 
   runApp(MyApp());
 }
@@ -40,17 +46,16 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider(create: (context) => PostedOrderProvider()),
       ],
       child: MaterialApp(
-          title: 'Urawai POS',
-          theme: ThemeData(
-              fontFamily: 'Sen',
-              primaryColor: Color(0xFF408be5),
-              scaffoldBackgroundColor: Color(0xFFfbfcfe),
-              textTheme: TextTheme(body1: TextStyle(color: Color(0xFF435c72)))),
-          home: MainPage(),
-          routes: {
-            '/postedOrderList ': (context) => PostedOrderList(),
-            // '/paymentScreen': (context) => PaymentScreen(),
-          }),
+        debugShowCheckedModeBanner: false,
+        title: 'Urawai POS',
+        theme: ThemeData(
+            fontFamily: 'Sen',
+            primaryColor: Color(0xFF408be5),
+            scaffoldBackgroundColor: Color(0xFFfbfcfe),
+            textTheme: TextTheme(body1: TextStyle(color: Color(0xFF435c72)))),
+        initialRoute: '/',
+        onGenerateRoute: RouteGenerator.onGenerate,
+      ),
     );
   }
 }

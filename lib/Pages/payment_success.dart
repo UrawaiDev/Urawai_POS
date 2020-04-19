@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:urawai_pos/Models/postedOrder.dart';
+import 'package:provider/provider.dart';
+import 'package:urawai_pos/Pages/mainPage.dart';
+import 'package:urawai_pos/Provider/postedOrder_provider.dart';
 import 'package:urawai_pos/Widgets/footer_OrderList.dart';
 import 'package:urawai_pos/constans/utils.dart';
 
@@ -26,6 +28,8 @@ class PaymentSuccess extends StatelessWidget {
     locale: 'en_US',
     decimalDigits: 0,
   );
+
+  static const String routeName = "PaymentSuccessPage";
 
   @override
   Widget build(BuildContext context) {
@@ -308,8 +312,22 @@ class PaymentSuccess extends StatelessWidget {
                                     ),
                                   ),
                                   onTap: () {
-                                    // TODO:Hapus record Apabila PostedOrder dan Clear Apabila OrderList
-                                    Navigator.pop(context);
+                                    try {
+                                      Provider.of<PostedOrderProvider>(context,
+                                              listen: false)
+                                          .resetFinalPayment();
+                                    } catch (e) {
+                                      throw (e.toString());
+                                    } finally {
+                                      Navigator.pushAndRemoveUntil(
+                                        context,
+                                        MaterialPageRoute(
+                                            builder: (context) => MainPage()),
+                                        ModalRoute.withName('/'),
+                                      );
+                                    }
+
+                                    // Navigator.pop(context);
                                   },
                                 ),
                               ],
@@ -344,7 +362,6 @@ class PaymentSuccess extends StatelessWidget {
 
   double getSubTotal() {
     double _grandTotal = 0;
-    double _tax = 0;
     double _subtotal;
 
     itemList.forEach((order) {

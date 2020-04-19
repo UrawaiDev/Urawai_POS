@@ -11,6 +11,7 @@ class DetailItemOrder extends StatelessWidget {
   final Function onPlusButtonTap;
   final _formatCurrency = NumberFormat("#,##0", "en_US");
   final Widget childWidget;
+  final TextEditingController _textNoteOrder = TextEditingController();
 
   DetailItemOrder(
       {this.productName,
@@ -23,6 +24,8 @@ class DetailItemOrder extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
+
     return Column(
       children: <Widget>[
         GestureDetector(
@@ -35,30 +38,48 @@ class DetailItemOrder extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: <Widget>[
                   // Item Detail
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: <Widget>[
-                      Text(
-                        productName,
-                        style: kBodyTextStyle,
-                      ),
-                      SizedBox(height: 5),
-                      Text(
-                        'Rp. ' + _formatCurrency.format(price),
-                        style: kPriceTextStyle,
-                      ),
-                      SizedBox(height: 8),
-                      Row(
-                        children: <Widget>[
-                          Icon(Icons.note),
-                          SizedBox(width: 5),
-                          Text(
-                            'Catatan',
-                            style: kNoteTextStyle,
-                          )
-                        ],
-                      ),
-                    ],
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: <Widget>[
+                        Text(
+                          productName,
+                          style: screenWidth > 1024
+                              ? kProductNameBigScreenTextStyle
+                              : kProductNameSmallScreenTextStyle,
+                        ),
+                        SizedBox(height: 5),
+                        Text(
+                          'Rp. ' + _formatCurrency.format(price),
+                          style: kPriceTextStyle,
+                        ),
+                        SizedBox(height: 8),
+                        Row(
+                          children: <Widget>[
+                            GestureDetector(
+                              child: Icon(Icons.note),
+                              onTap: () {
+                                // TODO: will check later OverFlow
+                                // CostumDialogBox.showInputDialogBox(
+                                //     context: context,
+                                //     textEditingController: _textNoteOrder,
+                                //     title: 'Nama Pelanggan / Nomor Meja',
+                                //     confirmButtonTitle: 'OK',
+                                //     onConfirmPressed: () {
+                                //       print(_textNoteOrder.text);
+                                //       Navigator.pop(context);
+                                //     });
+                              },
+                            ),
+                            SizedBox(width: 5),
+                            Text(
+                              'Catatan',
+                              style: kNoteTextStyle,
+                            )
+                          ],
+                        ),
+                      ],
+                    ),
                   ),
 
                   //Button plus & minus
@@ -69,8 +90,8 @@ class DetailItemOrder extends StatelessWidget {
                         children: <Widget>[
                           GestureDetector(
                             child: Container(
-                              width: 35,
-                              height: 35,
+                              width: 30,
+                              height: 30,
                               color: greyColor,
                               child: Icon(
                                 Icons.remove,
@@ -86,13 +107,15 @@ class DetailItemOrder extends StatelessWidget {
                             color: Colors.white,
                             child: Text(
                               quantity.toString(),
-                              style: kBodyTextStyle,
+                              style: screenWidth > 1024
+                                  ? kProductNameBigScreenTextStyle
+                                  : kProductNameSmallScreenTextStyle,
                             ),
                           ),
                           GestureDetector(
                             child: Container(
-                              width: 35,
-                              height: 35,
+                              width: 30,
+                              height: 30,
                               color: greyColor,
                               child: Icon(
                                 Icons.add,

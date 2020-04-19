@@ -2,6 +2,44 @@ import 'package:flutter/material.dart';
 import 'package:urawai_pos/constans/utils.dart';
 
 class CostumDialogBox {
+  static showInputDialogBox({
+    TextEditingController textEditingController,
+    BuildContext context,
+    String title,
+    String confirmButtonTitle,
+    Function onConfirmPressed,
+  }) {
+    return showDialog(
+        context: context,
+        barrierDismissible: true,
+        child: AlertDialog(
+          title: Text(
+            title,
+            style: kDialogTextStyle,
+          ),
+          content: TextField(
+            controller: textEditingController,
+            maxLength: 20,
+          ),
+          actions: <Widget>[
+            FlatButton(
+              child: Text(
+                'Batal',
+                style: kDialogTextStyle,
+              ),
+              onPressed: () => Navigator.pop(context),
+            ),
+            FlatButton(
+              child: Text(
+                confirmButtonTitle,
+                style: kDialogTextStyle,
+              ),
+              onPressed: onConfirmPressed,
+            )
+          ],
+        ));
+  }
+
   static Future<void> showCostumDialogBox({
     BuildContext context,
     String title,
@@ -10,7 +48,6 @@ class CostumDialogBox {
     Color iconColor,
     String confirmButtonTitle,
     Function onConfirmPressed,
-    Function onCancelPressed,
   }) async {
     return await showDialog(
         context: context,
@@ -42,7 +79,7 @@ class CostumDialogBox {
                 'Batal',
                 style: kDialogTextStyle,
               ),
-              onPressed: onCancelPressed,
+              onPressed: () => Navigator.pop(context),
             ),
             FlatButton(
               child: Text(

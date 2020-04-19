@@ -1,9 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:hive/hive.dart';
 import 'package:intl/intl.dart';
-import 'package:provider/provider.dart';
-import 'package:urawai_pos/Models/postedOrder.dart';
-import 'package:urawai_pos/Provider/orderList_provider.dart';
 import 'package:urawai_pos/constans/utils.dart';
 
 class FooterOrderList extends StatelessWidget {
@@ -22,9 +18,6 @@ class FooterOrderList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final orderlistProvider =
-        Provider.of<OrderListProvider>(context, listen: false);
-
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 8.0),
       child: Column(

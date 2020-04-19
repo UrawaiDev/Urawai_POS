@@ -12,14 +12,14 @@ class PostedOrderList extends StatelessWidget {
         child: FutureBuilder(
             future: Hive.openBox<PostedOrder>(postedBoxName),
             builder: (context, snapshot) {
-              //TODO:Buat Tampilan seperti Struck yang siap di cetak
               var orderBox = Hive.box<PostedOrder>(postedBoxName);
               if (snapshot.connectionState == ConnectionState.done &&
                   snapshot.hasData) {
                 return ListView.builder(
                     itemCount: orderBox.length,
                     itemBuilder: (context, index) {
-                      var item = orderBox.getAt(index) as PostedOrder;
+                      var item = orderBox.getAt(index);
+
                       return ListTile(
                         title: Text(item.id),
                         subtitle: Column(
