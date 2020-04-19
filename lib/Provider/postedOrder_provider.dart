@@ -61,7 +61,16 @@ class PostedOrderProvider with ChangeNotifier {
 
     _tax = _subtotal * 0.1;
     _grandTotal = _subtotal + _tax;
-    return _grandTotal;
+
+    //proses pembulatan.
+    if (_grandTotal != 0) {
+      var s = _grandTotal.toStringAsFixed(0);
+
+      s = s.substring(0, s.length - 2);
+      s = s + '00';
+      return double.parse(s);
+    } else
+      return _grandTotal;
   }
 
   double getSubtotal() {
