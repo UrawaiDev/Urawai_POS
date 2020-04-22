@@ -63,13 +63,15 @@ class PostedOrderAdapter extends TypeAdapter<PostedOrder> {
       grandTotal: fields[4] as double,
       orderList: (fields[5] as List)?.cast<OrderList>(),
       paidStatus: fields[6] as PaidStatus,
+      cashierName: fields[7] as String,
+      refernceOrder: fields[8] as String,
     );
   }
 
   @override
   void write(BinaryWriter writer, PostedOrder obj) {
     writer
-      ..writeByte(7)
+      ..writeByte(9)
       ..writeByte(0)
       ..write(obj.id)
       ..writeByte(1)
@@ -83,6 +85,10 @@ class PostedOrderAdapter extends TypeAdapter<PostedOrder> {
       ..writeByte(5)
       ..write(obj.orderList)
       ..writeByte(6)
-      ..write(obj.paidStatus);
+      ..write(obj.paidStatus)
+      ..writeByte(7)
+      ..write(obj.cashierName)
+      ..writeByte(8)
+      ..write(obj.refernceOrder);
   }
 }

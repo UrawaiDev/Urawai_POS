@@ -23,13 +23,15 @@ class OrderListAdapter extends TypeAdapter<OrderList> {
       quantity: fields[3] as int,
       note: fields[4] as String,
       dateTime: fields[5] as String,
+      refernceOrder: fields[7] as String,
+      cashierName: fields[6] as String,
     );
   }
 
   @override
   void write(BinaryWriter writer, OrderList obj) {
     writer
-      ..writeByte(6)
+      ..writeByte(8)
       ..writeByte(0)
       ..write(obj.id)
       ..writeByte(1)
@@ -41,6 +43,10 @@ class OrderListAdapter extends TypeAdapter<OrderList> {
       ..writeByte(4)
       ..write(obj.note)
       ..writeByte(5)
-      ..write(obj.dateTime);
+      ..write(obj.dateTime)
+      ..writeByte(6)
+      ..write(obj.cashierName)
+      ..writeByte(7)
+      ..write(obj.refernceOrder);
   }
 }

@@ -9,6 +9,7 @@ import 'package:urawai_pos/Provider/general_provider.dart';
 import 'package:urawai_pos/Provider/orderList_provider.dart';
 import 'package:path_provider/path_provider.dart' as path;
 import 'package:urawai_pos/Provider/postedOrder_provider.dart';
+import 'package:urawai_pos/Provider/transactionOrder_provider.dart';
 import 'package:urawai_pos/functions/routeGenerator.dart';
 
 import 'Models/transaction.dart';
@@ -44,6 +45,7 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider(create: (context) => OrderListProvider()),
         ChangeNotifierProvider(create: (context) => GeneralProvider()),
         ChangeNotifierProvider(create: (context) => PostedOrderProvider()),
+        ChangeNotifierProvider(create: (context) => TransactionOrderProvider()),
       ],
       child: MaterialApp(
         debugShowCheckedModeBanner: false,

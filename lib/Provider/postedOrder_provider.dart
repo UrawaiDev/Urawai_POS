@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:hive/hive.dart';
 import 'package:urawai_pos/Models/orderList.dart';
 import 'package:urawai_pos/Models/postedOrder.dart';
+import 'package:urawai_pos/Pages/mainPage.dart';
 
 class PostedOrderProvider with ChangeNotifier {
   PostedOrder _postedOrder;
   String _totalPayment = '';
   double _finalPayment = 0;
-  double _change = 0;
 
   PostedOrder get postedOrder => _postedOrder;
   set postedorder(PostedOrder newValue) {
@@ -22,12 +23,6 @@ class PostedOrderProvider with ChangeNotifier {
   String get totalPayment => _totalPayment;
   set totalPayment(String newValue) {
     _totalPayment = newValue;
-    notifyListeners();
-  }
-
-  get change => _change;
-  set change(double newValue) {
-    _change = newValue;
     notifyListeners();
   }
 
@@ -47,8 +42,18 @@ class PostedOrderProvider with ChangeNotifier {
     notifyListeners();
   }
 
-  // TODO:Rounded ke bawah saat nilai desimal
-  double getGrandTotal() {
+  double get subTotal {
+    double _total = 0;
+    double _subtotal = 0;
+
+    _postedOrder.orderList.forEach((order) {
+      _total = order.quantity * order.price;
+      _subtotal = _subtotal + _total;
+    });
+    return _subtotal;
+  }
+
+  double get grandTotal {
     double _grandTotal = 0;
     double _tax = 0;
     double _subtotal = 0;
@@ -62,26 +67,10 @@ class PostedOrderProvider with ChangeNotifier {
     _tax = _subtotal * 0.1;
     _grandTotal = _subtotal + _tax;
 
-    //proses pembulatan.
-    if (_grandTotal != 0) {
-      var s = _grandTotal.toStringAsFixed(0);
+    //proses pembulatan kebawah
+    _grandTotal = _grandTotal - (_grandTotal % 100);
 
-      s = s.substring(0, s.length - 2);
-      s = s + '00';
-      return double.parse(s);
-    } else
-      return _grandTotal;
-  }
-
-  double getSubtotal() {
-    double _total = 0;
-    double _subtotal = 0;
-
-    _postedOrder.orderList.forEach((order) {
-      _total = order.quantity * order.price;
-      _subtotal = _subtotal + _total;
-    });
-    return _subtotal;
+    return _grandTotal;
   }
 
   incrementQuantity(int index) {
@@ -96,5 +85,9 @@ class PostedOrderProvider with ChangeNotifier {
       _postedOrder.orderList[index].quantity--;
       notifyListeners();
     }
+  }
+
+  deletePostedOrder(String key) {
+    Hive.box<PostedOrder>(MainPage.postedBoxName).delete(key);
   }
 }

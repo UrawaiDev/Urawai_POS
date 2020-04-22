@@ -8,6 +8,7 @@ import 'package:urawai_pos/Models/transaction.dart';
 import 'package:urawai_pos/Pages/mainPage.dart';
 import 'package:urawai_pos/Pages/payment_success.dart';
 import 'package:urawai_pos/Provider/postedOrder_provider.dart';
+import 'package:urawai_pos/Provider/transactionOrder_provider.dart';
 import 'package:urawai_pos/Widgets/costum_DialogBox.dart';
 import 'package:urawai_pos/Widgets/detail_itemOrder.dart';
 import 'package:urawai_pos/Widgets/footer_OrderList.dart';
@@ -86,10 +87,10 @@ class PaymentScreenDraftOrder extends StatelessWidget {
                                           orderDate:
                                               DateTime.now().toIso8601String(),
                                           discount: 0,
-                                          grandTotal: postedOrderProvider
-                                              .getGrandTotal(),
+                                          grandTotal:
+                                              postedOrderProvider.grandTotal,
                                           subtotal:
-                                              postedOrderProvider.getSubtotal(),
+                                              postedOrderProvider.subTotal,
                                           orderList: postedOrderProvider
                                               .postedOrder.orderList,
                                           paidStatus: PaidStatus.UnPaid,
@@ -186,8 +187,8 @@ class PaymentScreenDraftOrder extends StatelessWidget {
                               children: <Widget>[
                                 FooterOrderList(
                                   dicount: 0,
-                                  grandTotal: stateProvider.getGrandTotal(),
-                                  subtotal: stateProvider.getSubtotal(),
+                                  grandTotal: stateProvider.grandTotal,
+                                  subtotal: stateProvider.subTotal,
                                   tax: 0.1,
                                 ),
                                 Divider(
@@ -219,10 +220,20 @@ class PaymentScreenDraftOrder extends StatelessWidget {
                                               'Anda akan menghapus transaksi ini?',
                                           confirmButtonTitle: 'Hapus',
                                           onConfirmPressed: () {
-                                            Hive.box<PostedOrder>(
-                                                    postedOrderBox)
-                                                .delete(stateProvider
-                                                    .postedOrder.id);
+                                            Provider.of<TransactionOrderProvider>(
+                                                    context,
+                                                    listen: false)
+                                                .addTransactionOrder(
+                                                    stateProvider:
+                                                        stateProvider,
+                                                    paymentStatus:
+                                                        PaymentStatus.VOID,
+                                                    paymentType:
+                                                        PaymentType.CASH);
+
+                                            stateProvider.deletePostedOrder(
+                                                stateProvider.postedOrder.id);
+                                            stateProvider.resetFinalPayment();
                                             Navigator.pop(
                                                 context); //close dialogBOx
                                             Navigator.pop(
@@ -313,7 +324,7 @@ class PaymentScreenDraftOrder extends StatelessWidget {
                                                     Text(
                                                       _formatCurrency.format(
                                                           postedOrderState
-                                                              .getGrandTotal()),
+                                                              .grandTotal),
                                                       style: TextStyle(
                                                         fontSize: 27,
                                                         color: Colors.white,
@@ -382,15 +393,19 @@ class PaymentScreenDraftOrder extends StatelessWidget {
                                                       style: TextStyle(
                                                           fontSize: 27),
                                                     ),
+                                                    // Only return value when bigger dan grandTotal
                                                     Text(
-                                                      postedOrderState
-                                                                  .finalPayment !=
-                                                              0
+                                                      postedOrderState.finalPayment !=
+                                                                  0 &&
+                                                              postedOrderState
+                                                                      .finalPayment >
+                                                                  postedOrderState
+                                                                      .grandTotal
                                                           ? _formatCurrency.format(
                                                               postedOrderState
                                                                       .finalPayment -
                                                                   postedOrderState
-                                                                      .getGrandTotal())
+                                                                      .grandTotal)
                                                           : 'Rp. 0',
                                                       style: TextStyle(
                                                           fontSize: 27),
@@ -536,7 +551,7 @@ class PaymentScreenDraftOrder extends StatelessWidget {
                         ),
                         color: Colors.grey[300],
                         onTap: () {
-                          state.finalPayment = state.getGrandTotal();
+                          state.finalPayment = state.grandTotal;
                         }),
                   ),
                   Expanded(
@@ -572,45 +587,37 @@ class PaymentScreenDraftOrder extends StatelessWidget {
                         ),
                       ),
                       onTap: () {
-                        CostumDialogBox.showCostumDialogBox(
-                          context: context,
-                          title: 'Konfirmasi',
-                          icon: Icons.receipt,
-                          iconColor: Colors.blue,
-                          contentString:
-                              'Pembayaran telah dilakukan dan Cetak Kwitansi, Lanjutkan?',
-                          confirmButtonTitle: 'Proses',
-                          onConfirmPressed: () {
-                            try {
-                              var boxTransaction = Hive.box<TransactionOrder>(
-                                  MainPage.transactionBoxName);
-                              var boxValue = TransactionOrder(
-                                id: state.postedOrder.id,
-                                cashierName: 'Soneta',
-                                date: state.postedOrder.orderDate,
-                                grandTotal: state.postedOrder.grandTotal,
-                                referenceOrder: 'Meja 1',
+                        if (state.finalPayment != 0 &&
+                            state.finalPayment >= state.grandTotal) {
+                          CostumDialogBox.showCostumDialogBox(
+                            context: context,
+                            title: 'Konfirmasi',
+                            icon: Icons.receipt,
+                            iconColor: Colors.blue,
+                            contentString:
+                                'Pembayaran telah dilakukan dan Cetak Kwitansi, Lanjutkan?',
+                            confirmButtonTitle: 'Proses',
+                            onConfirmPressed: () {
+                              Provider.of<TransactionOrderProvider>(context,
+                                      listen: false)
+                                  .addTransactionOrder(
+                                stateProvider: state,
                                 paymentStatus: PaymentStatus.COMPLETED,
                                 paymentType: PaymentType.CASH,
-                                itemList: state.postedOrder.orderList,
                               );
-                              // add new Trasaction Order to DB
-                              boxTransaction.put(
-                                  state.postedOrder.id, boxValue);
 
                               //delete Posted Order
-                              var boxPostedOrder =
-                                  Hive.box<PostedOrder>(MainPage.postedBoxName);
-                              boxPostedOrder.delete(state.postedOrder.id);
-                            } catch (e) {
-                              throw Exception(e.toString());
-                            } finally {
+                              Hive.box<PostedOrder>(MainPage.postedBoxName)
+                                  .delete(state.postedOrder.id);
+
+                              //Navigate to Payment Success Screen
                               Navigator.pushNamed(
                                   context, PaymentSuccess.routeName,
                                   arguments: state);
-                            }
-                          },
-                        );
+                            },
+                          );
+                        } else
+                          print('Pastikan sudah di bayar');
                       }),
                 ],
               ),

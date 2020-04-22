@@ -16,12 +16,19 @@ class OrderList {
   String note;
   @HiveField(5)
   String dateTime;
+  @HiveField(6)
+  String cashierName;
+  @HiveField(7)
+  String refernceOrder;
 
-  OrderList(
-      {this.id,
-      this.productName,
-      this.price,
-      this.quantity,
-      this.note,
-      this.dateTime});
+  OrderList({
+    this.id,
+    this.productName,
+    this.price,
+    this.quantity,
+    this.note,
+    this.dateTime,
+    this.refernceOrder,
+    this.cashierName,
+  });
 }

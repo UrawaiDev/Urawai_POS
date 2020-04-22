@@ -1,43 +1,67 @@
 import 'package:flutter/material.dart';
+import 'package:hive/hive.dart';
 import 'package:intl/intl.dart';
 import 'package:urawai_pos/Models/orderList.dart';
+import 'package:urawai_pos/Models/postedOrder.dart';
+import 'package:urawai_pos/Models/products.dart';
+import 'package:urawai_pos/Pages/mainPage.dart';
 import 'package:uuid/uuid.dart';
 
 class OrderListProvider with ChangeNotifier {
   final Uuid _uuid = Uuid();
   List<OrderList> orderlist = [];
-  double _grandTotal = 0;
   int _quantity = 1;
 
   String _orderID = '';
   String _orderDate = '';
+  String _cashierName = 'Dummy Cashier';
+  String _referenceOrder = 'Meja 7';
 
-  get orderID => _orderID;
+  String get orderID => _orderID;
   set orderID(String newValue) {
     _orderID = newValue;
     notifyListeners();
   }
 
-  get orderDate => _orderDate;
+  String get cashierName => _cashierName;
+  set cashierName(String newValue) {
+    _cashierName = newValue;
+    notifyListeners();
+  }
+
+  String get referenceOrder => _referenceOrder;
+  set referenceOrder(String newValue) {
+    _referenceOrder = newValue;
+    notifyListeners();
+  }
+
+  String get orderDate => _orderDate;
   set orderDate(String newValue) {
     _orderDate = newValue;
     notifyListeners();
   }
 
-  get grandTotal => _grandTotal;
-  set grandTotal(double newValue) {
-    _grandTotal = newValue;
-    notifyListeners();
-  }
+  // double get grandTotal => _grandTotal;
+  // set grandTotal(double newValue) {
+  //   _grandTotal = newValue;
+  //   notifyListeners();
+  // }
 
-  get quantity => _quantity;
+  int get quantity => _quantity;
   set quantity(int newValue) {
     _quantity = newValue;
     notifyListeners();
   }
 
-  void addToList(OrderList list) {
-    orderlist.add(list);
+  void addToList(Product item) {
+    orderlist.add(OrderList(
+      id: _uuid.v1(),
+      productName: item.name,
+      price: item.price,
+      dateTime: DateTime.now().toString(),
+      quantity: 1,
+    ));
+
     notifyListeners();
   }
 
@@ -70,11 +94,12 @@ class OrderListProvider with ChangeNotifier {
     orderlist.clear();
     orderID = '';
     orderDate = '';
+    cashierName = '';
+    referenceOrder = '';
     notifyListeners();
   }
 
-  // TODO:Rounded ke bawah saat nilai desimal
-  double getGrandTotal() {
+  double get grandTotal {
     double _grandTotal = 0;
     double _tax = 0;
     double _subtotal = 0;
@@ -88,18 +113,12 @@ class OrderListProvider with ChangeNotifier {
     _tax = _subtotal * 0.1;
     _grandTotal = _subtotal + _tax;
 
-    //proses pembulatan.
-    if (_grandTotal != 0) {
-      var s = _grandTotal.toStringAsFixed(0);
-
-      s = s.substring(0, s.length - 2);
-      s = s + '00';
-      return double.parse(s);
-    } else
-      return _grandTotal;
+    //proses pembulatan kebawah
+    _grandTotal = _grandTotal - (_grandTotal % 100);
+    return _grandTotal;
   }
 
-  double getSubtotal() {
+  double get subTotal {
     double _total = 0;
     double _subtotal = 0;
 
@@ -108,5 +127,31 @@ class OrderListProvider with ChangeNotifier {
       _subtotal = _subtotal + _total;
     });
     return _subtotal;
+  }
+
+  bool addPostedOrder(OrderListProvider orderlistState) {
+    var orderBox = Hive.box<PostedOrder>(MainPage.postedBoxName);
+
+    try {
+      var hiveValue = PostedOrder(
+        id: orderlistState.orderID,
+        orderDate: orderlistState.orderDate,
+        subtotal: orderlistState.subTotal,
+        discount: 0,
+        grandTotal: orderlistState.grandTotal,
+        orderList: orderlistState.orderlist.toList(),
+        paidStatus: PaidStatus.UnPaid,
+        cashierName: orderlistState.cashierName,
+        refernceOrder: orderlistState.referenceOrder,
+      );
+
+      //SAVE TO DATABASE
+      orderBox.put(orderlistState.orderID, hiveValue);
+      return true;
+    } catch (e) {
+      throw Exception(e.toString());
+    } finally {
+      print('save ${orderlistState.orderlist.length} Item(s) to DB');
+    }
   }
 }

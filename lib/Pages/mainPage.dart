@@ -3,7 +3,6 @@ import 'package:hive/hive.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
-import 'package:urawai_pos/Models/orderList.dart';
 import 'package:urawai_pos/Models/postedOrder.dart';
 import 'package:urawai_pos/Models/products.dart';
 import 'package:urawai_pos/Models/transaction.dart';
@@ -16,7 +15,6 @@ import 'package:urawai_pos/Widgets/costum_DialogBox.dart';
 import 'package:urawai_pos/Widgets/detail_itemOrder.dart';
 import 'package:urawai_pos/Widgets/footer_OrderList.dart';
 import 'package:urawai_pos/constans/utils.dart';
-import 'package:uuid/uuid.dart';
 
 class MainPage extends StatefulWidget {
   @override
@@ -31,7 +29,6 @@ class _MainPageState extends State<MainPage> {
     locale: 'en_US',
     decimalDigits: 0,
   );
-  final _uuid = Uuid();
   final TextEditingController _textReferenceOrder = TextEditingController();
 
   List<Product> products = [
@@ -144,14 +141,8 @@ class _MainPageState extends State<MainPage> {
                                               generalState.isDrawerShow ? 2 : 3,
                                           mainAxisSpacing: 10,
                                           crossAxisSpacing: 10,
-                                          children: products.map((p) {
-                                            return _cardMenu(
-                                              id: p.id,
-                                              productName: p.name,
-                                              productPrice: p.price,
-                                              imagePath: p.image,
-                                              isRecommended: p.isRecommended,
-                                            );
+                                          children: products.map((itemProduct) {
+                                            return _cardMenu(itemProduct);
                                           }).toList(),
                                         ),
                                       ),
@@ -259,8 +250,8 @@ class _MainPageState extends State<MainPage> {
                             Container(
                               child: FooterOrderList(
                                 dicount: 0,
-                                grandTotal: orderlistState.getGrandTotal(),
-                                subtotal: orderlistState.getSubtotal(),
+                                grandTotal: orderlistState.grandTotal,
+                                subtotal: orderlistState.subTotal,
                                 tax: 0.1,
                               ),
                             ),
@@ -280,66 +271,23 @@ class _MainPageState extends State<MainPage> {
                                                   .orderID.isNotEmpty &&
                                               orderlistState
                                                   .orderlist.isNotEmpty) {
-                                            print(
-                                                'save ${orderlistState.orderlist.length} Item(s) to DB');
-
-                                            var orderBox =
-                                                Hive.box<PostedOrder>(
-                                                    MainPage.postedBoxName);
-
-                                            var hiveValue = PostedOrder(
-                                              id: orderlistState.orderID,
-                                              orderDate:
-                                                  orderlistState.orderDate,
-                                              subtotal:
-                                                  orderlistState.getSubtotal(),
-                                              discount: 0,
-                                              grandTotal: orderlistState
-                                                  .getGrandTotal(),
-                                              orderList: orderlistState
-                                                  .orderlist
-                                                  .toList(),
-                                              paidStatus: PaidStatus.UnPaid,
-                                            );
-
-                                            //SAVE TO DATABASE
-                                            orderBox.put(orderlistState.orderID,
-                                                hiveValue);
-
-                                            showDialog(
-                                              barrierDismissible: false,
-                                              child: AlertDialog(
-                                                title: Text('Informasi Pesanan',
-                                                    style: kDialogTextStyle),
-                                                content: Row(
-                                                  children: <Widget>[
-                                                    Icon(
-                                                      Icons.info,
-                                                      size: 40,
-                                                      color: Colors.blue,
-                                                    ),
-                                                    SizedBox(width: 10),
-                                                    Text(
-                                                        'Pesanan sudah disimpan.',
-                                                        style:
-                                                            kDialogTextStyle),
-                                                  ],
-                                                ),
-                                                actions: <Widget>[
-                                                  FlatButton(
-                                                      onPressed: () {
-                                                        Navigator.pop(context);
-
+                                            // TODO:move code to OrderListProvider
+                                            if (orderlistState.addPostedOrder(
+                                                orderlistState)) {
+                                              CostumDialogBox
+                                                  .showDialogInformation(
+                                                      title: 'Information',
+                                                      contentText:
+                                                          'Daftar sudah disimpan kedalam Draft',
+                                                      context: context,
+                                                      icon: Icons.info,
+                                                      iconColor: Colors.blue,
+                                                      onTap: () {
                                                         orderlistState
                                                             .resetOrderList();
-                                                      },
-                                                      child: Text('OK',
-                                                          style:
-                                                              kDialogTextStyle))
-                                                ],
-                                              ),
-                                              context: context,
-                                            );
+                                                        Navigator.pop(context);
+                                                      });
+                                            }
                                           }
                                         }),
                                     _bottomButton(
@@ -356,8 +304,10 @@ class _MainPageState extends State<MainPage> {
 
                                           box.values.forEach((f) {
                                             print(f.id);
+                                            // box.delete(f.id);
                                             print(
                                                 'Jumlah item : ${f.itemList.length}');
+                                            print(f.paymentStatus);
                                           });
                                         }),
                                     _bottomButton(
@@ -407,24 +357,6 @@ class _MainPageState extends State<MainPage> {
                                           Navigator.pushNamed(
                                               context, PaymentSuccess.routeName,
                                               arguments: orderlistState);
-                                        // Navigator.push(
-                                        //     context,
-                                        //     MaterialPageRoute(
-                                        //         builder: (context) =>
-                                        //             PaymentSuccess(
-                                        //               itemList: orderlistState
-                                        //                   .orderlist,
-                                        //               date: orderlistState
-                                        //                   .orderDate,
-                                        //               orderID: orderlistState
-                                        //                   .orderID,
-                                        //               cashierName:
-                                        //                   'Mbak Nana',
-                                        //               pembayaran: orderlistState
-                                        //                   .getGrandTotal(), //belum dibuat
-                                        //               kembali:
-                                        //                   0, //belum dibuat
-                                        //             )));
                                       }),
                                 )
                               ],
@@ -505,7 +437,8 @@ class _MainPageState extends State<MainPage> {
                                                   child: Text(
                                                       (index + 1).toString()),
                                                 ),
-                                                title: Text(item.id ?? '-',
+                                                title: Text(
+                                                    item.refernceOrder ?? '-',
                                                     style: TextStyle(
                                                         fontSize: 22)),
                                                 subtitle: Column(
@@ -582,15 +515,16 @@ class _MainPageState extends State<MainPage> {
               onPressed: () {
                 if (orderlistProvider.orderlist.isEmpty) {
                   // TODO: check overflow saat keyboard muncul
-                  // CostumDialogBox.showInputDialogBox(
-                  //     context: context,
-                  //     textEditingController: _textReferenceOrder,
-                  //     title: 'Nama Pelanggan / Nomor Meja',
-                  //     confirmButtonTitle: 'OK',
-                  //     onConfirmPressed: () {
-                  //       print(_textReferenceOrder.text);
-                  //       Navigator.pop(context);
-                  //     });
+                  CostumDialogBox.showInputDialogBox(
+                      context: context,
+                      textEditingController: _textReferenceOrder,
+                      title: 'Nama Pelanggan / Nomor Meja',
+                      confirmButtonTitle: 'OK',
+                      onConfirmPressed: () {
+                        orderlistProvider.referenceOrder =
+                            _textReferenceOrder.text;
+                        Navigator.pop(context);
+                      });
                   orderlistProvider.createNewOrder();
                 } else if (orderlistProvider.orderlist.isNotEmpty) {
                   CostumDialogBox.showCostumDialogBox(
@@ -619,22 +553,24 @@ class _MainPageState extends State<MainPage> {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: <Widget>[
-            Expanded(
-              child: Text(
-                'Ref. Order: ',
-                style: TextStyle(
-                  color: priceColor,
-                  fontSize: 18,
-                ),
+            Text(
+              'Ref. Order: ',
+              style: TextStyle(
+                color: priceColor,
+                fontSize: 18,
               ),
             ),
             Expanded(
-              child: Text(
-                'Nama Cust. / No. Meja :',
-                overflow: TextOverflow.ellipsis,
-                style: TextStyle(
-                  color: priceColor,
-                  fontSize: 18,
+              child: Container(
+                child: Consumer<OrderListProvider>(
+                  builder: (context, state, _) => Text(
+                    state.referenceOrder ?? 'No Reference',
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      color: priceColor,
+                      fontSize: 18,
+                    ),
+                  ),
                 ),
               ),
             ),
@@ -671,13 +607,7 @@ class _MainPageState extends State<MainPage> {
     );
   }
 
-  Widget _cardMenu({
-    int id,
-    String productName,
-    double productPrice,
-    bool isRecommended = false,
-    String imagePath,
-  }) {
+  Widget _cardMenu(Product product) {
     var orderlistProvider =
         Provider.of<OrderListProvider>(context, listen: false);
 
@@ -694,8 +624,6 @@ class _MainPageState extends State<MainPage> {
                 alignment: Alignment.center,
                 children: <Widget>[
                   Container(
-                    // width: screenWidth * 0.2,
-                    // height: screenWidth * 0.12,
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(10),
                       color: greyColor,
@@ -706,14 +634,14 @@ class _MainPageState extends State<MainPage> {
                           shape: BoxShape.circle,
                           image: DecorationImage(
                             image: AssetImage(
-                              imagePath,
+                              product.image,
                             ),
                             fit: BoxFit.cover,
                           )),
                       // color: Colors.yellow,
                     ),
                   ),
-                  isRecommended
+                  product.isRecommended
                       ? Positioned(
                           top: 10,
                           right: 10,
@@ -729,14 +657,14 @@ class _MainPageState extends State<MainPage> {
             ),
             SizedBox(height: 10),
             Text(
-              productName,
+              product.name,
               style: screenWidth > 1024
                   ? kProductNameBigScreenTextStyle
                   : kProductNameSmallScreenTextStyle,
             ),
             SizedBox(height: 5),
             Text(
-              _formatCurrency.format(productPrice),
+              _formatCurrency.format(product.price),
               style: kPriceTextStyle,
             ),
           ],
@@ -744,13 +672,7 @@ class _MainPageState extends State<MainPage> {
       ),
       onDoubleTap: () {
         if (orderlistProvider.orderID.isNotEmpty) {
-          orderlistProvider.addToList(OrderList(
-            id: _uuid.v1(),
-            productName: productName,
-            price: productPrice,
-            dateTime: DateTime.now().toIso8601String(),
-            quantity: 1,
-          ));
+          orderlistProvider.addToList(product);
         }
       },
     );

@@ -22,16 +22,20 @@ class RouteGenerator {
           if (args is PostedOrderProvider) {
             // var state = args as PostedOrderProvider;
             return PaymentSuccess(
+                state: args,
                 itemList: args.postedOrder.orderList,
-                cashierName: 'Kasir Dummy (Posted Order)',
+                cashierName: args.postedOrder.cashierName,
+                referenceOrder: args.postedOrder.refernceOrder,
                 date: args.postedOrder.orderDate,
                 orderID: args.postedOrder.id,
                 pembayaran: args.finalPayment,
-                kembali: args.finalPayment - args.getGrandTotal());
+                kembali: args.finalPayment - args.grandTotal);
           } else if (args is OrderListProvider) {
             return PaymentSuccess(
+              state: args,
               itemList: args.orderlist,
-              cashierName: 'Kasir Dummy (OrderList)',
+              cashierName: args.cashierName,
+              referenceOrder: args.referenceOrder,
               date: args.orderDate,
               orderID: args.orderID,
               pembayaran: 0, //temporary value

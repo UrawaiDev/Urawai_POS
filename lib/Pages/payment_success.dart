@@ -9,18 +9,22 @@ import 'package:urawai_pos/constans/utils.dart';
 class PaymentSuccess extends StatelessWidget {
   final List<dynamic> itemList;
   final String cashierName;
+  final String referenceOrder;
   final String date;
   final String orderID;
   final double pembayaran;
   final double kembali;
+  final dynamic state;
 
   PaymentSuccess({
     @required this.itemList,
     @required this.cashierName,
+    @required this.referenceOrder,
     @required this.date,
     @required this.orderID,
     @required this.pembayaran,
     @required this.kembali,
+    @required this.state,
   });
 
   final _formatCurrency = NumberFormat.currency(
@@ -82,7 +86,7 @@ class PaymentSuccess extends StatelessWidget {
                               children: <Widget>[
                                 Text('Ref. Order :'),
                                 SizedBox(width: 8),
-                                Text(orderID),
+                                Text(referenceOrder ?? '-'),
                               ],
                             ),
                             Row(
@@ -96,7 +100,7 @@ class PaymentSuccess extends StatelessWidget {
                               children: <Widget>[
                                 Text('Kasir :'),
                                 SizedBox(width: 8),
-                                Text(cashierName),
+                                Text(cashierName ?? 'Cashier Not State'),
                               ],
                             ),
                             Divider(
@@ -149,8 +153,8 @@ class PaymentSuccess extends StatelessWidget {
                           children: <Widget>[
                             FooterOrderList(
                               dicount: 0,
-                              grandTotal: getGrandTotal(),
-                              subtotal: getSubTotal(),
+                              grandTotal: state.grandTotal,
+                              subtotal: state.subTotal,
                               tax: 0.1,
                             ),
                             Padding(
@@ -312,22 +316,18 @@ class PaymentSuccess extends StatelessWidget {
                                     ),
                                   ),
                                   onTap: () {
-                                    try {
-                                      Provider.of<PostedOrderProvider>(context,
-                                              listen: false)
-                                          .resetFinalPayment();
-                                    } catch (e) {
-                                      throw (e.toString());
-                                    } finally {
-                                      Navigator.pushAndRemoveUntil(
-                                        context,
-                                        MaterialPageRoute(
-                                            builder: (context) => MainPage()),
-                                        ModalRoute.withName('/'),
-                                      );
-                                    }
+                                    //reset variable
+                                    Provider.of<PostedOrderProvider>(context,
+                                            listen: false)
+                                        .resetFinalPayment();
 
-                                    // Navigator.pop(context);
+                                    //Navigate to Main Page
+                                    Navigator.pushAndRemoveUntil(
+                                      context,
+                                      MaterialPageRoute(
+                                          builder: (context) => MainPage()),
+                                      ModalRoute.withName('/'),
+                                    );
                                   },
                                 ),
                               ],
@@ -342,34 +342,5 @@ class PaymentSuccess extends StatelessWidget {
         ),
       ),
     );
-  }
-
-  double getGrandTotal() {
-    double _grandTotal = 0;
-    double _tax = 0;
-    double _subtotal;
-
-    itemList.forEach((order) {
-      _subtotal = order.quantity * order.price;
-      _grandTotal = _grandTotal + _subtotal;
-    });
-    _subtotal = _grandTotal;
-
-    _tax = _subtotal * 0.1;
-    _grandTotal = _subtotal + _tax;
-    return _grandTotal;
-  }
-
-  double getSubTotal() {
-    double _grandTotal = 0;
-    double _subtotal;
-
-    itemList.forEach((order) {
-      _subtotal = order.quantity * order.price;
-      _grandTotal = _grandTotal + _subtotal;
-    });
-    _subtotal = _grandTotal;
-
-    return _subtotal;
   }
 }

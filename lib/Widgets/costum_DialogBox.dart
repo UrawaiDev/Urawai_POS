@@ -2,6 +2,45 @@ import 'package:flutter/material.dart';
 import 'package:urawai_pos/constans/utils.dart';
 
 class CostumDialogBox {
+  static showDialogInformation({
+    BuildContext context,
+    String title,
+    IconData icon,
+    Color iconColor,
+    String contentText,
+    Function onTap,
+  }) {
+    showDialog(
+      barrierDismissible: false,
+      child: AlertDialog(
+        title: Text(title, style: kDialogTextStyle),
+        content: Row(
+          children: <Widget>[
+            Icon(
+              Icons.info,
+              size: 40,
+              color: Colors.blue,
+            ),
+            SizedBox(width: 10),
+            Text(contentText, style: kDialogTextStyle),
+          ],
+        ),
+        actions: <Widget>[
+          FlatButton(
+              onPressed: onTap,
+              //{
+              //   Navigator.pop(context);
+
+              //   orderlistState
+              //       .resetOrderList();
+              // },
+              child: Text('OK', style: kDialogTextStyle))
+        ],
+      ),
+      context: context,
+    );
+  }
+
   static showInputDialogBox({
     TextEditingController textEditingController,
     BuildContext context,

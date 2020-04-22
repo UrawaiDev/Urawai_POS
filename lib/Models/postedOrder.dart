@@ -31,13 +31,20 @@ class PostedOrder extends HiveObject {
   List<OrderList> orderList;
   @HiveField(6)
   PaidStatus paidStatus;
+  @HiveField(7)
+  String cashierName;
+  @HiveField(8)
+  String refernceOrder;
 
-  PostedOrder(
-      {this.id,
-      this.orderDate,
-      this.subtotal,
-      this.discount,
-      this.grandTotal,
-      this.orderList,
-      this.paidStatus});
+  PostedOrder({
+    this.id,
+    this.orderDate,
+    this.subtotal,
+    this.discount,
+    this.grandTotal,
+    this.orderList,
+    this.paidStatus,
+    this.cashierName,
+    this.refernceOrder,
+  });
 }
