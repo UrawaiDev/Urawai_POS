@@ -17,9 +17,9 @@ class CostumDialogBox {
         content: Row(
           children: <Widget>[
             Icon(
-              Icons.info,
+              icon,
               size: 40,
-              color: Colors.blue,
+              color: iconColor,
             ),
             SizedBox(width: 10),
             Text(contentText, style: kDialogTextStyle),
@@ -48,7 +48,7 @@ class CostumDialogBox {
     String confirmButtonTitle,
     Function onConfirmPressed,
   }) {
-    return showDialog(
+    showDialog(
         context: context,
         barrierDismissible: true,
         child: AlertDialog(

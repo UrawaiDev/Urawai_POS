@@ -23,6 +23,11 @@ TextStyle kProductNameSmallScreenTextStyle = TextStyle(
   fontSize: 20,
 );
 
+TextStyle kGrandTotalTextStyle = TextStyle(
+  fontWeight: FontWeight.bold,
+  fontSize: 20,
+);
+
 TextStyle kButtonPaymentTextStyle = TextStyle(
   fontWeight: FontWeight.bold,
   fontSize: 30,
@@ -39,7 +44,7 @@ TextStyle kNoteTextStyle = TextStyle(
 );
 
 TextStyle kDialogTextStyle = TextStyle(
-  fontSize: 25,
+  fontSize: 23,
 );
 
 TextStyle kStruckTextStyle = TextStyle(

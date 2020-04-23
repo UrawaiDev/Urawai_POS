@@ -24,7 +24,7 @@ class RouteGenerator {
             return PaymentSuccess(
                 state: args,
                 itemList: args.postedOrder.orderList,
-                cashierName: args.postedOrder.cashierName,
+                cashierName: args.cashierName,
                 referenceOrder: args.postedOrder.refernceOrder,
                 date: args.postedOrder.orderDate,
                 orderID: args.postedOrder.id,
@@ -38,8 +38,8 @@ class RouteGenerator {
               referenceOrder: args.referenceOrder,
               date: args.orderDate,
               orderID: args.orderID,
-              pembayaran: 0, //temporary value
-              kembali: 0, //temporary value
+              pembayaran: args.finalPayment,
+              kembali: args.finalPayment - args.grandTotal,
             );
           }
           return _onErrorRoute();

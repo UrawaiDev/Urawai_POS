@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
 import 'package:urawai_pos/Models/transaction.dart';
 import 'package:urawai_pos/Pages/mainPage.dart';
+import 'package:urawai_pos/Provider/orderList_provider.dart';
 import 'package:urawai_pos/Provider/postedOrder_provider.dart';
 
 class TransactionOrderProvider with ChangeNotifier {
@@ -22,6 +23,17 @@ class TransactionOrderProvider with ChangeNotifier {
           referenceOrder: stateProvider.postedOrder.refernceOrder,
           grandTotal: stateProvider.grandTotal,
           itemList: stateProvider.postedOrder.orderList,
+          paymentStatus: paymentStatus,
+          paymentType: paymentType,
+        );
+      } else if (stateProvider is OrderListProvider) {
+        _transactionOrder = TransactionOrder(
+          id: stateProvider.orderID,
+          cashierName: stateProvider.cashierName,
+          date: stateProvider.orderDate,
+          referenceOrder: stateProvider.referenceOrder,
+          grandTotal: stateProvider.grandTotal,
+          itemList: stateProvider.orderlist,
           paymentStatus: paymentStatus,
           paymentType: paymentType,
         );

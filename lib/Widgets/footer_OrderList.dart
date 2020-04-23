@@ -39,11 +39,11 @@ class FooterOrderList extends StatelessWidget {
             children: <Widget>[
               Text(
                 'Total',
-                style: TextStyle(fontSize: 25, fontWeight: FontWeight.bold),
+                style: kGrandTotalTextStyle,
               ),
               Text(
                 _formatCurrency.format(grandTotal),
-                style: TextStyle(fontSize: 25, fontWeight: FontWeight.bold),
+                style: kGrandTotalTextStyle,
               ),
             ],
           ),

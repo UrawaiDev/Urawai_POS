@@ -1,12 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:provider/provider.dart';
+import 'package:urawai_pos/Models/orderList.dart';
+import 'package:urawai_pos/Models/postedOrder.dart';
+import 'package:urawai_pos/Provider/orderList_provider.dart';
+import 'package:urawai_pos/Provider/postedOrder_provider.dart';
+import 'package:urawai_pos/Widgets/costum_DialogBox.dart';
 import 'package:urawai_pos/constans/utils.dart';
 
 class DetailItemOrder extends StatelessWidget {
-  final String productName;
-  final double price;
-  final int quantity;
-  final Function onLongPress;
+  final OrderList itemList;
+
+  final Function onAddNoteTap;
   final Function onMinusButtonTap;
   final Function onPlusButtonTap;
   final _formatCurrency = NumberFormat("#,##0", "en_US");
@@ -14,10 +19,8 @@ class DetailItemOrder extends StatelessWidget {
   final TextEditingController _textNoteOrder = TextEditingController();
 
   DetailItemOrder(
-      {this.productName,
-      this.price,
-      this.quantity,
-      this.onLongPress,
+      {@required this.itemList,
+      this.onAddNoteTap,
       this.onMinusButtonTap,
       this.onPlusButtonTap,
       this.childWidget});
@@ -43,14 +46,14 @@ class DetailItemOrder extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: <Widget>[
                         Text(
-                          productName,
+                          itemList.productName,
                           style: screenWidth > 1024
                               ? kProductNameBigScreenTextStyle
                               : kProductNameSmallScreenTextStyle,
                         ),
                         SizedBox(height: 5),
                         Text(
-                          'Rp. ' + _formatCurrency.format(price),
+                          'Rp. ' + _formatCurrency.format(itemList.price),
                           style: kPriceTextStyle,
                         ),
                         SizedBox(height: 8),
@@ -58,23 +61,16 @@ class DetailItemOrder extends StatelessWidget {
                           children: <Widget>[
                             GestureDetector(
                               child: Icon(Icons.note),
-                              onTap: () {
-                                // TODO: will check later OverFlow
-                                // CostumDialogBox.showInputDialogBox(
-                                //     context: context,
-                                //     textEditingController: _textNoteOrder,
-                                //     title: 'Nama Pelanggan / Nomor Meja',
-                                //     confirmButtonTitle: 'OK',
-                                //     onConfirmPressed: () {
-                                //       print(_textNoteOrder.text);
-                                //       Navigator.pop(context);
-                                //     });
-                              },
+                              onTap: onAddNoteTap,
                             ),
                             SizedBox(width: 5),
-                            Text(
-                              'Catatan',
-                              style: kNoteTextStyle,
+                            Expanded(
+                              child: Consumer<OrderListProvider>(
+                                builder: (context, state, _) => Text(
+                                  itemList.note ?? '-',
+                                  style: kNoteTextStyle,
+                                ),
+                              ),
                             )
                           ],
                         ),
@@ -106,7 +102,7 @@ class DetailItemOrder extends StatelessWidget {
                             height: 35,
                             color: Colors.white,
                             child: Text(
-                              quantity.toString(),
+                              itemList.quantity.toString(),
                               style: screenWidth > 1024
                                   ? kProductNameBigScreenTextStyle
                                   : kProductNameSmallScreenTextStyle,
@@ -134,7 +130,6 @@ class DetailItemOrder extends StatelessWidget {
               ),
             ),
           ),
-          onLongPress: onLongPress,
         ),
         Divider(),
       ],

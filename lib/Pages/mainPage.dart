@@ -7,10 +7,10 @@ import 'package:urawai_pos/Models/postedOrder.dart';
 import 'package:urawai_pos/Models/products.dart';
 import 'package:urawai_pos/Models/transaction.dart';
 import 'package:urawai_pos/Pages/payment_screen_draftOrder.dart';
-import 'package:urawai_pos/Pages/payment_success.dart';
 
 import 'package:urawai_pos/Provider/general_provider.dart';
 import 'package:urawai_pos/Provider/orderList_provider.dart';
+import 'package:urawai_pos/Provider/postedOrder_provider.dart';
 import 'package:urawai_pos/Widgets/costum_DialogBox.dart';
 import 'package:urawai_pos/Widgets/detail_itemOrder.dart';
 import 'package:urawai_pos/Widgets/footer_OrderList.dart';
@@ -19,6 +19,7 @@ import 'package:urawai_pos/constans/utils.dart';
 class MainPage extends StatefulWidget {
   @override
   _MainPageState createState() => _MainPageState();
+  static const String routeName = '/';
   static const String postedBoxName = "posted_order";
   static const String transactionBoxName = "TransactionOrder";
 }
@@ -30,6 +31,7 @@ class _MainPageState extends State<MainPage> {
     decimalDigits: 0,
   );
   final TextEditingController _textReferenceOrder = TextEditingController();
+  final TextEditingController _textNote = TextEditingController();
 
   List<Product> products = [
     Product(
@@ -93,6 +95,7 @@ class _MainPageState extends State<MainPage> {
   @override
   void dispose() {
     _textReferenceOrder.dispose();
+    _textNote.dispose();
     super.dispose();
   }
 
@@ -103,6 +106,7 @@ class _MainPageState extends State<MainPage> {
 
     return SafeArea(
       child: Scaffold(
+        resizeToAvoidBottomPadding: false,
         body: Container(
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -158,95 +162,113 @@ class _MainPageState extends State<MainPage> {
                   )),
               //RIGHT SIDE MENU ORDER LIST
               Expanded(
-                child: Container(
-                  color: Colors.white,
-                  padding: EdgeInsets.fromLTRB(5, 20, 5, 15),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: <Widget>[
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: <Widget>[_headerOrderList()],
-                      ),
-                      //ORDERED ITEM LIST
-                      orderlistState.orderlist.isEmpty
-                          ? Expanded(
-                              child: Container(
-                                alignment: Alignment.center,
-                                child: Text(
-                                  'Tidak Ada Pesanan',
-                                  style: kPriceTextStyle,
-                                ),
-                              ),
-                            )
-                          : Expanded(
-                              child: Padding(
-                                padding:
-                                    const EdgeInsets.symmetric(vertical: 5.0),
-                                child: Container(
-                                  child: Consumer<OrderListProvider>(
-                                    builder: (context, orderlistState, _) =>
-                                        ListView.builder(
-                                            itemCount:
-                                                orderlistState.orderlist.length,
-                                            itemBuilder: (context, index) {
-                                              var currentOrderList =
-                                                  orderlistState.orderlist;
-                                              final itemKey =
-                                                  currentOrderList[index];
-
-                                              return Dismissible(
-                                                key: ValueKey(itemKey),
-                                                background: Container(
-                                                  alignment: Alignment.center,
-                                                  color: Colors.red,
-                                                  child: Text(
-                                                    'Hapus',
-                                                    style: TextStyle(
-                                                        color: Colors.white,
-                                                        fontSize: 35,
-                                                        fontWeight:
-                                                            FontWeight.bold),
-                                                  ),
-                                                ),
-                                                onDismissed: (direction) {
-                                                  orderlistState
-                                                      .removeFromList(index);
-                                                },
-                                                child: DetailItemOrder(
-                                                  productName:
-                                                      currentOrderList[index]
-                                                          .productName,
-                                                  price: currentOrderList[index]
-                                                      .price,
-                                                  quantity:
-                                                      currentOrderList[index]
-                                                          .quantity,
-                                                  onLongPress: () {
-                                                    print(
-                                                        currentOrderList[index]
-                                                            .productName);
-                                                  },
-                                                  onMinusButtonTap: () =>
-                                                      orderlistState
-                                                          .decrementQuantity(
-                                                              index),
-                                                  onPlusButtonTap: () =>
-                                                      orderlistState
-                                                          .incrementQuantity(
-                                                              index),
-                                                  childWidget: Container(),
-                                                ),
-                                              );
-                                            }),
-                                  ),
-                                ),
-                              ),
-                            ),
-
-                      SingleChildScrollView(
-                        child: Column(
+                  child: Container(
+                      color: Colors.white,
+                      padding: EdgeInsets.fromLTRB(5, 20, 5, 15),
+                      child: Column(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: <Widget>[
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: <Widget>[_headerOrderList()],
+                            ),
+                            //ORDERED ITEM LIST
+                            orderlistState.orderlist.isEmpty
+                                ? Expanded(
+                                    child: Container(
+                                      alignment: Alignment.center,
+                                      child: Text(
+                                        'Tidak Ada Pesanan',
+                                        style: kPriceTextStyle,
+                                      ),
+                                    ),
+                                  )
+                                : Expanded(
+                                    child: Padding(
+                                      padding: const EdgeInsets.symmetric(
+                                          vertical: 5.0),
+                                      child: Container(
+                                        child: Consumer<OrderListProvider>(
+                                          builder: (context, orderlistState,
+                                                  _) =>
+                                              ListView.builder(
+                                                  itemCount: orderlistState
+                                                      .orderlist.length,
+                                                  itemBuilder:
+                                                      (context, index) {
+                                                    var currentOrderList =
+                                                        orderlistState
+                                                            .orderlist;
+                                                    final itemKey =
+                                                        currentOrderList[index];
+
+                                                    return Dismissible(
+                                                      key: ValueKey(itemKey),
+                                                      background: Container(
+                                                        alignment:
+                                                            Alignment.center,
+                                                        color: Colors.red,
+                                                        child: Text(
+                                                          'Hapus',
+                                                          style: TextStyle(
+                                                              color:
+                                                                  Colors.white,
+                                                              fontSize: 35,
+                                                              fontWeight:
+                                                                  FontWeight
+                                                                      .bold),
+                                                        ),
+                                                      ),
+                                                      onDismissed: (direction) {
+                                                        orderlistState
+                                                            .removeFromList(
+                                                                index);
+                                                      },
+                                                      child: DetailItemOrder(
+                                                        itemList:
+                                                            currentOrderList[
+                                                                index],
+                                                        onMinusButtonTap: () =>
+                                                            orderlistState
+                                                                .decrementQuantity(
+                                                                    index),
+                                                        onPlusButtonTap: () =>
+                                                            orderlistState
+                                                                .incrementQuantity(
+                                                                    index),
+                                                        onAddNoteTap: () {
+                                                          CostumDialogBox
+                                                              .showInputDialogBox(
+                                                                  context:
+                                                                      context,
+                                                                  textEditingController:
+                                                                      _textNote,
+                                                                  title:
+                                                                      'Catatan',
+                                                                  confirmButtonTitle:
+                                                                      'OK',
+                                                                  onConfirmPressed:
+                                                                      () {
+                                                                    orderlistState.addNote(
+                                                                        _textNote
+                                                                            .text,
+                                                                        index);
+                                                                    _textNote
+                                                                        .clear();
+
+                                                                    Navigator.pop(
+                                                                        context);
+                                                                  });
+                                                        },
+                                                        childWidget:
+                                                            Container(),
+                                                      ),
+                                                    );
+                                                  }),
+                                        ),
+                                      ),
+                                    ),
+                                  ),
                             Container(
                               child: FooterOrderList(
                                 dicount: 0,
@@ -271,7 +293,6 @@ class _MainPageState extends State<MainPage> {
                                                   .orderID.isNotEmpty &&
                                               orderlistState
                                                   .orderlist.isNotEmpty) {
-                                            // TODO:move code to OrderListProvider
                                             if (orderlistState.addPostedOrder(
                                                 orderlistState)) {
                                               CostumDialogBox
@@ -288,6 +309,12 @@ class _MainPageState extends State<MainPage> {
                                                         Navigator.pop(context);
                                                       });
                                             }
+                                            //set cashier name for PostedOrder Provider
+                                            Provider.of<PostedOrderProvider>(
+                                                        context,
+                                                        listen: false)
+                                                    .cashierName =
+                                                orderlistState.cashierName;
                                           }
                                         }),
                                     _bottomButton(
@@ -326,8 +353,6 @@ class _MainPageState extends State<MainPage> {
                                                 iconColor: Colors.red,
                                                 confirmButtonTitle: 'Hapus',
                                                 onConfirmPressed: () {
-                                                  orderlistState.orderlist
-                                                      .clear();
                                                   orderlistState
                                                       .resetOrderList();
                                                   Navigator.pop(context);
@@ -354,20 +379,15 @@ class _MainPageState extends State<MainPage> {
                                       onPressed: () {
                                         //SEMENTARA
                                         if (orderlistState.orderlist.isNotEmpty)
-                                          Navigator.pushNamed(
-                                              context, PaymentSuccess.routeName,
-                                              arguments: orderlistState);
+                                          Navigator.pushNamed(context,
+                                              PaymentScreenDraftOrder.routeName,
+                                              arguments:
+                                                  orderlistState.orderlist);
                                       }),
                                 )
                               ],
                             ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              )
+                          ]))),
 
               //Right side -- menu penjuala
             ],
@@ -514,7 +534,6 @@ class _MainPageState extends State<MainPage> {
               iconSize: 35,
               onPressed: () {
                 if (orderlistProvider.orderlist.isEmpty) {
-                  // TODO: check overflow saat keyboard muncul
                   CostumDialogBox.showInputDialogBox(
                       context: context,
                       textEditingController: _textReferenceOrder,
@@ -523,8 +542,11 @@ class _MainPageState extends State<MainPage> {
                       onConfirmPressed: () {
                         orderlistProvider.referenceOrder =
                             _textReferenceOrder.text;
+                        _textReferenceOrder.clear();
+                        orderlistProvider.cashierName = 'Dummy Cashier XXX';
                         Navigator.pop(context);
                       });
+                  // TODO: do not create new order if reference order is empty
                   orderlistProvider.createNewOrder();
                 } else if (orderlistProvider.orderlist.isNotEmpty) {
                   CostumDialogBox.showCostumDialogBox(
@@ -560,16 +582,14 @@ class _MainPageState extends State<MainPage> {
                 fontSize: 18,
               ),
             ),
-            Expanded(
-              child: Container(
-                child: Consumer<OrderListProvider>(
-                  builder: (context, state, _) => Text(
-                    state.referenceOrder ?? 'No Reference',
-                    overflow: TextOverflow.ellipsis,
-                    style: TextStyle(
-                      color: priceColor,
-                      fontSize: 18,
-                    ),
+            Container(
+              child: Consumer<OrderListProvider>(
+                builder: (context, state, _) => Text(
+                  state.referenceOrder ?? 'No Reference',
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    color: priceColor,
+                    fontSize: 18,
                   ),
                 ),
               ),
@@ -590,7 +610,7 @@ class _MainPageState extends State<MainPage> {
                 ),
               ),
               Expanded(
-                child: Text(orderlistState.orderDate.toString(),
+                child: Text(orderlistState.orderDate,
                     style: TextStyle(
                       color: priceColor,
                       fontSize: 16,
@@ -672,7 +692,11 @@ class _MainPageState extends State<MainPage> {
       ),
       onDoubleTap: () {
         if (orderlistProvider.orderID.isNotEmpty) {
-          orderlistProvider.addToList(product);
+          orderlistProvider.addToList(
+            item: product,
+            referenceOrder: orderlistProvider.referenceOrder,
+            cashierName: 'Dummy Casier Name',
+          );
         }
       },
     );

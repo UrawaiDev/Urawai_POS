@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:urawai_pos/Pages/mainPage.dart';
+import 'package:urawai_pos/Provider/orderList_provider.dart';
 import 'package:urawai_pos/Provider/postedOrder_provider.dart';
 import 'package:urawai_pos/Widgets/footer_OrderList.dart';
 import 'package:urawai_pos/constans/utils.dart';
@@ -166,17 +167,11 @@ class PaymentSuccess extends StatelessWidget {
                                 children: <Widget>[
                                   Text(
                                     'Pembayaran',
-                                    style: TextStyle(
-                                      fontSize: 25,
-                                      fontWeight: FontWeight.bold,
-                                    ),
+                                    style: kGrandTotalTextStyle,
                                   ),
                                   Text(
                                     _formatCurrency.format(pembayaran),
-                                    style: TextStyle(
-                                      fontSize: 25,
-                                      fontWeight: FontWeight.bold,
-                                    ),
+                                    style: kGrandTotalTextStyle,
                                   ),
                                 ],
                               ),
@@ -190,17 +185,11 @@ class PaymentSuccess extends StatelessWidget {
                                 children: <Widget>[
                                   Text(
                                     'Kembali',
-                                    style: TextStyle(
-                                      fontSize: 25,
-                                      fontWeight: FontWeight.bold,
-                                    ),
+                                    style: kGrandTotalTextStyle,
                                   ),
                                   Text(
                                     _formatCurrency.format(kembali),
-                                    style: TextStyle(
-                                      fontSize: 25,
-                                      fontWeight: FontWeight.bold,
-                                    ),
+                                    style: kGrandTotalTextStyle,
                                   ),
                                 ],
                               ),
@@ -320,6 +309,12 @@ class PaymentSuccess extends StatelessWidget {
                                     Provider.of<PostedOrderProvider>(context,
                                             listen: false)
                                         .resetFinalPayment();
+                                    Provider.of<OrderListProvider>(context,
+                                            listen: false)
+                                        .resetFinalPayment();
+                                    Provider.of<OrderListProvider>(context,
+                                            listen: false)
+                                        .resetOrderList();
 
                                     //Navigate to Main Page
                                     Navigator.pushAndRemoveUntil(

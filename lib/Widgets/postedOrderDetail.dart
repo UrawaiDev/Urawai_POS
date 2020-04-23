@@ -55,20 +55,16 @@ class PostedOrderDetail extends StatelessWidget {
                             orderlistState.removeFromList(index);
                           },
                           child: DetailItemOrder(
-                              productName: currentOrderList[index].productName,
-                              price: currentOrderList[index].price,
-                              quantity: currentOrderList[index].quantity,
-                              onLongPress: () {
-                                print(currentOrderList[index].productName);
-                              },
-                              onMinusButtonTap: () {
-                                if (currentOrderList[index].quantity > 1)
-                                  orderlistState.decrementQuantity(index);
-                              },
-                              onPlusButtonTap: () {
-                                if (currentOrderList[index].quantity <= 999)
-                                  orderlistState.incrementQuantity(index);
-                              }),
+                            itemList: currentOrderList[index],
+                            onMinusButtonTap: () {
+                              if (currentOrderList[index].quantity > 1)
+                                orderlistState.decrementQuantity(index);
+                            },
+                            onPlusButtonTap: () {
+                              if (currentOrderList[index].quantity <= 999)
+                                orderlistState.incrementQuantity(index);
+                            },
+                          ),
                         );
                       }),
                 ),

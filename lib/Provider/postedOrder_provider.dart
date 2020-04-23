@@ -8,6 +8,7 @@ class PostedOrderProvider with ChangeNotifier {
   PostedOrder _postedOrder;
   String _totalPayment = '';
   double _finalPayment = 0;
+  String _cashierName = '';
 
   PostedOrder get postedOrder => _postedOrder;
   set postedorder(PostedOrder newValue) {
@@ -26,6 +27,12 @@ class PostedOrderProvider with ChangeNotifier {
     notifyListeners();
   }
 
+  String get cashierName => _cashierName;
+  set cashierName(String newValue) {
+    _cashierName = newValue;
+    notifyListeners();
+  }
+
   addItem(PostedOrder pOrder, OrderList orderList) {
     pOrder.orderList.add(orderList);
     notifyListeners();
@@ -39,6 +46,11 @@ class PostedOrderProvider with ChangeNotifier {
 
   removeItemFromList(int index) {
     _postedOrder.orderList.removeAt(index);
+    notifyListeners();
+  }
+
+  addNote(String newValue, int index) {
+    _postedOrder.orderList[index].note = newValue;
     notifyListeners();
   }
 

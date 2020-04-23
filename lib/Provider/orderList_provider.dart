@@ -11,15 +11,31 @@ class OrderListProvider with ChangeNotifier {
   final Uuid _uuid = Uuid();
   List<OrderList> orderlist = [];
   int _quantity = 1;
+  double _finalPayment = 0;
+  String _totalPayment = '';
+  String _note = '-';
 
   String _orderID = '';
   String _orderDate = '';
-  String _cashierName = 'Dummy Cashier';
-  String _referenceOrder = 'Meja 7';
+  String _cashierName = '';
+  String _referenceOrder = '';
 
   String get orderID => _orderID;
   set orderID(String newValue) {
     _orderID = newValue;
+    notifyListeners();
+  }
+
+  String get totalPayment => _totalPayment;
+  set totalPayment(String newValue) {
+    _totalPayment = newValue;
+    notifyListeners();
+  }
+
+  String get note => _note;
+
+  void addNote(String newValue, int index) {
+    orderlist[index].note = newValue;
     notifyListeners();
   }
 
@@ -41,11 +57,11 @@ class OrderListProvider with ChangeNotifier {
     notifyListeners();
   }
 
-  // double get grandTotal => _grandTotal;
-  // set grandTotal(double newValue) {
-  //   _grandTotal = newValue;
-  //   notifyListeners();
-  // }
+  double get finalPayment => _finalPayment;
+  set finalPayment(double newValue) {
+    _finalPayment = newValue;
+    notifyListeners();
+  }
 
   int get quantity => _quantity;
   set quantity(int newValue) {
@@ -53,13 +69,21 @@ class OrderListProvider with ChangeNotifier {
     notifyListeners();
   }
 
-  void addToList(Product item) {
+  resetFinalPayment() {
+    _totalPayment = '';
+    _finalPayment = 0;
+    //notifyListeners();
+  }
+
+  void addToList({Product item, String referenceOrder, String cashierName}) {
     orderlist.add(OrderList(
       id: _uuid.v1(),
       productName: item.name,
       price: item.price,
       dateTime: DateTime.now().toString(),
       quantity: 1,
+      referenceOrder: referenceOrder,
+      cashierName: cashierName,
     ));
 
     notifyListeners();
@@ -92,10 +116,13 @@ class OrderListProvider with ChangeNotifier {
 
   void resetOrderList() {
     orderlist.clear();
-    orderID = '';
-    orderDate = '';
-    cashierName = '';
-    referenceOrder = '';
+    _orderID = '';
+    _orderDate = '';
+    _cashierName = '';
+    _referenceOrder = '';
+    _totalPayment = '';
+    _finalPayment = 0;
+
     notifyListeners();
   }
 
