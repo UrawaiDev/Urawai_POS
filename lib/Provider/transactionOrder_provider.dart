@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
 import 'package:urawai_pos/Models/transaction.dart';
-import 'package:urawai_pos/Pages/mainPage.dart';
+import 'package:urawai_pos/Pages/pos_Page.dart';
 import 'package:urawai_pos/Provider/orderList_provider.dart';
 import 'package:urawai_pos/Provider/postedOrder_provider.dart';
 
@@ -12,7 +12,7 @@ class TransactionOrderProvider with ChangeNotifier {
     @required PaymentType paymentType,
   }) {
     TransactionOrder _transactionOrder;
-    var box = Hive.box<TransactionOrder>(MainPage.transactionBoxName);
+    var box = Hive.box<TransactionOrder>(POSPage.transactionBoxName);
 
     try {
       if (stateProvider is PostedOrderProvider) {

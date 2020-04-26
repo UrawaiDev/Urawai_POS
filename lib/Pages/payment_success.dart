@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
-import 'package:urawai_pos/Pages/mainPage.dart';
+import 'package:urawai_pos/Pages/pos_Page.dart';
 import 'package:urawai_pos/Provider/orderList_provider.dart';
 import 'package:urawai_pos/Provider/postedOrder_provider.dart';
 import 'package:urawai_pos/Widgets/footer_OrderList.dart';
@@ -320,8 +320,8 @@ class PaymentSuccess extends StatelessWidget {
                                     Navigator.pushAndRemoveUntil(
                                       context,
                                       MaterialPageRoute(
-                                          builder: (context) => MainPage()),
-                                      ModalRoute.withName('/'),
+                                          builder: (context) => POSPage()),
+                                      ModalRoute.withName('/pos'),
                                     );
                                   },
                                 ),

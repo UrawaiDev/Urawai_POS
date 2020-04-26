@@ -55,7 +55,7 @@ class MyApp extends StatelessWidget {
             primaryColor: Color(0xFF408be5),
             scaffoldBackgroundColor: Color(0xFFfbfcfe),
             textTheme: TextTheme(body1: TextStyle(color: Color(0xFF435c72)))),
-        initialRoute: '/',
+        initialRoute: '/pos',
         onGenerateRoute: RouteGenerator.onGenerate,
       ),
     );

@@ -4,7 +4,7 @@ import 'package:intl/intl.dart';
 import 'package:urawai_pos/Models/orderList.dart';
 import 'package:urawai_pos/Models/postedOrder.dart';
 import 'package:urawai_pos/Models/products.dart';
-import 'package:urawai_pos/Pages/mainPage.dart';
+import 'package:urawai_pos/Pages/pos_Page.dart';
 import 'package:uuid/uuid.dart';
 
 class OrderListProvider with ChangeNotifier {
@@ -171,7 +171,7 @@ class OrderListProvider with ChangeNotifier {
   }
 
   bool addPostedOrder(OrderListProvider orderlistState) {
-    var orderBox = Hive.box<PostedOrder>(MainPage.postedBoxName);
+    var orderBox = Hive.box<PostedOrder>(POSPage.postedBoxName);
 
     try {
       var hiveValue = PostedOrder(

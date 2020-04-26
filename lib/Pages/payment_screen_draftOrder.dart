@@ -4,8 +4,8 @@ import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:urawai_pos/Models/postedOrder.dart';
 import 'package:urawai_pos/Models/transaction.dart';
-import 'package:urawai_pos/Pages/mainPage.dart';
 import 'package:urawai_pos/Pages/payment_success.dart';
+import 'package:urawai_pos/Pages/pos_Page.dart';
 import 'package:urawai_pos/Provider/orderList_provider.dart';
 import 'package:urawai_pos/Provider/postedOrder_provider.dart';
 import 'package:urawai_pos/Provider/transactionOrder_provider.dart';
@@ -416,7 +416,7 @@ class PaymentScreenDraftOrder extends StatelessWidget {
 
                               //delete Posted Order
                               if (itemList is PostedOrder) {
-                                Hive.box<PostedOrder>(MainPage.postedBoxName)
+                                Hive.box<PostedOrder>(POSPage.postedBoxName)
                                     .delete(state.postedOrder.id);
                               }
 

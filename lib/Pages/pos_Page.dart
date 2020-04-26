@@ -16,15 +16,15 @@ import 'package:urawai_pos/Widgets/detail_itemOrder.dart';
 import 'package:urawai_pos/Widgets/footer_OrderList.dart';
 import 'package:urawai_pos/constans/utils.dart';
 
-class MainPage extends StatefulWidget {
+class POSPage extends StatefulWidget {
   @override
-  _MainPageState createState() => _MainPageState();
-  static const String routeName = '/';
+  _POSPageState createState() => _POSPageState();
+  static const String routeName = '/pos';
   static const String postedBoxName = "posted_order";
   static const String transactionBoxName = "TransactionOrder";
 }
 
-class _MainPageState extends State<MainPage> {
+class _POSPageState extends State<POSPage> {
   final _formatCurrency = NumberFormat.currency(
     symbol: 'Rp.',
     locale: 'en_US',
@@ -326,7 +326,7 @@ class _MainPageState extends State<MainPage> {
                                         title: 'Diskon',
                                         onTap: () {
                                           var box = Hive.box<TransactionOrder>(
-                                              MainPage.transactionBoxName);
+                                              POSPage.transactionBoxName);
 
                                           print('------------------');
                                           print(
@@ -412,7 +412,7 @@ class _MainPageState extends State<MainPage> {
           children: <Widget>[
             ValueListenableBuilder(
               valueListenable:
-                  Hive.box<PostedOrder>(MainPage.postedBoxName).listenable(),
+                  Hive.box<PostedOrder>(POSPage.postedBoxName).listenable(),
               builder: (context, boxOrder, _) => Stack(
                 children: <Widget>[
                   IconButton(

@@ -3,7 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:urawai_pos/Models/orderList.dart';
 import 'package:urawai_pos/Models/products.dart';
 import 'package:urawai_pos/Models/transaction.dart';
-import 'package:urawai_pos/Pages/mainPage.dart';
+import 'package:urawai_pos/Pages/pos_Page.dart';
 import 'package:urawai_pos/Provider/orderList_provider.dart';
 import 'package:urawai_pos/Provider/transactionOrder_provider.dart';
 import 'package:urawai_pos/Widgets/costum_DialogBox.dart';
@@ -214,8 +214,8 @@ class _PaymentScreenLeftOrderListState
                           //back to main page
                           Navigator.pushAndRemoveUntil(
                             context,
-                            MaterialPageRoute(builder: (context) => MainPage()),
-                            ModalRoute.withName(MainPage.routeName),
+                            MaterialPageRoute(builder: (context) => POSPage()),
+                            ModalRoute.withName(POSPage.routeName),
                           );
                         }),
                   ),

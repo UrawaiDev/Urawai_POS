@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
 import 'package:urawai_pos/Models/orderList.dart';
 import 'package:urawai_pos/Models/postedOrder.dart';
-import 'package:urawai_pos/Pages/mainPage.dart';
+import 'package:urawai_pos/Pages/pos_Page.dart';
 
 class PostedOrderProvider with ChangeNotifier {
   PostedOrder _postedOrder;
@@ -113,6 +113,6 @@ class PostedOrderProvider with ChangeNotifier {
   }
 
   deletePostedOrder(String key) {
-    Hive.box<PostedOrder>(MainPage.postedBoxName).delete(key);
+    Hive.box<PostedOrder>(POSPage.postedBoxName).delete(key);
   }
 }
