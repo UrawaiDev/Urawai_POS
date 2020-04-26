@@ -69,6 +69,19 @@ class OrderListProvider with ChangeNotifier {
     notifyListeners();
   }
 
+  double get discountTotal {
+    var hasDiscount = orderlist.where((item) {
+      return item.discount != null && item.discount != 0;
+    });
+
+    double result = hasDiscount.fold(0, (prev, item) {
+      //perlu dikonfirmasi apakah diskon berlakuk kelipatan
+      return prev + ((item.price * (item.discount / 100)) * item.quantity);
+    });
+
+    return result;
+  }
+
   resetFinalPayment() {
     _totalPayment = '';
     _finalPayment = 0;
@@ -84,6 +97,7 @@ class OrderListProvider with ChangeNotifier {
       quantity: 1,
       referenceOrder: referenceOrder,
       cashierName: cashierName,
+      discount: item.dicount,
     ));
 
     notifyListeners();
@@ -138,7 +152,7 @@ class OrderListProvider with ChangeNotifier {
     _subtotal = _grandTotal;
 
     _tax = _subtotal * 0.1;
-    _grandTotal = _subtotal + _tax;
+    _grandTotal = (_subtotal + _tax) - discountTotal;
 
     //proses pembulatan kebawah
     _grandTotal = _grandTotal - (_grandTotal % 100);

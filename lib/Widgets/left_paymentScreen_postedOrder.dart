@@ -12,16 +12,31 @@ import 'package:urawai_pos/Widgets/detail_itemOrder.dart';
 import 'package:urawai_pos/Widgets/footer_OrderList.dart';
 import 'package:urawai_pos/constans/utils.dart';
 
-class PaymentScreenLeftPostedOrder extends StatelessWidget {
+class PaymentScreenLeftPostedOrder extends StatefulWidget {
   final PostedOrder postedOrder;
   PaymentScreenLeftPostedOrder(this.postedOrder);
+
+  @override
+  _PaymentScreenLeftPostedOrderState createState() =>
+      _PaymentScreenLeftPostedOrderState();
+}
+
+class _PaymentScreenLeftPostedOrderState
+    extends State<PaymentScreenLeftPostedOrder> {
+  TextEditingController _textNote = TextEditingController();
+
+  @override
+  void dispose() {
+    _textNote.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
     final postedOrderProvider =
         Provider.of<PostedOrderProvider>(context, listen: false);
 
-    postedOrderProvider.postedorder = postedOrder;
+    postedOrderProvider.postedorder = widget.postedOrder;
 
     return Expanded(
         child: Container(
@@ -46,7 +61,7 @@ class PaymentScreenLeftPostedOrder extends StatelessWidget {
                     icon: Icon(Icons.add),
                     onPressed: () {
                       postedOrderProvider.addItem(
-                        postedOrder,
+                        widget.postedOrder,
                         OrderList(
                           productName: 'Nasi Putih',
                           price: 5000,
@@ -62,7 +77,7 @@ class PaymentScreenLeftPostedOrder extends StatelessWidget {
                           postedOrderProvider.postedOrder.id,
                           PostedOrder(
                             id: postedOrderProvider.postedOrder.id,
-                            refernceOrder: postedOrder.refernceOrder,
+                            refernceOrder: widget.postedOrder.refernceOrder,
                             orderDate: DateTime.now().toIso8601String(),
                             discount: 0,
                             grandTotal: postedOrderProvider.grandTotal,
@@ -143,8 +158,6 @@ class PaymentScreenLeftPostedOrder extends StatelessWidget {
                           onMinusButtonTap: () =>
                               postedOrderProvider.decrementQuantity(index),
                           onAddNoteTap: () {
-                            TextEditingController _textNote =
-                                TextEditingController();
                             CostumDialogBox.showInputDialogBox(
                                 context: context,
                                 title: 'Masukkan Catatan',
@@ -154,8 +167,6 @@ class PaymentScreenLeftPostedOrder extends StatelessWidget {
                                   state.addNote(_textNote.text, index);
                                   _textNote.clear();
                                   Navigator.pop(context);
-                                  // TODO:How to dispose textController on Stateless Widget
-                                  // _textNote.dispose();
                                 });
                           },
                         );
@@ -170,7 +181,7 @@ class PaymentScreenLeftPostedOrder extends StatelessWidget {
               child: Column(
                 children: <Widget>[
                   FooterOrderList(
-                    dicount: 0,
+                    dicount: stateProvider.discountTotal,
                     grandTotal: stateProvider.grandTotal,
                     subtotal: stateProvider.subTotal,
                     tax: 0.1,

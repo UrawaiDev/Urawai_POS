@@ -2,10 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:urawai_pos/Models/orderList.dart';
-import 'package:urawai_pos/Models/postedOrder.dart';
 import 'package:urawai_pos/Provider/orderList_provider.dart';
-import 'package:urawai_pos/Provider/postedOrder_provider.dart';
-import 'package:urawai_pos/Widgets/costum_DialogBox.dart';
 import 'package:urawai_pos/constans/utils.dart';
 
 class DetailItemOrder extends StatelessWidget {
@@ -16,7 +13,6 @@ class DetailItemOrder extends StatelessWidget {
   final Function onPlusButtonTap;
   final _formatCurrency = NumberFormat("#,##0", "en_US");
   final Widget childWidget;
-  final TextEditingController _textNoteOrder = TextEditingController();
 
   DetailItemOrder(
       {@required this.itemList,

@@ -11,9 +11,23 @@ import 'package:urawai_pos/Widgets/detail_itemOrder.dart';
 import 'package:urawai_pos/Widgets/footer_OrderList.dart';
 import 'package:urawai_pos/constans/utils.dart';
 
-class PaymentScreenLeftOrderList extends StatelessWidget {
+class PaymentScreenLeftOrderList extends StatefulWidget {
   final List<OrderList> orderList;
   PaymentScreenLeftOrderList(this.orderList);
+
+  @override
+  _PaymentScreenLeftOrderListState createState() =>
+      _PaymentScreenLeftOrderListState();
+}
+
+class _PaymentScreenLeftOrderListState
+    extends State<PaymentScreenLeftOrderList> {
+  TextEditingController _textNote = TextEditingController();
+  @override
+  void dispose() {
+    _textNote.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -131,8 +145,6 @@ class PaymentScreenLeftOrderList extends StatelessWidget {
                           onMinusButtonTap: () =>
                               orderListProvider.decrementQuantity(index),
                           onAddNoteTap: () {
-                            TextEditingController _textNote =
-                                TextEditingController();
                             CostumDialogBox.showInputDialogBox(
                                 context: context,
                                 title: 'Masukkan Catatan',
@@ -143,8 +155,6 @@ class PaymentScreenLeftOrderList extends StatelessWidget {
                                       _textNote.text, index);
                                   _textNote.clear();
                                   Navigator.pop(context);
-                                  // TODO:How to dispose textController on Stateless Widget
-                                  // _textNote.dispose();
                                 });
                           },
                         );
@@ -159,7 +169,7 @@ class PaymentScreenLeftOrderList extends StatelessWidget {
               child: Column(
                 children: <Widget>[
                   FooterOrderList(
-                    dicount: 0,
+                    dicount: stateProvider.discountTotal,
                     grandTotal: stateProvider.grandTotal,
                     subtotal: stateProvider.subTotal,
                     tax: 0.1,

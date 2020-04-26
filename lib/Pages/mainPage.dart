@@ -32,6 +32,7 @@ class _MainPageState extends State<MainPage> {
   );
   final TextEditingController _textReferenceOrder = TextEditingController();
   final TextEditingController _textNote = TextEditingController();
+  final _formKey = GlobalKey<FormState>();
 
   List<Product> products = [
     Product(
@@ -41,6 +42,7 @@ class _MainPageState extends State<MainPage> {
       price: 20000,
       isRecommended: false,
       category: 1,
+      dicount: 10,
     ),
     Product(
       id: 2,
@@ -239,6 +241,8 @@ class _MainPageState extends State<MainPage> {
                                                         onAddNoteTap: () {
                                                           CostumDialogBox
                                                               .showInputDialogBox(
+                                                                  formKey:
+                                                                      _formKey,
                                                                   context:
                                                                       context,
                                                                   textEditingController:
@@ -271,7 +275,7 @@ class _MainPageState extends State<MainPage> {
                                   ),
                             Container(
                               child: FooterOrderList(
-                                dicount: 0,
+                                dicount: orderlistState.discountTotal,
                                 grandTotal: orderlistState.grandTotal,
                                 subtotal: orderlistState.subTotal,
                                 tax: 0.1,
@@ -415,91 +419,24 @@ class _MainPageState extends State<MainPage> {
                     icon: Icon(Icons.restaurant_menu),
                     iconSize: 35,
                     onPressed: () {
-                      showDialog(
-                        context: context,
-                        child: Dialog(
-                          child: Container(
-                            width: 500,
-                            height: 500,
-                            child: Padding(
-                              padding: const EdgeInsets.all(10.0),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: <Widget>[
-                                  Row(
-                                    children: <Widget>[
-                                      Icon(
-                                        Icons.format_list_bulleted,
-                                        color: Colors.blue,
-                                        size: 35,
-                                      ),
-                                      SizedBox(width: 10),
-                                      Text('Daftar Pesanan yang tersimpan.',
-                                          style: TextStyle(fontSize: 22)),
-                                    ],
-                                  ),
-                                  SizedBox(height: 15),
-                                  Expanded(
-                                      child: Container(
-                                    alignment: Alignment.center,
-                                    child: boxOrder.length == 0
-                                        ? Text('Tidak Ada Pesanan dalam Draft',
-                                            style: TextStyle(fontSize: 22))
-                                        : ListView.builder(
-                                            itemCount: boxOrder.length,
-                                            itemBuilder: (context, index) {
-                                              var item = boxOrder.getAt(index)
-                                                  as PostedOrder;
-                                              return ListTile(
-                                                contentPadding:
-                                                    EdgeInsets.all(8),
-                                                leading: CircleAvatar(
-                                                  child: Text(
-                                                      (index + 1).toString()),
-                                                ),
-                                                title: Text(
-                                                    item.refernceOrder ?? '-',
-                                                    style: TextStyle(
-                                                        fontSize: 22)),
-                                                subtitle: Column(
-                                                  crossAxisAlignment:
-                                                      CrossAxisAlignment.start,
-                                                  children: <Widget>[
-                                                    Text(
-                                                        'Jumlah Pesanan : ${item.orderList.length}',
-                                                        style: TextStyle(
-                                                            fontSize: 22)),
-                                                    Text(
-                                                        'Total Bayar ' +
-                                                            _formatCurrency
-                                                                .format(item
-                                                                    .grandTotal),
-                                                        style: TextStyle(
-                                                            fontSize: 22)),
-                                                  ],
-                                                ),
-                                                trailing: Icon(
-                                                  Icons.play_arrow,
-                                                  size: 35,
-                                                  color: Colors.blue,
-                                                ),
-                                                onLongPress: () {
-                                                  Navigator.pop(context);
-                                                  Navigator.pushNamed(
-                                                      context,
-                                                      PaymentScreenDraftOrder
-                                                          .routeName,
-                                                      arguments: item);
-                                                },
-                                              );
-                                            }),
-                                  )),
-                                ],
-                              ),
-                            ),
-                          ),
-                        ),
-                      );
+                      if (orderlistProvider.referenceOrder.isNotEmpty) {
+                        CostumDialogBox.showCostumDialogBox(
+                          context: context,
+                          title: 'Information',
+                          contentString:
+                              'Orderlist Sebelumnya belum disimpan, \n Tetap Lanjut?',
+                          icon: Icons.info,
+                          iconColor: Colors.blue,
+                          confirmButtonTitle: 'Ya',
+                          onConfirmPressed: () {
+                            Navigator.pop(context); //close dialogBox
+                            orderlistProvider.resetOrderList();
+                            _showPostedOrderList(context, boxOrder);
+                          },
+                        );
+                      } else {
+                        _showPostedOrderList(context, boxOrder);
+                      }
                     },
                   ),
                   //Notification PostedOrder
@@ -534,20 +471,7 @@ class _MainPageState extends State<MainPage> {
               iconSize: 35,
               onPressed: () {
                 if (orderlistProvider.orderlist.isEmpty) {
-                  CostumDialogBox.showInputDialogBox(
-                      context: context,
-                      textEditingController: _textReferenceOrder,
-                      title: 'Nama Pelanggan / Nomor Meja',
-                      confirmButtonTitle: 'OK',
-                      onConfirmPressed: () {
-                        orderlistProvider.referenceOrder =
-                            _textReferenceOrder.text;
-                        _textReferenceOrder.clear();
-                        orderlistProvider.cashierName = 'Dummy Cashier XXX';
-                        Navigator.pop(context);
-                      });
-                  // TODO: do not create new order if reference order is empty
-                  orderlistProvider.createNewOrder();
+                  _createNewOrder(orderlistProvider);
                 } else if (orderlistProvider.orderlist.isNotEmpty) {
                   CostumDialogBox.showCostumDialogBox(
                     context: context,
@@ -558,9 +482,8 @@ class _MainPageState extends State<MainPage> {
                     iconColor: Colors.blue,
                     confirmButtonTitle: 'Ya',
                     onConfirmPressed: () {
-                      orderlistProvider.resetOrderList();
-                      orderlistProvider.createNewOrder();
-                      Navigator.pop(context);
+                      Navigator.pop(context); //close dialogBox
+                      _createNewOrder(orderlistProvider);
                     },
                   );
                 }
@@ -627,6 +550,102 @@ class _MainPageState extends State<MainPage> {
     );
   }
 
+  Future _showPostedOrderList(BuildContext context, boxOrder) {
+    return showDialog(
+      context: context,
+      child: Dialog(
+        child: Container(
+          width: 500,
+          height: 500,
+          child: Padding(
+            padding: const EdgeInsets.all(10.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: <Widget>[
+                Row(
+                  children: <Widget>[
+                    Icon(
+                      Icons.format_list_bulleted,
+                      color: Colors.blue,
+                      size: 35,
+                    ),
+                    SizedBox(width: 10),
+                    Text('Daftar Pesanan yang tersimpan.',
+                        style: TextStyle(fontSize: 22)),
+                  ],
+                ),
+                SizedBox(height: 15),
+                Expanded(
+                    child: Container(
+                  alignment: Alignment.center,
+                  child: boxOrder.length == 0
+                      ? Text('Tidak Ada Pesanan dalam Draft',
+                          style: TextStyle(fontSize: 22))
+                      : ListView.builder(
+                          itemCount: boxOrder.length,
+                          itemBuilder: (context, index) {
+                            var item = boxOrder.getAt(index) as PostedOrder;
+                            return ListTile(
+                              contentPadding: EdgeInsets.all(8),
+                              leading: CircleAvatar(
+                                child: Text((index + 1).toString()),
+                              ),
+                              title: Text(item.refernceOrder ?? '-',
+                                  style: TextStyle(fontSize: 22)),
+                              subtitle: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: <Widget>[
+                                  Text(
+                                      'Jumlah Pesanan : ${item.orderList.length}',
+                                      style: TextStyle(fontSize: 22)),
+                                  Text(
+                                      'Total Bayar ' +
+                                          _formatCurrency
+                                              .format(item.grandTotal),
+                                      style: TextStyle(fontSize: 22)),
+                                ],
+                              ),
+                              trailing: Icon(
+                                Icons.play_arrow,
+                                size: 35,
+                                color: Colors.blue,
+                              ),
+                              onLongPress: () {
+                                Navigator.pop(context);
+                                Navigator.pushNamed(
+                                    context, PaymentScreenDraftOrder.routeName,
+                                    arguments: item);
+                              },
+                            );
+                          }),
+                )),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _createNewOrder(OrderListProvider orderlistProvider) {
+    CostumDialogBox.showInputDialogBox(
+        formKey: _formKey,
+        context: context,
+        textEditingController: _textReferenceOrder,
+        title: 'Nama Pelanggan / Nomor Meja',
+        confirmButtonTitle: 'OK',
+        onConfirmPressed: () {
+          if (_formKey.currentState.validate()) {
+            orderlistProvider.resetOrderList();
+            orderlistProvider.referenceOrder = _textReferenceOrder.text;
+            orderlistProvider.cashierName = 'Dummy Cashier XXX';
+            orderlistProvider.createNewOrder();
+            _textReferenceOrder.clear();
+            Navigator.pop(context);
+          }
+        });
+  }
+
   Widget _cardMenu(Product product) {
     var orderlistProvider =
         Provider.of<OrderListProvider>(context, listen: false);
@@ -683,10 +702,26 @@ class _MainPageState extends State<MainPage> {
                   : kProductNameSmallScreenTextStyle,
             ),
             SizedBox(height: 5),
-            Text(
-              _formatCurrency.format(product.price),
-              style: kPriceTextStyle,
-            ),
+            product.dicount == 0 || product.dicount == null
+                ? Text(
+                    _formatCurrency.format(product.price),
+                    style: kPriceTextStyle,
+                  )
+                : Column(
+                    children: <Widget>[
+                      Text(
+                        _formatCurrency.format(product.price),
+                        style: TextStyle(
+                          decoration: TextDecoration.lineThrough,
+                        ),
+                      ),
+                      Text(
+                        _formatCurrency.format(product.price -
+                            (product.price * (product.dicount / 100))),
+                        style: kPriceTextStyle,
+                      ),
+                    ],
+                  )
           ],
         ),
       ),

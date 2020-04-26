@@ -5,12 +5,15 @@ class Product {
   double price;
   bool isRecommended = false;
   int category;
+  int dicount = 0;
 
-  Product(
-      {this.id,
-      this.name,
-      this.image,
-      this.price,
-      this.isRecommended,
-      this.category});
+  Product({
+    this.id,
+    this.name,
+    this.image,
+    this.price,
+    this.isRecommended,
+    this.category,
+    this.dicount,
+  });
 }

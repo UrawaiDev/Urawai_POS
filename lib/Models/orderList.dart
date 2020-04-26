@@ -20,6 +20,8 @@ class OrderList {
   String cashierName;
   @HiveField(7)
   String referenceOrder;
+  @HiveField(8)
+  int discount;
 
   OrderList({
     this.id,
@@ -30,5 +32,6 @@ class OrderList {
     this.dateTime,
     this.referenceOrder,
     this.cashierName,
+    this.discount,
   });
 }

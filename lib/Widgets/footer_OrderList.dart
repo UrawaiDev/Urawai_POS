@@ -27,8 +27,7 @@ class FooterOrderList extends StatelessWidget {
           _bottomInfo(
               title: 'Subtotal', value: _formatCurrency.format(subtotal)),
           SizedBox(height: 8),
-          _bottomInfo(
-              title: 'Diskon (0%)', value: _formatCurrency.format(dicount)),
+          _bottomInfo(title: 'Diskon', value: _formatCurrency.format(dicount)),
           SizedBox(height: 8),
           _bottomInfo(
               title: 'Pajak (10%)',

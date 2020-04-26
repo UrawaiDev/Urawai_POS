@@ -153,7 +153,7 @@ class PaymentSuccess extends StatelessWidget {
                         Column(
                           children: <Widget>[
                             FooterOrderList(
-                              dicount: 0,
+                              dicount: state.discountTotal,
                               grandTotal: state.grandTotal,
                               subtotal: state.subTotal,
                               tax: 0.1,

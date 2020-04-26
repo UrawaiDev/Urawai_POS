@@ -44,21 +44,32 @@ class CostumDialogBox {
   static showInputDialogBox({
     TextEditingController textEditingController,
     BuildContext context,
+    Key formKey,
     String title,
     String confirmButtonTitle,
     Function onConfirmPressed,
   }) {
     showDialog(
         context: context,
-        barrierDismissible: true,
+        barrierDismissible: false,
         child: AlertDialog(
           title: Text(
             title,
             style: kDialogTextStyle,
           ),
-          content: TextField(
-            controller: textEditingController,
-            maxLength: 20,
+          content: Form(
+            key: formKey,
+            child: TextFormField(
+              controller: textEditingController,
+              autofocus: true,
+              maxLength: 20,
+              validator: (value) {
+                if (value.isEmpty)
+                  return 'Rereferensi tidak boleh kosong.';
+                else if (value.length < 3) return 'Minimal 3 Karakter.';
+                return null;
+              },
+            ),
           ),
           actions: <Widget>[
             FlatButton(
