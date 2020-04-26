@@ -2,22 +2,22 @@ import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
-import 'package:urawai_pos/Models/postedOrder.dart';
-import 'package:urawai_pos/Models/transaction.dart';
-import 'package:urawai_pos/Pages/payment_success.dart';
-import 'package:urawai_pos/Pages/pos_Page.dart';
-import 'package:urawai_pos/Provider/orderList_provider.dart';
-import 'package:urawai_pos/Provider/postedOrder_provider.dart';
-import 'package:urawai_pos/Provider/transactionOrder_provider.dart';
-import 'package:urawai_pos/Widgets/costum_DialogBox.dart';
-import 'package:urawai_pos/Widgets/left_paymentScreen_OrderList.dart';
-import 'package:urawai_pos/Widgets/left_paymentScreen_postedOrder.dart';
-import 'package:urawai_pos/constans/utils.dart';
+import 'package:urawai_pos/core/Models/postedOrder.dart';
+import 'package:urawai_pos/core/Models/transaction.dart';
+import 'package:urawai_pos/core/Provider/orderList_provider.dart';
+import 'package:urawai_pos/core/Provider/postedOrder_provider.dart';
+import 'package:urawai_pos/core/Provider/transactionOrder_provider.dart';
+import 'package:urawai_pos/ui/Pages/payment_success/payment_success.dart';
+import 'package:urawai_pos/ui/Pages/pos/pos_Page.dart';
+import 'package:urawai_pos/ui/Widgets/costum_DialogBox.dart';
+import 'package:urawai_pos/ui/Widgets/left_paymentScreen_OrderList.dart';
+import 'package:urawai_pos/ui/Widgets/left_paymentScreen_postedOrder.dart';
+import 'package:urawai_pos/ui/utils/constans/utils.dart';
 
-class PaymentScreenDraftOrder extends StatelessWidget {
+class PaymentScreen extends StatelessWidget {
   final dynamic itemList;
   static const String postedOrderBox = "Posted_Order";
-  static const String routeName = "PaymentScreenDraftOrder";
+  static const String routeName = "PaymentScreen";
 
   final _formatCurrency = NumberFormat.currency(
     symbol: 'Rp.',
@@ -25,7 +25,7 @@ class PaymentScreenDraftOrder extends StatelessWidget {
     decimalDigits: 0,
   );
 
-  PaymentScreenDraftOrder(this.itemList);
+  PaymentScreen(this.itemList);
 
   @override
   Widget build(BuildContext context) {

@@ -1,5 +1,5 @@
 import 'package:hive/hive.dart';
-import 'package:urawai_pos/Models/orderList.dart';
+import 'package:urawai_pos/core/Models/orderList.dart';
 
 part 'postedOrder.g.dart';
 

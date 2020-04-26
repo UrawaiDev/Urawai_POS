@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
-import 'package:urawai_pos/Pages/pos_Page.dart';
-import 'package:urawai_pos/Provider/orderList_provider.dart';
-import 'package:urawai_pos/Provider/postedOrder_provider.dart';
-import 'package:urawai_pos/Widgets/footer_OrderList.dart';
-import 'package:urawai_pos/constans/utils.dart';
+import 'package:urawai_pos/core/Provider/orderList_provider.dart';
+import 'package:urawai_pos/core/Provider/postedOrder_provider.dart';
+import 'package:urawai_pos/ui/Pages/pos/pos_Page.dart';
+import 'package:urawai_pos/ui/Widgets/footer_OrderList.dart';
+import 'package:urawai_pos/ui/utils/constans/utils.dart';
 
 class PaymentSuccess extends StatelessWidget {
   final List<dynamic> itemList;

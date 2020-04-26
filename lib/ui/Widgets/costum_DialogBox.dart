@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:urawai_pos/constans/utils.dart';
+import 'package:urawai_pos/ui/utils/constans/utils.dart';
 
 class CostumDialogBox {
   static showDialogInformation({

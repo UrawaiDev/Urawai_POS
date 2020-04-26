@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
 import 'package:intl/intl.dart';
-import 'package:urawai_pos/Models/orderList.dart';
-import 'package:urawai_pos/Models/postedOrder.dart';
-import 'package:urawai_pos/Models/products.dart';
-import 'package:urawai_pos/Pages/pos_Page.dart';
+import 'package:urawai_pos/core/Models/orderList.dart';
+import 'package:urawai_pos/core/Models/postedOrder.dart';
+import 'package:urawai_pos/core/Models/products.dart';
+import 'package:urawai_pos/ui/Pages/pos/pos_Page.dart';
 import 'package:uuid/uuid.dart';
 
 class OrderListProvider with ChangeNotifier {

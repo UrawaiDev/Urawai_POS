@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:urawai_pos/Models/postedOrder.dart';
-import 'package:urawai_pos/Provider/orderList_provider.dart';
+import 'package:urawai_pos/core/Models/postedOrder.dart';
+import 'package:urawai_pos/core/Provider/orderList_provider.dart';
 
 import 'detail_itemOrder.dart';
 import 'footer_OrderList.dart';

@@ -3,18 +3,18 @@ import 'package:hive/hive.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
-import 'package:urawai_pos/Models/postedOrder.dart';
-import 'package:urawai_pos/Models/products.dart';
-import 'package:urawai_pos/Models/transaction.dart';
-import 'package:urawai_pos/Pages/payment_screen_draftOrder.dart';
+import 'package:urawai_pos/core/Models/postedOrder.dart';
+import 'package:urawai_pos/core/Models/products.dart';
+import 'package:urawai_pos/core/Models/transaction.dart';
+import 'package:urawai_pos/core/Provider/general_provider.dart';
+import 'package:urawai_pos/core/Provider/orderList_provider.dart';
+import 'package:urawai_pos/core/Provider/postedOrder_provider.dart';
+import 'package:urawai_pos/ui/Pages/payment_screen/payment_screen.dart';
 
-import 'package:urawai_pos/Provider/general_provider.dart';
-import 'package:urawai_pos/Provider/orderList_provider.dart';
-import 'package:urawai_pos/Provider/postedOrder_provider.dart';
-import 'package:urawai_pos/Widgets/costum_DialogBox.dart';
-import 'package:urawai_pos/Widgets/detail_itemOrder.dart';
-import 'package:urawai_pos/Widgets/footer_OrderList.dart';
-import 'package:urawai_pos/constans/utils.dart';
+import 'package:urawai_pos/ui/Widgets/costum_DialogBox.dart';
+import 'package:urawai_pos/ui/Widgets/detail_itemOrder.dart';
+import 'package:urawai_pos/ui/Widgets/footer_OrderList.dart';
+import 'package:urawai_pos/ui/utils/constans/utils.dart';
 
 class POSPage extends StatefulWidget {
   @override
@@ -383,8 +383,8 @@ class _POSPageState extends State<POSPage> {
                                       onPressed: () {
                                         //SEMENTARA
                                         if (orderlistState.orderlist.isNotEmpty)
-                                          Navigator.pushNamed(context,
-                                              PaymentScreenDraftOrder.routeName,
+                                          Navigator.pushNamed(
+                                              context, PaymentScreen.routeName,
                                               arguments:
                                                   orderlistState.orderlist);
                                       }),
@@ -613,7 +613,7 @@ class _POSPageState extends State<POSPage> {
                               onLongPress: () {
                                 Navigator.pop(context);
                                 Navigator.pushNamed(
-                                    context, PaymentScreenDraftOrder.routeName,
+                                    context, PaymentScreen.routeName,
                                     arguments: item);
                               },
                             );

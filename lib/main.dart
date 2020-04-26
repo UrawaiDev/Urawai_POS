@@ -2,17 +2,17 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:hive/hive.dart';
 import 'package:provider/provider.dart';
-import 'package:urawai_pos/Models/orderList.dart';
-import 'package:urawai_pos/Models/postedOrder.dart';
+import 'package:urawai_pos/core/Models/orderList.dart';
+import 'package:urawai_pos/core/Models/postedOrder.dart';
 
-import 'package:urawai_pos/Provider/general_provider.dart';
-import 'package:urawai_pos/Provider/orderList_provider.dart';
 import 'package:path_provider/path_provider.dart' as path;
-import 'package:urawai_pos/Provider/postedOrder_provider.dart';
-import 'package:urawai_pos/Provider/transactionOrder_provider.dart';
-import 'package:urawai_pos/functions/routeGenerator.dart';
+import 'package:urawai_pos/core/Provider/general_provider.dart';
+import 'package:urawai_pos/core/Provider/orderList_provider.dart';
+import 'package:urawai_pos/core/Provider/postedOrder_provider.dart';
+import 'package:urawai_pos/core/Provider/transactionOrder_provider.dart';
+import 'package:urawai_pos/ui/utils/functions/routeGenerator.dart';
 
-import 'Models/transaction.dart';
+import 'core/Models/transaction.dart';
 
 const String postedOrderBox = "Posted_Order";
 const String transactionBoxName = "TransactionOrder";

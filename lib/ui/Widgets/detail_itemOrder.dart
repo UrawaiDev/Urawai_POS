@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
-import 'package:urawai_pos/Models/orderList.dart';
-import 'package:urawai_pos/Provider/orderList_provider.dart';
-import 'package:urawai_pos/constans/utils.dart';
+import 'package:urawai_pos/core/Models/orderList.dart';
+import 'package:urawai_pos/core/Provider/orderList_provider.dart';
+import 'package:urawai_pos/ui/utils/constans/utils.dart';
 
 class DetailItemOrder extends StatelessWidget {
   final OrderList itemList;

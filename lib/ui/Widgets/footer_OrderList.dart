@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:urawai_pos/constans/utils.dart';
+import 'package:urawai_pos/ui/utils/constans/utils.dart';
 
 class FooterOrderList extends StatelessWidget {
   final _formatCurrency = NumberFormat.currency(

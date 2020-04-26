@@ -1,15 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:urawai_pos/Models/orderList.dart';
-import 'package:urawai_pos/Models/products.dart';
-import 'package:urawai_pos/Models/transaction.dart';
-import 'package:urawai_pos/Pages/pos_Page.dart';
-import 'package:urawai_pos/Provider/orderList_provider.dart';
-import 'package:urawai_pos/Provider/transactionOrder_provider.dart';
-import 'package:urawai_pos/Widgets/costum_DialogBox.dart';
-import 'package:urawai_pos/Widgets/detail_itemOrder.dart';
-import 'package:urawai_pos/Widgets/footer_OrderList.dart';
-import 'package:urawai_pos/constans/utils.dart';
+import 'package:urawai_pos/core/Models/orderList.dart';
+import 'package:urawai_pos/core/Models/products.dart';
+import 'package:urawai_pos/core/Models/transaction.dart';
+import 'package:urawai_pos/core/Provider/orderList_provider.dart';
+import 'package:urawai_pos/core/Provider/transactionOrder_provider.dart';
+import 'package:urawai_pos/ui/Pages/pos/pos_Page.dart';
+import 'package:urawai_pos/ui/Widgets/costum_DialogBox.dart';
+import 'package:urawai_pos/ui/Widgets/footer_OrderList.dart';
+import 'package:urawai_pos/ui/utils/constans/utils.dart';
+
+import 'detail_itemOrder.dart';
 
 class PaymentScreenLeftOrderList extends StatefulWidget {
   final List<OrderList> orderList;

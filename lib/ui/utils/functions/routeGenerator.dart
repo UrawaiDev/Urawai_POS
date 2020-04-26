@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:urawai_pos/Pages/payment_screen_draftOrder.dart';
-import 'package:urawai_pos/Pages/payment_success.dart';
-import 'package:urawai_pos/Pages/pos_Page.dart';
-import 'package:urawai_pos/Provider/orderList_provider.dart';
-import 'package:urawai_pos/Provider/postedOrder_provider.dart';
+import 'package:urawai_pos/core/Provider/orderList_provider.dart';
+import 'package:urawai_pos/core/Provider/postedOrder_provider.dart';
+import 'package:urawai_pos/ui/Pages/payment_screen/payment_screen.dart';
+import 'package:urawai_pos/ui/Pages/payment_success/payment_success.dart';
+import 'package:urawai_pos/ui/Pages/pos/pos_Page.dart';
 
 class RouteGenerator {
   static Route<dynamic> onGenerate(settings) {
@@ -13,9 +13,8 @@ class RouteGenerator {
       case POSPage.routeName:
         return MaterialPageRoute(builder: (context) => POSPage());
         break;
-      case PaymentScreenDraftOrder.routeName:
-        return MaterialPageRoute(
-            builder: (context) => PaymentScreenDraftOrder(args));
+      case PaymentScreen.routeName:
+        return MaterialPageRoute(builder: (context) => PaymentScreen(args));
         break;
       case PaymentSuccess.routeName:
         return MaterialPageRoute(builder: (context) {
