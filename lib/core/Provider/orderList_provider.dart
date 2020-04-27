@@ -89,18 +89,37 @@ class OrderListProvider with ChangeNotifier {
   }
 
   void addToList({Product item, String referenceOrder, String cashierName}) {
-    orderlist.add(OrderList(
-      id: _uuid.v1(),
-      productName: item.name,
-      price: item.price,
-      dateTime: DateTime.now().toString(),
-      quantity: 1,
-      referenceOrder: referenceOrder,
-      cashierName: cashierName,
-      discount: item.dicount,
-    ));
+    //TODO: saat ini berdasarkan nama product next perlu di update dengan id.
+    int index = orderlist.indexWhere((data) => data.productName == item.name);
 
-    notifyListeners();
+    //-1 item not found in orderlist
+    if (index == -1) {
+      orderlist.add(OrderList(
+        id: _uuid.v1(),
+        productName: item.name,
+        price: item.price,
+        dateTime: DateTime.now().toString(),
+        quantity: 1,
+        referenceOrder: referenceOrder,
+        cashierName: cashierName,
+        discount: item.dicount,
+      ));
+      notifyListeners();
+    } else {
+      int prevQty = orderlist[index].quantity;
+
+      orderlist[index] = OrderList(
+        id: _uuid.v1(),
+        productName: item.name,
+        price: item.price,
+        dateTime: DateTime.now().toString(),
+        quantity: prevQty + 1, //tambahan dengan quantity sebelumnya
+        referenceOrder: referenceOrder,
+        cashierName: cashierName,
+        discount: item.dicount,
+      );
+      notifyListeners();
+    }
   }
 
   void removeFromList(int index) {
