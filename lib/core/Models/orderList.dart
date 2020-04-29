@@ -15,7 +15,7 @@ class OrderList {
   @HiveField(4)
   String note;
   @HiveField(5)
-  String dateTime;
+  DateTime dateTime;
   @HiveField(6)
   String cashierName;
   @HiveField(7)

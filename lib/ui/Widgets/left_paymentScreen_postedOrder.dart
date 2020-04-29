@@ -78,7 +78,7 @@ class _PaymentScreenLeftPostedOrderState
                           PostedOrder(
                             id: postedOrderProvider.postedOrder.id,
                             refernceOrder: widget.postedOrder.refernceOrder,
-                            orderDate: DateTime.now().toIso8601String(),
+                            dateTime: DateTime.now(),
                             discount: 0,
                             grandTotal: postedOrderProvider.grandTotal,
                             subtotal: postedOrderProvider.subTotal,

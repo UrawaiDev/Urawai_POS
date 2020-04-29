@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:urawai_pos/core/Provider/orderList_provider.dart';
 import 'package:urawai_pos/core/Provider/postedOrder_provider.dart';
+import 'package:urawai_pos/ui/Pages/Transacation_history/transaction_history.dart';
 import 'package:urawai_pos/ui/Pages/payment_screen/payment_screen.dart';
 import 'package:urawai_pos/ui/Pages/payment_success/payment_success.dart';
 import 'package:urawai_pos/ui/Pages/pos/pos_Page.dart';
@@ -16,6 +17,10 @@ class RouteGenerator {
       case PaymentScreen.routeName:
         return MaterialPageRoute(builder: (context) => PaymentScreen(args));
         break;
+      case TransactionHistoryPage.routeName:
+        return MaterialPageRoute(
+            builder: (context) => TransactionHistoryPage());
+        break;
       case PaymentSuccess.routeName:
         return MaterialPageRoute(builder: (context) {
           if (args is PostedOrderProvider) {
@@ -25,7 +30,7 @@ class RouteGenerator {
                 itemList: args.postedOrder.orderList,
                 cashierName: args.cashierName,
                 referenceOrder: args.postedOrder.refernceOrder,
-                date: args.postedOrder.orderDate,
+                date: args.postedOrder.dateTime,
                 orderID: args.postedOrder.id,
                 pembayaran: args.finalPayment,
                 kembali: args.finalPayment - args.grandTotal);

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:hive/hive.dart';
 import 'package:hive_flutter/hive_flutter.dart';
-import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:urawai_pos/core/Models/postedOrder.dart';
 import 'package:urawai_pos/core/Models/products.dart';
@@ -9,11 +9,13 @@ import 'package:urawai_pos/core/Models/transaction.dart';
 import 'package:urawai_pos/core/Provider/general_provider.dart';
 import 'package:urawai_pos/core/Provider/orderList_provider.dart';
 import 'package:urawai_pos/core/Provider/postedOrder_provider.dart';
+import 'package:urawai_pos/ui/Pages/Transacation_history/transaction_history.dart';
 import 'package:urawai_pos/ui/Pages/payment_screen/payment_screen.dart';
 
 import 'package:urawai_pos/ui/Widgets/costum_DialogBox.dart';
 import 'package:urawai_pos/ui/Widgets/detail_itemOrder.dart';
 import 'package:urawai_pos/ui/Widgets/footer_OrderList.dart';
+import 'package:urawai_pos/ui/utils/constans/formatter.dart';
 import 'package:urawai_pos/ui/utils/constans/utils.dart';
 
 class POSPage extends StatefulWidget {
@@ -25,11 +27,6 @@ class POSPage extends StatefulWidget {
 }
 
 class _POSPageState extends State<POSPage> {
-  final _formatCurrency = NumberFormat.currency(
-    symbol: 'Rp.',
-    locale: 'en_US',
-    decimalDigits: 0,
-  );
   final TextEditingController _textReferenceOrder = TextEditingController();
   final TextEditingController _textNote = TextEditingController();
   final _formKey = GlobalKey<FormState>();
@@ -42,7 +39,7 @@ class _POSPageState extends State<POSPage> {
       price: 20000,
       isRecommended: false,
       category: 1,
-      dicount: 10,
+      discount: 10,
     ),
     Product(
       id: 2,
@@ -130,7 +127,7 @@ class _POSPageState extends State<POSPage> {
                                   children: <Widget>[
                                     //drawer Menue
                                     generalState.isDrawerShow
-                                        ? drawerMenu(screenHeight)
+                                        ? listMenu(screenHeight)
                                         : Container(),
 
                                     //menu content
@@ -336,6 +333,7 @@ class _POSPageState extends State<POSPage> {
                                           box.values.forEach((f) {
                                             print(f.id);
                                             // box.delete(f.id);
+                                            print('Order Date : ${f.date}');
                                             print(
                                                 'Jumlah item : ${f.itemList.length}');
                                             print(f.paymentStatus);
@@ -532,13 +530,11 @@ class _POSPageState extends State<POSPage> {
                   ),
                 ),
               ),
-              Expanded(
-                child: Text(orderlistState.orderDate,
-                    style: TextStyle(
-                      color: priceColor,
-                      fontSize: 16,
-                    )),
-              ),
+              Text(Formatter.dateFormat(orderlistState.orderDate),
+                  style: TextStyle(
+                    color: priceColor,
+                    fontSize: 16,
+                  )),
             ],
           ),
         ),
@@ -600,8 +596,8 @@ class _POSPageState extends State<POSPage> {
                                       style: TextStyle(fontSize: 22)),
                                   Text(
                                       'Total Bayar ' +
-                                          _formatCurrency
-                                              .format(item.grandTotal),
+                                          Formatter.currencyFormat(
+                                              item.grandTotal),
                                       style: TextStyle(fontSize: 22)),
                                 ],
                               ),
@@ -702,22 +698,22 @@ class _POSPageState extends State<POSPage> {
                   : kProductNameSmallScreenTextStyle,
             ),
             SizedBox(height: 5),
-            product.dicount == 0 || product.dicount == null
+            product.discount == 0 || product.discount == null
                 ? Text(
-                    _formatCurrency.format(product.price),
+                    Formatter.currencyFormat(product.price),
                     style: kPriceTextStyle,
                   )
                 : Column(
                     children: <Widget>[
                       Text(
-                        _formatCurrency.format(product.price),
+                        Formatter.currencyFormat(product.price),
                         style: TextStyle(
                           decoration: TextDecoration.lineThrough,
                         ),
                       ),
                       Text(
-                        _formatCurrency.format(product.price -
-                            (product.price * (product.dicount / 100))),
+                        Formatter.currencyFormat(product.price -
+                            (product.price * (product.discount / 100))),
                         style: kPriceTextStyle,
                       ),
                     ],
@@ -759,6 +755,68 @@ class _POSPageState extends State<POSPage> {
         ),
       ),
       onTap: onTap,
+    );
+  }
+
+  Widget listMenu(double screenHeight) {
+    return Expanded(
+      child: Padding(
+        padding: const EdgeInsets.only(left: 8.0),
+        child: Container(
+          color: Colors.white,
+          height: screenHeight - 120,
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: <Widget>[
+              Container(
+                color: Color(0xFFebf2fd),
+                child: ListTile(
+                  leading: Icon(Icons.home),
+                  title: (Text(
+                    'Beranda',
+                    style: kMainMenuStyle,
+                  )),
+                  selected: true,
+                  onTap: () {},
+                ),
+              ),
+              ListTile(
+                  leading: FaIcon(FontAwesomeIcons.cashRegister),
+                  title: (Text(
+                    'Transaksi',
+                    style: kMainMenuStyle,
+                  ))),
+              ListTile(
+                leading: FaIcon(FontAwesomeIcons.clipboardList),
+                title: (Text(
+                  'Riwayat Transaksi',
+                  style: kMainMenuStyle,
+                )),
+                onTap: () => Navigator.pushNamed(
+                    context, TransactionHistoryPage.routeName),
+              ),
+              ListTile(
+                leading: FaIcon(FontAwesomeIcons.book),
+                title: (Text(
+                  'Laporan',
+                  style: kMainMenuStyle,
+                )),
+              ),
+              ListTile(
+                leading: FaIcon(FontAwesomeIcons.cog),
+                title: (Text(
+                  'Pengaturan',
+                  style: kMainMenuStyle,
+                )),
+              ),
+              ListTile(
+                leading: FaIcon(FontAwesomeIcons.lifeRing),
+                title: (Text('Bantuan', style: kMainMenuStyle)),
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 

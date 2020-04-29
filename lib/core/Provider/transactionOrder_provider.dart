@@ -19,7 +19,7 @@ class TransactionOrderProvider with ChangeNotifier {
         _transactionOrder = TransactionOrder(
           id: stateProvider.postedOrder.id,
           cashierName: stateProvider.postedOrder.cashierName,
-          date: stateProvider.postedOrder.orderDate,
+          date: stateProvider.postedOrder.dateTime,
           referenceOrder: stateProvider.postedOrder.refernceOrder,
           grandTotal: stateProvider.grandTotal,
           itemList: stateProvider.postedOrder.orderList,

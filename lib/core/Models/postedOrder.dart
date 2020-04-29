@@ -20,7 +20,7 @@ class PostedOrder extends HiveObject {
   @HiveField(0)
   String id;
   @HiveField(1)
-  String orderDate;
+  DateTime dateTime;
   @HiveField(2)
   double subtotal;
   @HiveField(3)
@@ -38,7 +38,7 @@ class PostedOrder extends HiveObject {
 
   PostedOrder({
     this.id,
-    this.orderDate,
+    this.dateTime,
     this.subtotal,
     this.discount,
     this.grandTotal,

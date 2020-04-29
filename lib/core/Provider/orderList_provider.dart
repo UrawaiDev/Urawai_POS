@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
-import 'package:intl/intl.dart';
 import 'package:urawai_pos/core/Models/orderList.dart';
 import 'package:urawai_pos/core/Models/postedOrder.dart';
 import 'package:urawai_pos/core/Models/products.dart';
@@ -16,7 +15,7 @@ class OrderListProvider with ChangeNotifier {
   String _note = '-';
 
   String _orderID = '';
-  String _orderDate = '';
+  DateTime _orderDate;
   String _cashierName = '';
   String _referenceOrder = '';
 
@@ -51,8 +50,8 @@ class OrderListProvider with ChangeNotifier {
     notifyListeners();
   }
 
-  String get orderDate => _orderDate;
-  set orderDate(String newValue) {
+  DateTime get orderDate => _orderDate;
+  set orderDate(DateTime newValue) {
     _orderDate = newValue;
     notifyListeners();
   }
@@ -95,28 +94,28 @@ class OrderListProvider with ChangeNotifier {
     //-1 item not found in orderlist
     if (index == -1) {
       orderlist.add(OrderList(
-        id: _uuid.v1(),
+        id: _orderID,
         productName: item.name,
         price: item.price,
-        dateTime: DateTime.now().toString(),
+        dateTime: DateTime.now(),
         quantity: 1,
         referenceOrder: referenceOrder,
         cashierName: cashierName,
-        discount: item.dicount,
+        discount: item.discount,
       ));
       notifyListeners();
     } else {
       int prevQty = orderlist[index].quantity;
 
       orderlist[index] = OrderList(
-        id: _uuid.v1(),
+        id: _orderID,
         productName: item.name,
         price: item.price,
-        dateTime: DateTime.now().toString(),
+        dateTime: DateTime.now(),
         quantity: prevQty + 1, //tambahan dengan quantity sebelumnya
         referenceOrder: referenceOrder,
         cashierName: cashierName,
-        discount: item.dicount,
+        discount: item.discount,
       );
       notifyListeners();
     }
@@ -142,15 +141,15 @@ class OrderListProvider with ChangeNotifier {
   }
 
   void createNewOrder() {
-    _orderID = _uuid.v1().substring(0, 8);
-    _orderDate = DateFormat.yMEd().add_jms().format(DateTime.now());
+    _orderID = _uuid.v1().substring(0, 8).toUpperCase();
+    _orderDate = DateTime.now();
     notifyListeners();
   }
 
   void resetOrderList() {
     orderlist.clear();
     _orderID = '';
-    _orderDate = '';
+    _orderDate = null;
     _cashierName = '';
     _referenceOrder = '';
     _totalPayment = '';
@@ -195,7 +194,7 @@ class OrderListProvider with ChangeNotifier {
     try {
       var hiveValue = PostedOrder(
         id: orderlistState.orderID,
-        orderDate: orderlistState.orderDate,
+        dateTime: orderlistState.orderDate,
         subtotal: orderlistState.subTotal,
         discount: 0,
         grandTotal: orderlistState.grandTotal,

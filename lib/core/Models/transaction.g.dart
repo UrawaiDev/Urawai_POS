@@ -93,7 +93,7 @@ class TransactionOrderAdapter extends TypeAdapter<TransactionOrder> {
       id: fields[0] as String,
       cashierName: fields[1] as String,
       referenceOrder: fields[2] as String,
-      date: fields[3] as String,
+      date: fields[3] as DateTime,
       grandTotal: fields[4] as double,
       paymentType: fields[5] as PaymentType,
       paymentStatus: fields[6] as PaymentStatus,

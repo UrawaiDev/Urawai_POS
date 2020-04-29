@@ -1,13 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
+import 'package:urawai_pos/ui/utils/constans/formatter.dart';
 import 'package:urawai_pos/ui/utils/constans/utils.dart';
 
 class FooterOrderList extends StatelessWidget {
-  final _formatCurrency = NumberFormat.currency(
-    symbol: 'Rp.',
-    locale: 'en_US',
-    decimalDigits: 0,
-  );
   static const String postedOrderBox = "Posted_Order";
   final double subtotal;
   final double grandTotal;
@@ -25,13 +20,14 @@ class FooterOrderList extends StatelessWidget {
           Divider(thickness: 3),
           SizedBox(height: 8),
           _bottomInfo(
-              title: 'Subtotal', value: _formatCurrency.format(subtotal)),
+              title: 'Subtotal', value: Formatter.currencyFormat(subtotal)),
           SizedBox(height: 8),
-          _bottomInfo(title: 'Diskon', value: _formatCurrency.format(dicount)),
+          _bottomInfo(
+              title: 'Diskon', value: Formatter.currencyFormat(dicount)),
           SizedBox(height: 8),
           _bottomInfo(
               title: 'Pajak (10%)',
-              value: _formatCurrency.format(subtotal * tax)),
+              value: Formatter.currencyFormat(subtotal * tax)),
           SizedBox(height: 8),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -41,7 +37,7 @@ class FooterOrderList extends StatelessWidget {
                 style: kGrandTotalTextStyle,
               ),
               Text(
-                _formatCurrency.format(grandTotal),
+                Formatter.currencyFormat(grandTotal),
                 style: kGrandTotalTextStyle,
               ),
             ],

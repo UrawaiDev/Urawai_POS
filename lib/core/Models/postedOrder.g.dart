@@ -57,7 +57,7 @@ class PostedOrderAdapter extends TypeAdapter<PostedOrder> {
     };
     return PostedOrder(
       id: fields[0] as String,
-      orderDate: fields[1] as String,
+      dateTime: fields[1] as DateTime,
       subtotal: fields[2] as double,
       discount: fields[3] as double,
       grandTotal: fields[4] as double,
@@ -75,7 +75,7 @@ class PostedOrderAdapter extends TypeAdapter<PostedOrder> {
       ..writeByte(0)
       ..write(obj.id)
       ..writeByte(1)
-      ..write(obj.orderDate)
+      ..write(obj.dateTime)
       ..writeByte(2)
       ..write(obj.subtotal)
       ..writeByte(3)

@@ -5,7 +5,7 @@ class Product {
   double price;
   bool isRecommended = false;
   int category;
-  int dicount = 0;
+  int discount = 0;
 
   Product({
     this.id,
@@ -14,6 +14,6 @@ class Product {
     this.price,
     this.isRecommended,
     this.category,
-    this.dicount,
+    this.discount,
   });
 }

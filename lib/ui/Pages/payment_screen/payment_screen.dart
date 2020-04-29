@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
-import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:urawai_pos/core/Models/postedOrder.dart';
 import 'package:urawai_pos/core/Models/transaction.dart';
+import 'package:urawai_pos/core/Provider/general_provider.dart';
 import 'package:urawai_pos/core/Provider/orderList_provider.dart';
 import 'package:urawai_pos/core/Provider/postedOrder_provider.dart';
 import 'package:urawai_pos/core/Provider/transactionOrder_provider.dart';
@@ -12,23 +12,21 @@ import 'package:urawai_pos/ui/Pages/pos/pos_Page.dart';
 import 'package:urawai_pos/ui/Widgets/costum_DialogBox.dart';
 import 'package:urawai_pos/ui/Widgets/left_paymentScreen_OrderList.dart';
 import 'package:urawai_pos/ui/Widgets/left_paymentScreen_postedOrder.dart';
+import 'package:urawai_pos/ui/utils/constans/formatter.dart';
 import 'package:urawai_pos/ui/utils/constans/utils.dart';
+import 'package:urawai_pos/ui/utils/functions/paymentHelpers.dart';
 
 class PaymentScreen extends StatelessWidget {
   final dynamic itemList;
   static const String postedOrderBox = "Posted_Order";
   static const String routeName = "PaymentScreen";
 
-  final _formatCurrency = NumberFormat.currency(
-    symbol: 'Rp.',
-    locale: 'en_US',
-    decimalDigits: 0,
-  );
-
   PaymentScreen(this.itemList);
 
   @override
   Widget build(BuildContext context) {
+    int selectedIndex = 0;
+
     return WillPopScope(
       onWillPop: () => Future.value(false),
       child: Container(
@@ -49,35 +47,72 @@ class PaymentScreen extends StatelessWidget {
                       child: Container(
                           // color: Colors.blue,
                           child: Padding(
-                        padding: const EdgeInsets.fromLTRB(20, 30, 20, 20),
+                        padding: const EdgeInsets.fromLTRB(20, 10, 20, 20),
                         child: Column(
                           children: <Widget>[
                             Expanded(
-                              child: Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceEvenly,
-                                children: <Widget>[
-                                  _paymentMethodCard(
-                                    'Cash',
-                                    Icons.attach_money,
-                                    Color(0xFFebf3fe),
+                                flex: 2,
+                                child: Container(
+                                  child: ListView.builder(
+                                    scrollDirection: Axis.horizontal,
+                                    itemCount: PaymentType.values.length,
+                                    itemBuilder: (context, index) {
+                                      return Padding(
+                                        padding: const EdgeInsets.all(8.0),
+                                        child: Consumer<GeneralProvider>(
+                                          builder: (context, state, _) =>
+                                              GestureDetector(
+                                            child: AnimatedContainer(
+                                              duration:
+                                                  Duration(milliseconds: 700),
+                                              curve: Curves.easeIn,
+                                              alignment: Alignment.center,
+                                              width: 200,
+                                              decoration: BoxDecoration(
+                                                  color: index ==
+                                                          state.selectedIndex
+                                                      ? kSelectedColor
+                                                      : Colors.grey[200],
+                                                  borderRadius:
+                                                      BorderRadius.circular(
+                                                          10)),
+                                              margin: EdgeInsets.symmetric(
+                                                  horizontal: 10, vertical: 10),
+                                              child: Column(
+                                                mainAxisAlignment:
+                                                    MainAxisAlignment.center,
+                                                children: <Widget>[
+                                                  Icon(
+                                                      PaymentHelper
+                                                          .getPaymentTypeIcon(
+                                                              PaymentType
+                                                                      .values[
+                                                                  index]),
+                                                      size: 35),
+                                                  SizedBox(height: 10),
+                                                  Text(
+                                                    PaymentHelper
+                                                        .getPaymentType(
+                                                            PaymentType
+                                                                .values[index]),
+                                                    style: kPriceTextStyle,
+                                                  ),
+                                                ],
+                                              ),
+                                            ),
+                                            onTap: () {
+                                              state.selectedIndex = index;
+                                              print(index);
+                                            },
+                                          ),
+                                        ),
+                                      );
+                                    },
                                   ),
-                                  _paymentMethodCard(
-                                    'Credit/Debit Card',
-                                    Icons.credit_card,
-                                    Colors.white,
-                                  ),
-                                  _paymentMethodCard(
-                                    'E-Money',
-                                    Icons.confirmation_number,
-                                    Colors.white,
-                                  ),
-                                ],
-                              ),
-                            ),
+                                )),
                             SizedBox(height: 20),
                             Expanded(
-                              flex: 6,
+                              flex: 7,
                               child: Container(
                                 decoration: BoxDecoration(
                                   border: Border.all(
@@ -125,7 +160,7 @@ class PaymentScreen extends StatelessWidget {
                                                       ),
                                                     ),
                                                     Text(
-                                                      _formatCurrency.format(
+                                                      Formatter.currencyFormat(
                                                           state.grandTotal),
                                                       style: TextStyle(
                                                         fontSize: 27,
@@ -162,7 +197,7 @@ class PaymentScreen extends StatelessWidget {
                                                           fontSize: 27),
                                                     ),
                                                     Text(
-                                                      _formatCurrency.format(
+                                                      Formatter.currencyFormat(
                                                           state.finalPayment),
                                                       style: TextStyle(
                                                           fontSize: 27),
@@ -200,7 +235,7 @@ class PaymentScreen extends StatelessWidget {
                                                               state.finalPayment >
                                                                   state
                                                                       .grandTotal
-                                                          ? _formatCurrency.format(
+                                                          ? Formatter.currencyFormat(
                                                               state.finalPayment -
                                                                   state
                                                                       .grandTotal)

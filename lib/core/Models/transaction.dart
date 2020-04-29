@@ -11,7 +11,7 @@ class TransactionOrder {
   @HiveField(2)
   String referenceOrder;
   @HiveField(3)
-  String date;
+  DateTime date;
   @HiveField(4)
   double grandTotal;
   @HiveField(5)

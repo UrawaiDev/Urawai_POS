@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 
 Color priceColor = Color(0xFF878f95);
+Color cardBGColor = Color(0xFFe4e4e4);
 Color greyColor = Color(0xFFe4e4e4);
+Color kSelectedColor = Color(0xFFebf2fd);
 
 TextStyle kHeaderTextStyle = TextStyle(
   fontWeight: FontWeight.w600,
@@ -16,6 +18,11 @@ TextStyle kBodyTextStyle = TextStyle(
 TextStyle kProductNameBigScreenTextStyle = TextStyle(
   fontWeight: FontWeight.bold,
   fontSize: 25,
+);
+
+TextStyle kMainMenuStyle = TextStyle(
+  fontWeight: FontWeight.w400,
+  fontSize: 20,
 );
 
 TextStyle kProductNameSmallScreenTextStyle = TextStyle(

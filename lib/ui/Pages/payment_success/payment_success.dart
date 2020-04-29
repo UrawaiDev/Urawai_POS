@@ -1,17 +1,17 @@
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:urawai_pos/core/Provider/orderList_provider.dart';
 import 'package:urawai_pos/core/Provider/postedOrder_provider.dart';
 import 'package:urawai_pos/ui/Pages/pos/pos_Page.dart';
 import 'package:urawai_pos/ui/Widgets/footer_OrderList.dart';
+import 'package:urawai_pos/ui/utils/constans/formatter.dart';
 import 'package:urawai_pos/ui/utils/constans/utils.dart';
 
 class PaymentSuccess extends StatelessWidget {
   final List<dynamic> itemList;
   final String cashierName;
   final String referenceOrder;
-  final String date;
+  final DateTime date;
   final String orderID;
   final double pembayaran;
   final double kembali;
@@ -27,12 +27,6 @@ class PaymentSuccess extends StatelessWidget {
     @required this.kembali,
     @required this.state,
   });
-
-  final _formatCurrency = NumberFormat.currency(
-    symbol: 'Rp.',
-    locale: 'en_US',
-    decimalDigits: 0,
-  );
 
   static const String routeName = "PaymentSuccessPage";
 
@@ -94,7 +88,7 @@ class PaymentSuccess extends StatelessWidget {
                               children: <Widget>[
                                 Text('Tanggal :'),
                                 SizedBox(width: 8),
-                                Text(date),
+                                Text(Formatter.dateFormat(date)),
                               ],
                             ),
                             Row(
@@ -126,9 +120,7 @@ class PaymentSuccess extends StatelessWidget {
                                           Row(
                                             children: <Widget>[
                                               Text(
-                                                itemList[index]
-                                                    .quantity
-                                                    .toString(),
+                                                'x${itemList[index].quantity}',
                                                 style: kStruckTextStyle,
                                               ),
                                               SizedBox(width: 15),
@@ -139,8 +131,9 @@ class PaymentSuccess extends StatelessWidget {
                                             ],
                                           ),
                                           Text(
-                                            _formatCurrency
-                                                .format(itemList[index].price),
+                                            Formatter.currencyFormat(
+                                                itemList[index].price *
+                                                    itemList[index].quantity),
                                             style: kStruckTextStyle,
                                           ),
                                         ],
@@ -170,7 +163,7 @@ class PaymentSuccess extends StatelessWidget {
                                     style: kGrandTotalTextStyle,
                                   ),
                                   Text(
-                                    _formatCurrency.format(pembayaran),
+                                    Formatter.currencyFormat(pembayaran),
                                     style: kGrandTotalTextStyle,
                                   ),
                                 ],
@@ -188,7 +181,7 @@ class PaymentSuccess extends StatelessWidget {
                                     style: kGrandTotalTextStyle,
                                   ),
                                   Text(
-                                    _formatCurrency.format(kembali),
+                                    Formatter.currencyFormat(kembali),
                                     style: kGrandTotalTextStyle,
                                   ),
                                 ],
