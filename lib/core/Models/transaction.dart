@@ -4,6 +4,7 @@ part 'transaction.g.dart';
 
 @HiveType(typeId: 3)
 class TransactionOrder {
+  static const String boxName = 'TransactionOrder';
   @HiveField(0)
   String id;
   @HiveField(1)
@@ -20,6 +21,14 @@ class TransactionOrder {
   PaymentStatus paymentStatus;
   @HiveField(7)
   List<dynamic> itemList;
+  @HiveField(8)
+  double subtotal;
+  @HiveField(9)
+  double discount;
+  @HiveField(10)
+  double tender;
+  @HiveField(11)
+  double change;
 
   TransactionOrder({
     this.id,
@@ -30,6 +39,10 @@ class TransactionOrder {
     this.paymentType,
     this.paymentStatus,
     this.itemList,
+    this.discount,
+    this.subtotal,
+    this.change,
+    this.tender,
   });
 }
 

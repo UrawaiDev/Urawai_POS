@@ -55,16 +55,16 @@ class PostedOrderProvider with ChangeNotifier {
   }
 
   double get discountTotal {
-    var hasDiscount = _postedOrder.orderList.where((item) {
-      return item.discount != null && item.discount != 0;
-    });
+    // var hasDiscount = _postedOrder.orderList.where((item) {
+    //   return item.discount != null && item.discount != 0;
+    // });
 
-    double result = hasDiscount.fold(0, (prev, item) {
-      //perlu dikonfirmasi apakah diskon berlakuk kelipatan
-      return prev + ((item.price * (item.discount / 100)) * item.quantity);
-    });
-
-    return result;
+    // double result = hasDiscount.fold(0, (prev, item) {
+    //   //perlu dikonfirmasi apakah diskon berlakuk kelipatan
+    //   return prev + ((item.price * (item.discount / 100)) * item.quantity);
+    // });
+    //just return value from db
+    return _postedOrder.discount;
   }
 
   double get subTotal {

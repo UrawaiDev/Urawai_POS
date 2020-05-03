@@ -25,7 +25,7 @@ class PaymentScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    int selectedIndex = 0;
+    final generalState = Provider.of<GeneralProvider>(context);
 
     return WillPopScope(
       onWillPop: () => Future.value(false),
@@ -70,14 +70,15 @@ class PaymentScreen extends StatelessWidget {
                                               width: 200,
                                               decoration: BoxDecoration(
                                                   color: index ==
-                                                          state.selectedIndex
+                                                          state
+                                                              .paymentType.index
                                                       ? kSelectedColor
                                                       : Colors.grey[200],
                                                   borderRadius:
                                                       BorderRadius.circular(
                                                           10)),
                                               margin: EdgeInsets.symmetric(
-                                                  horizontal: 10, vertical: 10),
+                                                  vertical: 10),
                                               child: Column(
                                                 mainAxisAlignment:
                                                     MainAxisAlignment.center,
@@ -101,8 +102,8 @@ class PaymentScreen extends StatelessWidget {
                                               ),
                                             ),
                                             onTap: () {
-                                              state.selectedIndex = index;
-                                              print(index);
+                                              state.paymentType =
+                                                  PaymentType.values[index];
                                             },
                                           ),
                                         ),
@@ -121,144 +122,7 @@ class PaymentScreen extends StatelessWidget {
                                   ),
                                   color: Color(0xFFf5f6f7),
                                 ),
-                                child: Consumer2<PostedOrderProvider,
-                                        OrderListProvider>(
-                                    builder: (context, statePostedOrder,
-                                        stateOrderList, _) {
-                                  var state;
-                                  if (itemList is PostedOrder)
-                                    state = statePostedOrder;
-                                  else
-                                    state = stateOrderList;
-
-                                  return Column(
-                                    children: <Widget>[
-                                      Column(
-                                        children: <Widget>[
-                                          Padding(
-                                            padding: const EdgeInsets.all(10.0),
-                                            child: Container(
-                                              decoration: BoxDecoration(
-                                                  color: Colors.black,
-                                                  border: Border.all(
-                                                    color: Colors.blue,
-                                                    width: 3,
-                                                  )),
-                                              child: Padding(
-                                                padding:
-                                                    const EdgeInsets.all(10.0),
-                                                child: Row(
-                                                  mainAxisAlignment:
-                                                      MainAxisAlignment
-                                                          .spaceBetween,
-                                                  children: <Widget>[
-                                                    Text(
-                                                      'Total Bayar',
-                                                      style: TextStyle(
-                                                        fontSize: 27,
-                                                        color: Colors.white,
-                                                      ),
-                                                    ),
-                                                    Text(
-                                                      Formatter.currencyFormat(
-                                                          state.grandTotal),
-                                                      style: TextStyle(
-                                                        fontSize: 27,
-                                                        color: Colors.white,
-                                                        fontWeight:
-                                                            FontWeight.bold,
-                                                      ),
-                                                    ),
-                                                  ],
-                                                ),
-                                              ),
-                                            ),
-                                          ),
-                                          SizedBox(width: 10),
-                                          Padding(
-                                            padding: const EdgeInsets.all(10.0),
-                                            child: Container(
-                                              decoration: BoxDecoration(
-                                                  border: Border.all(
-                                                color: Colors.blue,
-                                                width: 3,
-                                              )),
-                                              child: Padding(
-                                                padding:
-                                                    const EdgeInsets.all(10.0),
-                                                child: Row(
-                                                  mainAxisAlignment:
-                                                      MainAxisAlignment
-                                                          .spaceBetween,
-                                                  children: <Widget>[
-                                                    Text(
-                                                      'Pembayaran',
-                                                      style: TextStyle(
-                                                          fontSize: 27),
-                                                    ),
-                                                    Text(
-                                                      Formatter.currencyFormat(
-                                                          state.finalPayment),
-                                                      style: TextStyle(
-                                                          fontSize: 27),
-                                                    ),
-                                                  ],
-                                                ),
-                                              ),
-                                            ),
-                                          ),
-                                          SizedBox(width: 10),
-                                          Padding(
-                                            padding: const EdgeInsets.all(10.0),
-                                            child: Container(
-                                              decoration: BoxDecoration(
-                                                  border: Border.all(
-                                                color: Colors.blue,
-                                                width: 3,
-                                              )),
-                                              child: Padding(
-                                                padding:
-                                                    const EdgeInsets.all(10.0),
-                                                child: Row(
-                                                  mainAxisAlignment:
-                                                      MainAxisAlignment
-                                                          .spaceBetween,
-                                                  children: <Widget>[
-                                                    Text(
-                                                      'Kembali',
-                                                      style: TextStyle(
-                                                          fontSize: 27),
-                                                    ),
-                                                    // Only return value when bigger dan grandTotal
-                                                    Text(
-                                                      state.finalPayment != 0 &&
-                                                              state.finalPayment >
-                                                                  state
-                                                                      .grandTotal
-                                                          ? Formatter.currencyFormat(
-                                                              state.finalPayment -
-                                                                  state
-                                                                      .grandTotal)
-                                                          : 'Rp. 0',
-                                                      style: TextStyle(
-                                                          fontSize: 27),
-                                                    ),
-                                                  ],
-                                                ),
-                                              ),
-                                            ),
-                                          ),
-                                          // keyPadArea(context),
-                                        ],
-                                      ),
-                                      Expanded(
-                                        child: Container(
-                                          child: keyPadArea(context),
-                                        ),
-                                      ),
-                                    ],
-                                  );
-                                }),
+                                child: _paymentMethod(generalState.paymentType),
                               ),
                             ),
                           ],
@@ -271,6 +135,225 @@ class PaymentScreen extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  Widget _paymentMethod(PaymentType paymentType) {
+    if (paymentType == PaymentType.CASH) {
+      return _cashPaymentWidget();
+    } else
+      return _nonCashPaymentWidget();
+  }
+
+  Widget _nonCashPaymentWidget() {
+    return Consumer2<PostedOrderProvider, OrderListProvider>(
+        builder: (context, statePostedOrder, stateOrderList, _) {
+      var state;
+      if (itemList is PostedOrder)
+        state = statePostedOrder;
+      else
+        state = stateOrderList;
+      return Column(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: <Widget>[
+          Padding(
+            padding: const EdgeInsets.all(10.0),
+            child: Container(
+              decoration: BoxDecoration(
+                  color: Colors.black,
+                  border: Border.all(
+                    color: Colors.blue,
+                    width: 3,
+                  )),
+              child: Padding(
+                padding: const EdgeInsets.all(10.0),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: <Widget>[
+                    Text(
+                      'Total Bayar',
+                      style: TextStyle(
+                        fontSize: 27,
+                        color: Colors.white,
+                      ),
+                    ),
+                    Text(
+                      Formatter.currencyFormat(state.grandTotal),
+                      style: TextStyle(
+                        fontSize: 27,
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+          _buttonPayment(
+              color: Colors.blue,
+              text: Text(
+                'BAYAR',
+                style: TextStyle(
+                  fontSize: 30,
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              onTap: () {
+                GeneralProvider generalProvider =
+                    Provider.of<GeneralProvider>(context, listen: false);
+
+                CostumDialogBox.showCostumDialogBox(
+                  context: context,
+                  title: 'Konfirmasi',
+                  icon: Icons.receipt,
+                  iconColor: Colors.blue,
+                  contentString:
+                      'Pembayaran telah dilakukan dan Cetak Kwitansi, Lanjutkan?',
+                  confirmButtonTitle: 'Proses',
+                  onConfirmPressed: () {
+                    //Add Transaction
+                    Provider.of<TransactionOrderProvider>(context,
+                            listen: false)
+                        .addTransactionOrder(
+                      stateProvider: state,
+                      paymentStatus: PaymentStatus.COMPLETED,
+                      paymentType: generalProvider.paymentType,
+                    );
+
+                    //delete Posted Order
+                    if (itemList is PostedOrder) {
+                      Hive.box<PostedOrder>(POSPage.postedBoxName)
+                          .delete(state.postedOrder.id);
+                    }
+
+                    //Navigate to Payment Success Screen
+                    Navigator.pushNamed(context, PaymentSuccess.routeName,
+                        arguments: state);
+                  },
+                );
+              }),
+        ],
+      );
+    });
+  }
+
+  Widget _cashPaymentWidget() {
+    return Consumer2<PostedOrderProvider, OrderListProvider>(
+        builder: (context, statePostedOrder, stateOrderList, _) {
+      var state;
+      if (itemList is PostedOrder)
+        state = statePostedOrder;
+      else
+        state = stateOrderList;
+
+      return Column(
+        children: <Widget>[
+          Column(
+            children: <Widget>[
+              Padding(
+                padding: const EdgeInsets.all(10.0),
+                child: Container(
+                  decoration: BoxDecoration(
+                      color: Colors.black,
+                      border: Border.all(
+                        color: Colors.blue,
+                        width: 3,
+                      )),
+                  child: Padding(
+                    padding: const EdgeInsets.all(10.0),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: <Widget>[
+                        Text(
+                          'Total Bayar',
+                          style: TextStyle(
+                            fontSize: 27,
+                            color: Colors.white,
+                          ),
+                        ),
+                        Text(
+                          Formatter.currencyFormat(state.grandTotal),
+                          style: TextStyle(
+                            fontSize: 27,
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+              SizedBox(width: 10),
+              Padding(
+                padding: const EdgeInsets.all(10.0),
+                child: Container(
+                  decoration: BoxDecoration(
+                      border: Border.all(
+                    color: Colors.blue,
+                    width: 3,
+                  )),
+                  child: Padding(
+                    padding: const EdgeInsets.all(10.0),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: <Widget>[
+                        Text(
+                          'Pembayaran',
+                          style: TextStyle(fontSize: 27),
+                        ),
+                        Text(
+                          Formatter.currencyFormat(state.finalPayment),
+                          style: TextStyle(fontSize: 27),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+              SizedBox(width: 10),
+              Padding(
+                padding: const EdgeInsets.all(10.0),
+                child: Container(
+                  decoration: BoxDecoration(
+                      border: Border.all(
+                    color: Colors.blue,
+                    width: 3,
+                  )),
+                  child: Padding(
+                    padding: const EdgeInsets.all(10.0),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: <Widget>[
+                        Text(
+                          'Kembali',
+                          style: TextStyle(fontSize: 27),
+                        ),
+                        // Only return value when bigger dan grandTotal
+                        Text(
+                          state.finalPayment != 0 &&
+                                  state.finalPayment > state.grandTotal
+                              ? Formatter.currencyFormat(
+                                  state.finalPayment - state.grandTotal)
+                              : 'Rp. 0',
+                          style: TextStyle(fontSize: 27),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+          Expanded(
+            child: Container(
+              child: keyPadArea(context),
+            ),
+          ),
+        ],
+      );
+    });
   }
 
   Padding keyPadArea(BuildContext context) {
@@ -552,37 +635,6 @@ class PaymentScreen extends StatelessWidget {
               fontSize: 30,
               fontWeight: FontWeight.bold,
             )),
-      ),
-    );
-  }
-
-  Widget _paymentMethodCard(String title, IconData icon, Color color) {
-    return Expanded(
-      child: Padding(
-        padding: const EdgeInsets.all(5.0),
-        child: Container(
-          alignment: Alignment.center,
-          decoration: BoxDecoration(
-              color: color,
-              borderRadius: BorderRadius.circular(10),
-              border: Border.all(
-                color: Colors.grey,
-              )),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: <Widget>[
-              Icon(
-                icon,
-                size: 35,
-              ),
-              SizedBox(width: 10),
-              Text(
-                title,
-                style: TextStyle(fontSize: 20),
-              )
-            ],
-          ),
-        ),
       ),
     );
   }

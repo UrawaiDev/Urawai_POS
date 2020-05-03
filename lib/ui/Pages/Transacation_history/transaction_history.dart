@@ -5,7 +5,10 @@ import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:urawai_pos/core/Models/transaction.dart';
 import 'package:urawai_pos/core/Provider/general_provider.dart';
+import 'package:urawai_pos/core/Provider/transactionOrder_provider.dart';
+import 'package:urawai_pos/ui/Pages/Transacation_history/detail_transaction.dart';
 import 'package:urawai_pos/ui/Pages/pos/pos_Page.dart';
+import 'package:urawai_pos/ui/Widgets/drawerMenu.dart';
 import 'package:urawai_pos/ui/utils/constans/formatter.dart';
 import 'package:urawai_pos/ui/utils/constans/utils.dart';
 import 'package:urawai_pos/ui/utils/functions/paymentHelpers.dart';
@@ -19,16 +22,23 @@ class TransactionHistoryPage extends StatelessWidget {
 
     return SafeArea(
         child: Scaffold(
+      appBar: AppBar(
+        // automaticallyImplyLeading: false,
+        title: Text('Riwayat Transasksi'),
+      ),
+      drawer: Drawer(
+        child: DrawerMenu(),
+      ),
       body: Container(
         child: Row(
           children: <Widget>[
+            // Expanded(
+            //   child: Container(
+            //     color: Colors.blue,
+            //   ),
+            // ),
             Expanded(
-              child: Container(
-                color: Colors.blue,
-              ),
-            ),
-            Expanded(
-              flex: 3,
+              // flex: 3,
               child: Container(
                 // color: Colors.yellow,
                 child: Padding(
@@ -90,13 +100,16 @@ class TransactionHistoryPage extends StatelessWidget {
                                   style: kProductNameBigScreenTextStyle),
                             ))
                           : Expanded(
-                              child: Consumer<GeneralProvider>(
-                                builder: (context, state, _) => GridView.count(
-                                    shrinkWrap: true,
-                                    crossAxisCount: 3,
-                                    mainAxisSpacing: 20,
-                                    crossAxisSpacing: 15,
-                                    children: _loadTransactionList(box, state)),
+                              child: Consumer2<GeneralProvider,
+                                  TransactionOrderProvider>(
+                                builder: (context, state, state2, _) =>
+                                    GridView.count(
+                                        shrinkWrap: true,
+                                        crossAxisCount: 4,
+                                        mainAxisSpacing: 20,
+                                        crossAxisSpacing: 15,
+                                        children:
+                                            _loadTransactionList(box, state)),
                               ),
                             ),
                     ],
@@ -113,13 +126,11 @@ class TransactionHistoryPage extends StatelessWidget {
   List<Widget> _loadTransactionList(
       Box<TransactionOrder> box, GeneralProvider state) {
     if (state.selectedDate == null) {
-      print('null date');
       var result = box.values
           .map((itemList) => _buildCardTransaction(itemList))
           .toList();
       return result;
     } else {
-      print('selected date');
       var result = box.values
           .where((item) {
             bool result = DateFormat("dMy").format(item.date) ==
@@ -187,19 +198,6 @@ class TransactionHistoryPage extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: <Widget>[
                 Text(
-                  'Pembayaran:',
-                  style: kPriceTextStyle,
-                ),
-                Text(
-                  PaymentHelper.getPaymentType(item.paymentType),
-                  style: kPriceTextStyle,
-                ),
-              ],
-            ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: <Widget>[
-                Text(
                   'Status:',
                   style: kPriceTextStyle,
                 ),
@@ -222,7 +220,7 @@ class TransactionHistoryPage extends StatelessWidget {
               style: kPriceTextStyle,
             ),
             Text(
-              item.cashierName,
+              item.cashierName ?? '[null]',
               style: kPriceTextStyle,
             ),
             SizedBox(height: 5),
@@ -237,10 +235,36 @@ class TransactionHistoryPage extends StatelessWidget {
                   Formatter.currencyFormat(item.grandTotal),
                   style: kProductNameBigScreenTextStyle,
                 ),
-                Icon(
-                  Icons.info,
-                  color: Colors.blue,
-                  size: 25,
+                Builder(
+                  builder: (context) => Row(
+                    children: <Widget>[
+                      GestureDetector(
+                        child: Icon(
+                          Icons.info,
+                          color: Colors.blue,
+                          size: 25,
+                        ),
+                        onTap: () => Navigator.pushNamed(
+                          context,
+                          DetailTransactionPage.routeName,
+                          arguments: item.id,
+                        ),
+                      ),
+                      SizedBox(width: 5),
+                      GestureDetector(
+                          child: Icon(
+                            Icons.delete,
+                            color: Colors.red,
+                            size: 25,
+                          ),
+                          onTap: () {
+                            // TODO: will be enclosure with costume dialog Box
+                            Provider.of<TransactionOrderProvider>(context,
+                                    listen: false)
+                                .deleteTransaction(item.id);
+                          }),
+                    ],
+                  ),
                 ),
               ],
             ),

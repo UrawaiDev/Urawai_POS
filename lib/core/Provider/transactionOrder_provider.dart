@@ -3,7 +3,6 @@ import 'package:hive/hive.dart';
 import 'package:urawai_pos/core/Models/transaction.dart';
 import 'package:urawai_pos/core/Provider/orderList_provider.dart';
 import 'package:urawai_pos/core/Provider/postedOrder_provider.dart';
-import 'package:urawai_pos/ui/Pages/pos/pos_Page.dart';
 
 class TransactionOrderProvider with ChangeNotifier {
   addTransactionOrder({
@@ -12,7 +11,7 @@ class TransactionOrderProvider with ChangeNotifier {
     @required PaymentType paymentType,
   }) {
     TransactionOrder _transactionOrder;
-    var box = Hive.box<TransactionOrder>(POSPage.transactionBoxName);
+    var box = Hive.box<TransactionOrder>(TransactionOrder.boxName);
 
     try {
       if (stateProvider is PostedOrderProvider) {
@@ -21,10 +20,16 @@ class TransactionOrderProvider with ChangeNotifier {
           cashierName: stateProvider.postedOrder.cashierName,
           date: stateProvider.postedOrder.dateTime,
           referenceOrder: stateProvider.postedOrder.refernceOrder,
+          discount: stateProvider.discountTotal,
+          subtotal: stateProvider.subTotal,
           grandTotal: stateProvider.grandTotal,
           itemList: stateProvider.postedOrder.orderList,
           paymentStatus: paymentStatus,
           paymentType: paymentType,
+          tender: stateProvider.finalPayment,
+          change: paymentType == PaymentType.CASH
+              ? stateProvider.finalPayment - stateProvider.grandTotal
+              : 0,
         );
       } else if (stateProvider is OrderListProvider) {
         _transactionOrder = TransactionOrder(
@@ -32,10 +37,16 @@ class TransactionOrderProvider with ChangeNotifier {
           cashierName: stateProvider.cashierName,
           date: stateProvider.orderDate,
           referenceOrder: stateProvider.referenceOrder,
+          discount: stateProvider.discountTotal,
+          subtotal: stateProvider.subTotal,
           grandTotal: stateProvider.grandTotal,
-          itemList: stateProvider.orderlist,
+          itemList: stateProvider.orderlist.toList(),
           paymentStatus: paymentStatus,
           paymentType: paymentType,
+          tender: stateProvider.finalPayment,
+          change: paymentType == PaymentType.CASH
+              ? stateProvider.finalPayment - stateProvider.grandTotal
+              : 0,
         );
       }
       //Add to Hive Box
@@ -44,7 +55,13 @@ class TransactionOrderProvider with ChangeNotifier {
       throw Exception(e.toString());
     } finally {
       print(
-          'Order ID : ${_transactionOrder.id} telah berhasil di tambahkan dgn status ${_transactionOrder.paymentStatus}');
+          'Order ID : ${_transactionOrder.id} dgn jumlah item ${_transactionOrder.itemList.length} telah berhasil di tambahkan dgn status ${_transactionOrder.paymentStatus}');
     }
+  }
+
+  deleteTransaction(String key) {
+    Hive.box<TransactionOrder>(TransactionOrder.boxName).delete(key);
+    print('$key deleted');
+    notifyListeners();
   }
 }

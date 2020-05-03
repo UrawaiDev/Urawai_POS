@@ -1,13 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:urawai_pos/core/Models/transaction.dart';
 
 class GeneralProvider with ChangeNotifier {
   bool _isDrawerShow = true;
   DateTime _selectedDate;
-  int _selectedIndex = 0;
+  PaymentType _paymentType = PaymentType.CASH;
 
-  int get selectedIndex => _selectedIndex;
-  set selectedIndex(int newValue) {
-    _selectedIndex = newValue;
+  PaymentType get paymentType => _paymentType;
+  set paymentType(PaymentType newValue) {
+    _paymentType = newValue;
     notifyListeners();
   }
 

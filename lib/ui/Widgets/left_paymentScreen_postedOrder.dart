@@ -78,13 +78,14 @@ class _PaymentScreenLeftPostedOrderState
                           PostedOrder(
                             id: postedOrderProvider.postedOrder.id,
                             refernceOrder: widget.postedOrder.refernceOrder,
-                            dateTime: DateTime.now(),
-                            discount: 0,
+                            dateTime: postedOrderProvider.postedOrder.dateTime,
+                            discount: postedOrderProvider.discountTotal,
                             grandTotal: postedOrderProvider.grandTotal,
                             subtotal: postedOrderProvider.subTotal,
                             orderList:
                                 postedOrderProvider.postedOrder.orderList,
                             paidStatus: PaidStatus.UnPaid,
+                            cashierName: postedOrderProvider.cashierName,
                           ));
 
                       Provider.of<PostedOrderProvider>(context, listen: false)

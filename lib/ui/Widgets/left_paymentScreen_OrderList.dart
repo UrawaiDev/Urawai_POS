@@ -69,7 +69,6 @@ class _PaymentScreenLeftOrderListState
                           name: 'Nasi Putih',
                           price: 5000,
                         ),
-                        cashierName: 'Dummy Cashier Name',
                         referenceOrder: orderListProvider.referenceOrder,
                       );
                     },

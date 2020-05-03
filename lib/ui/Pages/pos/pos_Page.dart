@@ -5,7 +5,6 @@ import 'package:hive_flutter/hive_flutter.dart';
 import 'package:provider/provider.dart';
 import 'package:urawai_pos/core/Models/postedOrder.dart';
 import 'package:urawai_pos/core/Models/products.dart';
-import 'package:urawai_pos/core/Models/transaction.dart';
 import 'package:urawai_pos/core/Provider/general_provider.dart';
 import 'package:urawai_pos/core/Provider/orderList_provider.dart';
 import 'package:urawai_pos/core/Provider/postedOrder_provider.dart';
@@ -14,6 +13,7 @@ import 'package:urawai_pos/ui/Pages/payment_screen/payment_screen.dart';
 
 import 'package:urawai_pos/ui/Widgets/costum_DialogBox.dart';
 import 'package:urawai_pos/ui/Widgets/detail_itemOrder.dart';
+import 'package:urawai_pos/ui/Widgets/extraDiscount.dart';
 import 'package:urawai_pos/ui/Widgets/footer_OrderList.dart';
 import 'package:urawai_pos/ui/utils/constans/formatter.dart';
 import 'package:urawai_pos/ui/utils/constans/utils.dart';
@@ -29,6 +29,7 @@ class POSPage extends StatefulWidget {
 class _POSPageState extends State<POSPage> {
   final TextEditingController _textReferenceOrder = TextEditingController();
   final TextEditingController _textNote = TextEditingController();
+  final TextEditingController _textExtraDiscount = TextEditingController();
   final _formKey = GlobalKey<FormState>();
 
   List<Product> products = [
@@ -95,6 +96,7 @@ class _POSPageState extends State<POSPage> {
   void dispose() {
     _textReferenceOrder.dispose();
     _textNote.dispose();
+    _textExtraDiscount.dispose();
     super.dispose();
   }
 
@@ -322,22 +324,31 @@ class _POSPageState extends State<POSPage> {
                                         icon: Icon(Icons.disc_full),
                                         title: 'Diskon',
                                         onTap: () {
-                                          var box = Hive.box<TransactionOrder>(
-                                              POSPage.transactionBoxName);
+                                          //   var box = Hive.box<TransactionOrder>(
+                                          //       POSPage.transactionBoxName);
 
-                                          print('------------------');
-                                          print(
-                                              'Jumlah Transaction Order (${box.length})');
-                                          print('------------------');
+                                          //   print('------------------');
+                                          //   print(
+                                          //       'Jumlah Transaction Order (${box.length})');
+                                          //   print('------------------');
 
-                                          box.values.forEach((f) {
-                                            print(f.id);
-                                            // box.delete(f.id);
-                                            print('Order Date : ${f.date}');
-                                            print(
-                                                'Jumlah item : ${f.itemList.length}');
-                                            print(f.paymentStatus);
-                                          });
+                                          //   box.values.forEach((f) {
+                                          //     print(f.id);
+                                          //     // box.delete(f.id);
+                                          //     print('Order Date : ${f.date}');
+                                          //     print(
+                                          //         'Jumlah item : ${f.itemList.length}');
+                                          //     print(f.paymentStatus);
+                                          //   });
+
+                                          if (orderlistState
+                                              .orderlist.isNotEmpty) {
+                                            showDialog(
+                                                context: context,
+                                                barrierDismissible: false,
+                                                builder: (context) =>
+                                                    ExtraDiscoutDialog());
+                                          }
                                         }),
                                     _bottomButton(
                                         icon: Icon(Icons.delete,
@@ -634,7 +645,8 @@ class _POSPageState extends State<POSPage> {
           if (_formKey.currentState.validate()) {
             orderlistProvider.resetOrderList();
             orderlistProvider.referenceOrder = _textReferenceOrder.text;
-            orderlistProvider.cashierName = 'Dummy Cashier XXX';
+            orderlistProvider.cashierName =
+                'Dummy Cashier XXX'; //override Cashier Name HERE
             orderlistProvider.createNewOrder();
             _textReferenceOrder.clear();
             Navigator.pop(context);
@@ -726,7 +738,6 @@ class _POSPageState extends State<POSPage> {
           orderlistProvider.addToList(
             item: product,
             referenceOrder: orderlistProvider.referenceOrder,
-            cashierName: 'Dummy Casier Name',
           );
         }
       },

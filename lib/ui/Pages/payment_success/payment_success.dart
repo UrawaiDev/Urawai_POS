@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:urawai_pos/core/Models/transaction.dart';
 import 'package:urawai_pos/core/Provider/orderList_provider.dart';
 import 'package:urawai_pos/core/Provider/postedOrder_provider.dart';
 import 'package:urawai_pos/ui/Pages/pos/pos_Page.dart';
@@ -9,20 +10,14 @@ import 'package:urawai_pos/ui/utils/constans/utils.dart';
 
 class PaymentSuccess extends StatelessWidget {
   final List<dynamic> itemList;
-  final String cashierName;
-  final String referenceOrder;
-  final DateTime date;
-  final String orderID;
   final double pembayaran;
   final double kembali;
   final dynamic state;
+  final PaymentType paymentType;
 
   PaymentSuccess({
     @required this.itemList,
-    @required this.cashierName,
-    @required this.referenceOrder,
-    @required this.date,
-    @required this.orderID,
+    @required this.paymentType,
     @required this.pembayaran,
     @required this.kembali,
     @required this.state,
@@ -32,8 +27,25 @@ class PaymentSuccess extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    String _cashierName;
+    String _referenceOrder;
+    DateTime _orderDate;
+
+    //Get header information
+    if (state is OrderListProvider) {
+      var x = state as OrderListProvider;
+      _cashierName = x.cashierName;
+      _referenceOrder = x.referenceOrder;
+      _orderDate = x.orderDate;
+    } else if (state is PostedOrderProvider) {
+      var x = state as PostedOrderProvider;
+      _cashierName = x.postedOrder.cashierName;
+      _referenceOrder = x.postedOrder.refernceOrder;
+      _orderDate = x.postedOrder.dateTime;
+    }
+
     return WillPopScope(
-      onWillPop: () => Future.value(false),
+      onWillPop: () => _onTransactionComplete(context),
       child: SafeArea(
         child: Scaffold(
           body: Container(
@@ -81,21 +93,21 @@ class PaymentSuccess extends StatelessWidget {
                               children: <Widget>[
                                 Text('Ref. Order :'),
                                 SizedBox(width: 8),
-                                Text(referenceOrder ?? '-'),
+                                Text(_referenceOrder ?? '-'),
                               ],
                             ),
                             Row(
                               children: <Widget>[
                                 Text('Tanggal :'),
                                 SizedBox(width: 8),
-                                Text(Formatter.dateFormat(date)),
+                                Text(Formatter.dateFormat(_orderDate)),
                               ],
                             ),
                             Row(
                               children: <Widget>[
                                 Text('Kasir :'),
                                 SizedBox(width: 8),
-                                Text(cashierName ?? 'Cashier Not State'),
+                                Text(_cashierName ?? 'Cashier Not State'),
                               ],
                             ),
                             Divider(
@@ -163,7 +175,10 @@ class PaymentSuccess extends StatelessWidget {
                                     style: kGrandTotalTextStyle,
                                   ),
                                   Text(
-                                    Formatter.currencyFormat(pembayaran),
+                                    paymentType == PaymentType.CASH
+                                        ? Formatter.currencyFormat(pembayaran)
+                                        : Formatter.currencyFormat(
+                                            state.grandTotal),
                                     style: kGrandTotalTextStyle,
                                   ),
                                 ],
@@ -181,7 +196,9 @@ class PaymentSuccess extends StatelessWidget {
                                     style: kGrandTotalTextStyle,
                                   ),
                                   Text(
-                                    Formatter.currencyFormat(kembali),
+                                    paymentType == PaymentType.CASH
+                                        ? Formatter.currencyFormat(kembali)
+                                        : Formatter.currencyFormat(0),
                                     style: kGrandTotalTextStyle,
                                   ),
                                 ],
@@ -298,24 +315,7 @@ class PaymentSuccess extends StatelessWidget {
                                     ),
                                   ),
                                   onTap: () {
-                                    //reset variable
-                                    Provider.of<PostedOrderProvider>(context,
-                                            listen: false)
-                                        .resetFinalPayment();
-                                    Provider.of<OrderListProvider>(context,
-                                            listen: false)
-                                        .resetFinalPayment();
-                                    Provider.of<OrderListProvider>(context,
-                                            listen: false)
-                                        .resetOrderList();
-
-                                    //Navigate to Main Page
-                                    Navigator.pushAndRemoveUntil(
-                                      context,
-                                      MaterialPageRoute(
-                                          builder: (context) => POSPage()),
-                                      ModalRoute.withName('/pos'),
-                                    );
+                                    _onTransactionComplete(context);
                                   },
                                 ),
                               ],
@@ -330,5 +330,22 @@ class PaymentSuccess extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  Future<void> _onTransactionComplete(BuildContext context) {
+    //reset variable
+    Provider.of<PostedOrderProvider>(context, listen: false)
+        .resetFinalPayment();
+    Provider.of<OrderListProvider>(context, listen: false).resetFinalPayment();
+    Provider.of<OrderListProvider>(context, listen: false).resetOrderList();
+
+    //Navigate to Main Page
+    Navigator.pushAndRemoveUntil(
+      context,
+      MaterialPageRoute(builder: (context) => POSPage()),
+      ModalRoute.withName('/pos'),
+    );
+
+    return null;
   }
 }

@@ -19,6 +19,8 @@ class OrderListProvider with ChangeNotifier {
   String _cashierName = '';
   String _referenceOrder = '';
 
+  double _extraDiscount = 0;
+
   String get orderID => _orderID;
   set orderID(String newValue) {
     _orderID = newValue;
@@ -78,18 +80,24 @@ class OrderListProvider with ChangeNotifier {
       return prev + ((item.price * (item.discount / 100)) * item.quantity);
     });
 
-    return result;
+    return result + _extraDiscount;
+  }
+
+  double get extraDicount => _extraDiscount;
+  set extraDicount(double newValue) {
+    _extraDiscount = newValue;
+    notifyListeners();
   }
 
   resetFinalPayment() {
     _totalPayment = '';
     _finalPayment = 0;
-    //notifyListeners();
   }
 
-  void addToList({Product item, String referenceOrder, String cashierName}) {
-    //TODO: saat ini berdasarkan nama product next perlu di update dengan id.
-    int index = orderlist.indexWhere((data) => data.productName == item.name);
+  void addToList({Product item, String referenceOrder}) {
+    int index = orderlist.indexWhere((data) {
+      return data.productName == item.name && data.price == item.price;
+    });
 
     //-1 item not found in orderlist
     if (index == -1) {
@@ -100,7 +108,6 @@ class OrderListProvider with ChangeNotifier {
         dateTime: DateTime.now(),
         quantity: 1,
         referenceOrder: referenceOrder,
-        cashierName: cashierName,
         discount: item.discount,
       ));
       notifyListeners();
@@ -114,7 +121,6 @@ class OrderListProvider with ChangeNotifier {
         dateTime: DateTime.now(),
         quantity: prevQty + 1, //tambahan dengan quantity sebelumnya
         referenceOrder: referenceOrder,
-        cashierName: cashierName,
         discount: item.discount,
       );
       notifyListeners();
@@ -154,6 +160,7 @@ class OrderListProvider with ChangeNotifier {
     _referenceOrder = '';
     _totalPayment = '';
     _finalPayment = 0;
+    _extraDiscount = 0;
 
     notifyListeners();
   }
@@ -196,7 +203,7 @@ class OrderListProvider with ChangeNotifier {
         id: orderlistState.orderID,
         dateTime: orderlistState.orderDate,
         subtotal: orderlistState.subTotal,
-        discount: 0,
+        discount: orderlistState.discountTotal,
         grandTotal: orderlistState.grandTotal,
         orderList: orderlistState.orderlist.toList(),
         paidStatus: PaidStatus.UnPaid,

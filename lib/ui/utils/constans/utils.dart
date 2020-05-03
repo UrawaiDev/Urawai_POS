@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 Color priceColor = Color(0xFF878f95);
 Color cardBGColor = Color(0xFFe4e4e4);
 Color greyColor = Color(0xFFe4e4e4);
-Color kSelectedColor = Color(0xFFebf2fd);
+Color kSelectedColor = Color(0xFFe4f2fe);
 
 TextStyle kHeaderTextStyle = TextStyle(
   fontWeight: FontWeight.w600,
