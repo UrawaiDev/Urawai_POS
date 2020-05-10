@@ -10,6 +10,7 @@ import 'package:urawai_pos/core/Provider/orderList_provider.dart';
 import 'package:urawai_pos/core/Provider/postedOrder_provider.dart';
 import 'package:urawai_pos/ui/Pages/Transacation_history/transaction_history.dart';
 import 'package:urawai_pos/ui/Pages/payment_screen/payment_screen.dart';
+import 'package:urawai_pos/ui/Pages/transaction_report/transaction_report.dart';
 
 import 'package:urawai_pos/ui/Widgets/costum_DialogBox.dart';
 import 'package:urawai_pos/ui/Widgets/detail_itemOrder.dart';
@@ -26,11 +27,14 @@ class POSPage extends StatefulWidget {
   static const String transactionBoxName = "TransactionOrder";
 }
 
-class _POSPageState extends State<POSPage> {
+class _POSPageState extends State<POSPage> with SingleTickerProviderStateMixin {
   final TextEditingController _textReferenceOrder = TextEditingController();
   final TextEditingController _textNote = TextEditingController();
   final TextEditingController _textExtraDiscount = TextEditingController();
   final _formKey = GlobalKey<FormState>();
+
+  AnimationController _animationController;
+  Animation<double> _animationScale;
 
   List<Product> products = [
     Product(
@@ -93,10 +97,25 @@ class _POSPageState extends State<POSPage> {
   ];
 
   @override
+  void initState() {
+    super.initState();
+    _animationController = AnimationController(
+      vsync: this,
+      value: 0.1,
+      duration: Duration(seconds: 1),
+    );
+
+    _animationScale = CurvedAnimation(
+        parent: _animationController, curve: Curves.bounceInOut);
+    _animationController.forward();
+  }
+
+  @override
   void dispose() {
     _textReferenceOrder.dispose();
     _textNote.dispose();
     _textExtraDiscount.dispose();
+    _animationController.dispose();
     super.dispose();
   }
 
@@ -475,28 +494,31 @@ class _POSPageState extends State<POSPage> {
                 style: TextStyle(fontSize: 25, fontWeight: FontWeight.bold),
               ),
             ),
-            IconButton(
-              icon: Icon(Icons.add),
-              iconSize: 35,
-              onPressed: () {
-                if (orderlistProvider.orderlist.isEmpty) {
-                  _createNewOrder(orderlistProvider);
-                } else if (orderlistProvider.orderlist.isNotEmpty) {
-                  CostumDialogBox.showCostumDialogBox(
-                    context: context,
-                    title: 'Information',
-                    contentString:
-                        'Orderlist Sebelumnya belum disimpan, \nApakah akan tetap dibuatkan order List Baru?',
-                    icon: Icons.info,
-                    iconColor: Colors.blue,
-                    confirmButtonTitle: 'Ya',
-                    onConfirmPressed: () {
-                      Navigator.pop(context); //close dialogBox
-                      _createNewOrder(orderlistProvider);
-                    },
-                  );
-                }
-              },
+            ScaleTransition(
+              scale: _animationScale,
+              child: IconButton(
+                icon: Icon(Icons.add),
+                iconSize: 35,
+                onPressed: () {
+                  if (orderlistProvider.orderlist.isEmpty) {
+                    _createNewOrder(orderlistProvider);
+                  } else if (orderlistProvider.orderlist.isNotEmpty) {
+                    CostumDialogBox.showCostumDialogBox(
+                      context: context,
+                      title: 'Information',
+                      contentString:
+                          'Orderlist Sebelumnya belum disimpan, \nApakah akan tetap dibuatkan order List Baru?',
+                      icon: Icons.info,
+                      iconColor: Colors.blue,
+                      confirmButtonTitle: 'Ya',
+                      onConfirmPressed: () {
+                        Navigator.pop(context); //close dialogBox
+                        _createNewOrder(orderlistProvider);
+                      },
+                    );
+                  }
+                },
+              ),
             ),
           ],
         ),
@@ -517,7 +539,7 @@ class _POSPageState extends State<POSPage> {
             Container(
               child: Consumer<OrderListProvider>(
                 builder: (context, state, _) => Text(
-                  state.referenceOrder ?? 'No Reference',
+                  state.referenceOrder ?? '[null]',
                   overflow: TextOverflow.ellipsis,
                   style: TextStyle(
                     color: priceColor,
@@ -739,6 +761,8 @@ class _POSPageState extends State<POSPage> {
             item: product,
             referenceOrder: orderlistProvider.referenceOrder,
           );
+        } else {
+          _animationController.forward();
         }
       },
     );
@@ -812,6 +836,8 @@ class _POSPageState extends State<POSPage> {
                   'Laporan',
                   style: kMainMenuStyle,
                 )),
+                onTap: () =>
+                    Navigator.pushNamed(context, TransactionReport.routeName),
               ),
               ListTile(
                 leading: FaIcon(FontAwesomeIcons.cog),

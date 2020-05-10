@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:urawai_pos/ui/Pages/Transacation_history/transaction_history.dart';
+import 'package:urawai_pos/ui/Pages/pos/pos_Page.dart';
+import 'package:urawai_pos/ui/Pages/transaction_report/transaction_report.dart';
 import 'package:urawai_pos/ui/utils/constans/utils.dart';
 
 class DrawerMenu extends StatelessWidget {
@@ -22,19 +24,21 @@ class DrawerMenu extends StatelessWidget {
           ),
         ),
         ListTile(
-            leading: FaIcon(FontAwesomeIcons.cashRegister),
-            title: (Text(
-              'Transaksi',
-              style: kMainMenuStyle,
-            ))),
+          leading: FaIcon(FontAwesomeIcons.cashRegister),
+          title: (Text(
+            'Transaksi',
+            style: kMainMenuStyle,
+          )),
+          onTap: () => Navigator.pushNamed(context, POSPage.routeName),
+        ),
         ListTile(
           leading: FaIcon(FontAwesomeIcons.clipboardList),
           title: (Text(
             'Riwayat Transaksi',
             style: kMainMenuStyle,
           )),
-          onTap: () => Navigator.pushReplacementNamed(
-              context, TransactionHistoryPage.routeName),
+          onTap: () =>
+              Navigator.pushNamed(context, TransactionHistoryPage.routeName),
         ),
         ListTile(
           leading: FaIcon(FontAwesomeIcons.book),
@@ -42,6 +46,8 @@ class DrawerMenu extends StatelessWidget {
             'Laporan',
             style: kMainMenuStyle,
           )),
+          onTap: () =>
+              Navigator.pushNamed(context, TransactionReport.routeName),
         ),
         ListTile(
           leading: FaIcon(FontAwesomeIcons.cog),

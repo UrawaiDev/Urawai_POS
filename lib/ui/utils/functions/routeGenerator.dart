@@ -8,6 +8,7 @@ import 'package:urawai_pos/ui/Pages/Transacation_history/transaction_history.dar
 import 'package:urawai_pos/ui/Pages/payment_screen/payment_screen.dart';
 import 'package:urawai_pos/ui/Pages/payment_success/payment_success.dart';
 import 'package:urawai_pos/ui/Pages/pos/pos_Page.dart';
+import 'package:urawai_pos/ui/Pages/transaction_report/transaction_report.dart';
 
 class RouteGenerator {
   static Route<dynamic> onGenerate(settings) {
@@ -54,10 +55,14 @@ class RouteGenerator {
           return MaterialPageRoute(
               builder: (context) => DetailTransactionPage(boxKey: args));
         break;
+      case TransactionReport.routeName:
+        return MaterialPageRoute(builder: (context) => TransactionReport());
+        break;
       default:
         //route error due to type order not found
         return _onErrorRoute();
     }
+    return _onErrorRoute();
   }
 }
 

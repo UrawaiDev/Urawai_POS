@@ -4,6 +4,7 @@ import 'package:urawai_pos/core/Models/transaction.dart';
 import 'package:urawai_pos/core/Provider/orderList_provider.dart';
 import 'package:urawai_pos/core/Provider/postedOrder_provider.dart';
 import 'package:urawai_pos/ui/Pages/pos/pos_Page.dart';
+import 'package:urawai_pos/ui/Widgets/costum_button.dart';
 import 'package:urawai_pos/ui/Widgets/footer_OrderList.dart';
 import 'package:urawai_pos/ui/utils/constans/formatter.dart';
 import 'package:urawai_pos/ui/utils/constans/utils.dart';
@@ -90,24 +91,27 @@ class PaymentSuccess extends StatelessWidget {
                               thickness: 2,
                             ),
                             Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: <Widget>[
-                                Text('Ref. Order :'),
+                                Text('Ref. Order:'),
                                 SizedBox(width: 8),
-                                Text(_referenceOrder ?? '-'),
+                                Text(_referenceOrder ?? '[null]'),
                               ],
                             ),
                             Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: <Widget>[
-                                Text('Tanggal :'),
+                                Text('Tanggal:'),
                                 SizedBox(width: 8),
                                 Text(Formatter.dateFormat(_orderDate)),
                               ],
                             ),
                             Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: <Widget>[
-                                Text('Kasir :'),
+                                Text('Kasir:'),
                                 SizedBox(width: 8),
-                                Text(_cashierName ?? 'Cashier Not State'),
+                                Text(_cashierName ?? '[null]'),
                               ],
                             ),
                             Divider(
@@ -248,75 +252,13 @@ class PaymentSuccess extends StatelessWidget {
                             child: Row(
                               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                               children: <Widget>[
-                                GestureDetector(
-                                  child: Container(
-                                    alignment: Alignment.center,
-                                    width: 300,
-                                    height: 70,
-                                    decoration: BoxDecoration(
-                                        border: Border.all(
-                                      width: 4,
-                                      color: Colors.blueAccent,
-                                    )),
-                                    child: Padding(
-                                      padding: const EdgeInsets.all(8.0),
-                                      child: Row(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.center,
-                                        children: <Widget>[
-                                          Icon(
-                                            Icons.print,
-                                            size: 40,
-                                            color: Colors.blue,
-                                          ),
-                                          SizedBox(width: 10),
-                                          Text(
-                                            'Duplikat Kwitansi',
-                                            style: TextStyle(
-                                                fontSize: 25,
-                                                fontWeight: FontWeight.bold),
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                  ),
-                                  onTap: () {},
-                                ),
-                                GestureDetector(
-                                  child: Container(
-                                    alignment: Alignment.center,
-                                    width: 300,
-                                    height: 70,
-                                    decoration: BoxDecoration(
-                                        border: Border.all(
-                                      width: 4,
-                                      color: Colors.green,
-                                    )),
-                                    child: Padding(
-                                      padding: const EdgeInsets.all(8.0),
-                                      child: Row(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.center,
-                                        children: <Widget>[
-                                          Icon(
-                                            Icons.done,
-                                            size: 40,
-                                            color: Colors.green,
-                                          ),
-                                          SizedBox(width: 10),
-                                          Text(
-                                            'Selesai',
-                                            style: TextStyle(
-                                                fontSize: 25,
-                                                fontWeight: FontWeight.bold),
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                  ),
-                                  onTap: () {
-                                    _onTransactionComplete(context);
-                                  },
+                                CostumButton.squareButton('Cetak Kwitansi',
+                                    prefixIcon: Icons.print),
+                                CostumButton.squareButton(
+                                  'Selesai',
+                                  prefixIcon: Icons.done,
+                                  borderColor: Colors.green,
+                                  onTap: () => _onTransactionComplete(context),
                                 ),
                               ],
                             ),

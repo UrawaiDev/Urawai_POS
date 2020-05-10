@@ -98,13 +98,17 @@ class TransactionOrderAdapter extends TypeAdapter<TransactionOrder> {
       paymentType: fields[5] as PaymentType,
       paymentStatus: fields[6] as PaymentStatus,
       itemList: (fields[7] as List)?.cast<dynamic>(),
+      discount: fields[9] as double,
+      subtotal: fields[8] as double,
+      change: fields[11] as double,
+      tender: fields[10] as double,
     );
   }
 
   @override
   void write(BinaryWriter writer, TransactionOrder obj) {
     writer
-      ..writeByte(8)
+      ..writeByte(12)
       ..writeByte(0)
       ..write(obj.id)
       ..writeByte(1)
@@ -120,6 +124,14 @@ class TransactionOrderAdapter extends TypeAdapter<TransactionOrder> {
       ..writeByte(6)
       ..write(obj.paymentStatus)
       ..writeByte(7)
-      ..write(obj.itemList);
+      ..write(obj.itemList)
+      ..writeByte(8)
+      ..write(obj.subtotal)
+      ..writeByte(9)
+      ..write(obj.discount)
+      ..writeByte(10)
+      ..write(obj.tender)
+      ..writeByte(11)
+      ..write(obj.change);
   }
 }

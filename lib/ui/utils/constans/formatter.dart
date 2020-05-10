@@ -11,7 +11,7 @@ class Formatter {
   }
 
   static String dateFormat(DateTime date) {
-    if (date == null) return '-';
+    if (date == null) return '[null]';
 
     return DateFormat("d-M-y").add_Hm().format(date);
   }

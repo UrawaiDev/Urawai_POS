@@ -8,6 +8,7 @@ import 'package:urawai_pos/core/Provider/general_provider.dart';
 import 'package:urawai_pos/core/Provider/transactionOrder_provider.dart';
 import 'package:urawai_pos/ui/Pages/Transacation_history/detail_transaction.dart';
 import 'package:urawai_pos/ui/Pages/pos/pos_Page.dart';
+import 'package:urawai_pos/ui/Widgets/costum_DialogBox.dart';
 import 'package:urawai_pos/ui/Widgets/drawerMenu.dart';
 import 'package:urawai_pos/ui/utils/constans/formatter.dart';
 import 'package:urawai_pos/ui/utils/constans/utils.dart';
@@ -40,6 +41,7 @@ class TransactionHistoryPage extends StatelessWidget {
             Expanded(
               // flex: 3,
               child: Container(
+                // color: Color(0xFFfafbfd),
                 // color: Colors.yellow,
                 child: Padding(
                   padding: const EdgeInsets.all(8.0),
@@ -52,41 +54,46 @@ class TransactionHistoryPage extends StatelessWidget {
                               style: kProductNameBigScreenTextStyle),
                           SizedBox(height: 20),
                           Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: <Widget>[
-                              Text('Cari Berdasarkan Tanggal',
+                              Text('Cari Berdasarkan Tanggal:',
                                   style: kProductNameSmallScreenTextStyle),
-                              SizedBox(width: 15),
-                              GestureDetector(
-                                child: FaIcon(
-                                  FontAwesomeIcons.calendarDay,
-                                  color: Colors.blue,
-                                  size: 35,
-                                ),
-                                onTap: () async {
-                                  DateTime selectedDate = await showDatePicker(
-                                      context: context,
-                                      initialDate: DateTime.now(),
-                                      firstDate: DateTime(2020),
-                                      lastDate: DateTime(2030));
+                              Row(
+                                children: <Widget>[
+                                  GestureDetector(
+                                    child: FaIcon(
+                                      FontAwesomeIcons.calendarDay,
+                                      color: Colors.blue,
+                                      size: 35,
+                                    ),
+                                    onTap: () async {
+                                      DateTime selectedDate =
+                                          await showDatePicker(
+                                              context: context,
+                                              initialDate: DateTime.now(),
+                                              firstDate: DateTime(2020),
+                                              lastDate: DateTime(2040));
 
-                                  Provider.of<GeneralProvider>(context,
-                                          listen: false)
-                                      .selectedDate = selectedDate;
-                                },
-                              ),
-                              SizedBox(width: 15),
-                              GestureDetector(
-                                child: FaIcon(
-                                  FontAwesomeIcons.syncAlt,
-                                  color: Colors.green,
-                                  size: 35,
-                                ),
-                                onTap: () async {
-                                  Provider.of<GeneralProvider>(context,
-                                          listen: false)
-                                      .selectedDate = null;
-                                },
-                              ),
+                                      Provider.of<GeneralProvider>(context,
+                                              listen: false)
+                                          .selectedDate = selectedDate;
+                                    },
+                                  ),
+                                  SizedBox(width: 20),
+                                  GestureDetector(
+                                    child: FaIcon(
+                                      FontAwesomeIcons.syncAlt,
+                                      color: Colors.green,
+                                      size: 35,
+                                    ),
+                                    onTap: () async {
+                                      Provider.of<GeneralProvider>(context,
+                                              listen: false)
+                                          .selectedDate = null;
+                                    },
+                                  ),
+                                ],
+                              )
                             ],
                           ),
                           SizedBox(height: 20),
@@ -99,19 +106,28 @@ class TransactionHistoryPage extends StatelessWidget {
                               child: Text("Belum Anda Transasksi",
                                   style: kProductNameBigScreenTextStyle),
                             ))
-                          : Expanded(
-                              child: Consumer2<GeneralProvider,
-                                  TransactionOrderProvider>(
-                                builder: (context, state, state2, _) =>
-                                    GridView.count(
-                                        shrinkWrap: true,
-                                        crossAxisCount: 4,
-                                        mainAxisSpacing: 20,
-                                        crossAxisSpacing: 15,
-                                        children:
-                                            _loadTransactionList(box, state)),
-                              ),
-                            ),
+                          : _loadTransactionList(box,
+                                      Provider.of<GeneralProvider>(context))
+                                  .isNotEmpty
+                              ? Expanded(
+                                  child: Consumer2<GeneralProvider,
+                                      TransactionOrderProvider>(
+                                    builder: (context, state, state2, _) =>
+                                        GridView.count(
+                                            shrinkWrap: true,
+                                            crossAxisCount: 4,
+                                            mainAxisSpacing: 20,
+                                            crossAxisSpacing: 15,
+                                            children: _loadTransactionList(
+                                                box, state)),
+                                  ),
+                                )
+                              : Expanded(
+                                  child: Container(
+                                  alignment: Alignment.center,
+                                  child: Text("Belum Anda Transasksi",
+                                      style: kProductNameBigScreenTextStyle),
+                                ))
                     ],
                   ),
                 ),
@@ -140,23 +156,26 @@ class TransactionHistoryPage extends StatelessWidget {
           .map((itemList) => _buildCardTransaction(itemList))
           .toList();
 
-      if (result.length == 0) {
-        return [
-          Container(
-            alignment: Alignment.center,
-            child: Text("Belum Anda Transasksi",
-                style: kProductNameBigScreenTextStyle),
-          )
-        ];
-      } else
-        return result;
+      // if (result.length == 0) {
+      //   return [
+      //     Container(
+      //       alignment: Alignment.center,
+      //       child: Text("Belum Anda Transasksi",
+      //           style: kProductNameBigScreenTextStyle),
+      //     )
+      //   ];
+      // } else
+      //   return result;
+
+      return result;
     }
   }
 
   Container _buildCardTransaction(TransactionOrder item) {
     return Container(
       decoration: BoxDecoration(
-        color: cardBGColor,
+        color: Color(0xFFf4f4f4),
+        border: Border.all(color: Colors.black),
         borderRadius: BorderRadius.circular(10),
       ),
       child: Padding(
@@ -258,10 +277,20 @@ class TransactionHistoryPage extends StatelessWidget {
                             size: 25,
                           ),
                           onTap: () {
-                            // TODO: will be enclosure with costume dialog Box
-                            Provider.of<TransactionOrderProvider>(context,
-                                    listen: false)
-                                .deleteTransaction(item.id);
+                            CostumDialogBox.showCostumDialogBox(
+                                title: 'Konfirmasi',
+                                context: context,
+                                contentString:
+                                    'Anda Akan menhapus Transaksi ID.[${item.id}], Hapus ?',
+                                icon: Icons.delete,
+                                iconColor: Colors.red,
+                                confirmButtonTitle: 'Hapus',
+                                onConfirmPressed: () {
+                                  Provider.of<TransactionOrderProvider>(context,
+                                          listen: false)
+                                      .deleteTransaction(item.id);
+                                  Navigator.pop(context);
+                                });
                           }),
                     ],
                   ),
