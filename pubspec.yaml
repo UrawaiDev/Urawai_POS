@@ -31,6 +31,7 @@ dependencies:
   intl: ^0.16.1
   uuid: ^2.0.4
   provider: ^4.0.4
+  cloud_firestore: ^0.13.5
 
 dev_dependencies:
   flutter_test:
