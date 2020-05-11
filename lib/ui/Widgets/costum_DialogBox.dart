@@ -12,30 +12,26 @@ class CostumDialogBox {
   }) {
     showDialog(
       barrierDismissible: false,
-      child: AlertDialog(
-        title: Text(title, style: kDialogTextStyle),
-        content: Row(
-          children: <Widget>[
-            Icon(
-              icon,
-              size: 40,
-              color: iconColor,
-            ),
-            SizedBox(width: 10),
-            Text(contentText, style: kDialogTextStyle),
+      child: WillPopScope(
+        onWillPop: () => Future.value(false),
+        child: AlertDialog(
+          title: Text(title, style: kDialogTextStyle),
+          content: Row(
+            children: <Widget>[
+              Icon(
+                icon,
+                size: 40,
+                color: iconColor,
+              ),
+              SizedBox(width: 10),
+              Text(contentText, style: kDialogTextStyle),
+            ],
+          ),
+          actions: <Widget>[
+            FlatButton(
+                onPressed: onTap, child: Text('OK', style: kDialogTextStyle))
           ],
         ),
-        actions: <Widget>[
-          FlatButton(
-              onPressed: onTap,
-              //{
-              //   Navigator.pop(context);
-
-              //   orderlistState
-              //       .resetOrderList();
-              // },
-              child: Text('OK', style: kDialogTextStyle))
-        ],
       ),
       context: context,
     );

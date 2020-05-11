@@ -10,6 +10,14 @@ class PostedOrderProvider with ChangeNotifier {
   double _finalPayment = 0;
   String _cashierName = '';
 
+  Map<String, dynamic> toJson() {
+    final Map<String, dynamic> data = Map<String, dynamic>();
+    if (this._postedOrder.orderList != null)
+      data['orderlist'] =
+          this._postedOrder.orderList.map((d) => d.toJson()).toList();
+    return data;
+  }
+
   PostedOrder get postedOrder => _postedOrder;
   set postedorder(PostedOrder newValue) {
     _postedOrder = newValue;

@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
 import 'package:provider/provider.dart';
@@ -22,6 +23,8 @@ class PaymentScreen extends StatelessWidget {
   static const String routeName = "PaymentScreen";
 
   PaymentScreen(this.itemList);
+
+  final String shopName = 'WarungMakyos';
 
   @override
   Widget build(BuildContext context) {
@@ -211,15 +214,30 @@ class PaymentScreen extends StatelessWidget {
                   contentString:
                       'Pembayaran telah dilakukan dan Cetak Kwitansi, Lanjutkan?',
                   confirmButtonTitle: 'Proses',
-                  onConfirmPressed: () {
-                    //Add Transaction
-                    Provider.of<TransactionOrderProvider>(context,
-                            listen: false)
-                        .addTransactionOrder(
+                  onConfirmPressed: () async {
+                    final transactionProvider =
+                        Provider.of<TransactionOrderProvider>(context,
+                            listen: false);
+
+                    //TODO:When offline use these codes.
+                    // //Add Transaction to HIVE DB when offline
+                    // Provider.of<TransactionOrderProvider>(context,
+                    //         listen: false)
+                    //     .addTransactionOrder(
+                    //   stateProvider: state,
+                    //   paymentStatus: PaymentStatus.COMPLETED,
+                    //   paymentType: generalProvider.paymentType,
+                    // );
+
+                    // Add Transaction to Firestore
+                    transactionProvider.addTransactionToFirestore(
                       stateProvider: state,
                       paymentStatus: PaymentStatus.COMPLETED,
                       paymentType: generalProvider.paymentType,
+                      shopName: shopName,
                     );
+
+                    // TODO: will check if posted on not into FireStore
 
                     //delete Posted Order
                     if (itemList is PostedOrder) {
@@ -522,15 +540,26 @@ class PaymentScreen extends StatelessWidget {
                             contentString:
                                 'Pembayaran telah dilakukan dan Cetak Kwitansi, Lanjutkan?',
                             confirmButtonTitle: 'Proses',
-                            onConfirmPressed: () {
-                              //Add Transaction
-                              Provider.of<TransactionOrderProvider>(context,
-                                      listen: false)
-                                  .addTransactionOrder(
-                                stateProvider: state,
-                                paymentStatus: PaymentStatus.COMPLETED,
-                                paymentType: PaymentType.CASH,
-                              );
+                            onConfirmPressed: () async {
+                              final transactionProvider =
+                                  Provider.of<TransactionOrderProvider>(context,
+                                      listen: false);
+
+                              // //Add Transaction to Hive DB when Offline
+                              // Provider.of<TransactionOrderProvider>(context,
+                              //         listen: false)
+                              //     .addTransactionOrder(
+                              //   stateProvider: state,
+                              //   paymentStatus: PaymentStatus.COMPLETED,
+                              //   paymentType: PaymentType.CASH,
+                              // );
+
+                              // add to Firestore DB
+                              transactionProvider.addTransactionToFirestore(
+                                  stateProvider: state,
+                                  paymentStatus: PaymentStatus.COMPLETED,
+                                  paymentType: PaymentType.CASH,
+                                  shopName: shopName);
 
                               //delete Posted Order
                               if (itemList is PostedOrder) {

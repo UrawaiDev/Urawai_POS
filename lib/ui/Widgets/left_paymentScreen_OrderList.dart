@@ -24,6 +24,9 @@ class PaymentScreenLeftOrderList extends StatefulWidget {
 class _PaymentScreenLeftOrderListState
     extends State<PaymentScreenLeftOrderList> {
   TextEditingController _textNote = TextEditingController();
+
+  static const String shopName = 'WarungMakyos';
+
   @override
   void dispose() {
     _textNote.dispose();
@@ -201,22 +204,43 @@ class _PaymentScreenLeftOrderListState
                         contentString: 'Anda akan menghapus transaksi ini?',
                         confirmButtonTitle: 'Hapus',
                         onConfirmPressed: () {
-                          Provider.of<TransactionOrderProvider>(context,
-                                  listen: false)
-                              .addTransactionOrder(
-                                  stateProvider: stateProvider,
-                                  paymentStatus: PaymentStatus.VOID,
-                                  paymentType: PaymentType.CASH);
+                          final transactionProvider =
+                              Provider.of<TransactionOrderProvider>(context,
+                                  listen: false);
 
-                          stateProvider.resetOrderList();
-                          Navigator.pop(context); //close dialogBOx
+                          // Will be use when Offline only
+                          // Provider.of<TransactionOrderProvider>(context,
+                          //         listen: false)
+                          //     .addTransactionOrder(
+                          //         stateProvider: stateProvider,
+                          //         paymentStatus: PaymentStatus.VOID,
+                          //         paymentType: PaymentType.CASH);
 
-                          //back to main page
-                          Navigator.pushAndRemoveUntil(
-                            context,
-                            MaterialPageRoute(builder: (context) => POSPage()),
-                            ModalRoute.withName(POSPage.routeName),
-                          );
+                          transactionProvider.addTransactionToFirestore(
+                              stateProvider: stateProvider,
+                              paymentStatus: PaymentStatus.VOID,
+                              paymentType: PaymentType.CASH,
+                              shopName:
+                                  shopName); //TODO; will replace with dynamic shopname
+                          Navigator.pop(context); //close Hapus dialogBOx
+
+                          CostumDialogBox.showDialogInformation(
+                              context: context,
+                              icon: Icons.info,
+                              iconColor: Colors.blue,
+                              title: 'Informasi',
+                              contentText: 'Transaksi berhasil di Hapus.',
+                              onTap: () {
+                                //clear list
+                                stateProvider.resetOrderList();
+                                //back to main page
+                                Navigator.pushAndRemoveUntil(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (context) => POSPage()),
+                                  ModalRoute.withName(POSPage.routeName),
+                                );
+                              });
                         }),
                   ),
                 ],

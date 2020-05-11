@@ -24,6 +24,7 @@ class PaymentScreenLeftPostedOrder extends StatefulWidget {
 class _PaymentScreenLeftPostedOrderState
     extends State<PaymentScreenLeftPostedOrder> {
   TextEditingController _textNote = TextEditingController();
+  static const String shopName = 'WarungMakyos';
 
   @override
   void dispose() {
@@ -214,12 +215,24 @@ class _PaymentScreenLeftPostedOrderState
                         contentString: 'Anda akan menghapus transaksi ini?',
                         confirmButtonTitle: 'Hapus',
                         onConfirmPressed: () {
-                          Provider.of<TransactionOrderProvider>(context,
-                                  listen: false)
-                              .addTransactionOrder(
-                                  stateProvider: stateProvider,
-                                  paymentStatus: PaymentStatus.VOID,
-                                  paymentType: PaymentType.CASH);
+                          final transactionProvider =
+                              Provider.of<TransactionOrderProvider>(context,
+                                  listen: false);
+
+                          //Will be use when offline only
+                          // Provider.of<TransactionOrderProvider>(context,
+                          //         listen: false)
+                          //     .addTransactionOrder(
+                          //         stateProvider: stateProvider,
+                          //         paymentStatus: PaymentStatus.VOID,
+                          //         paymentType: PaymentType.CASH);
+
+                          transactionProvider.addTransactionToFirestore(
+                            stateProvider: stateProvider,
+                            paymentStatus: PaymentStatus.VOID,
+                            paymentType: PaymentType.CASH,
+                            shopName: shopName,
+                          );
 
                           stateProvider
                               .deletePostedOrder(stateProvider.postedOrder.id);

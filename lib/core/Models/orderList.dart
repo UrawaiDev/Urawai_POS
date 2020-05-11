@@ -23,6 +23,8 @@ class OrderList {
   @HiveField(8)
   int discount;
 
+  //TODO: delete column cashier Name , Reference Order , dateTime
+
   OrderList({
     this.id,
     this.productName,
@@ -34,4 +36,31 @@ class OrderList {
     this.cashierName,
     this.discount,
   });
+
+  OrderList.fromJson(Map<String, dynamic> json) {
+    id = json['id'];
+    productName = json['productName'];
+    price = json['price'];
+    quantity = json['quantity'];
+    note = json['note'];
+    // dateTime = json['dateTime'];
+    // referenceOrder = json['referenceOrder'];
+    // cashierName = json['cashierName'];
+    // discount = json['discount'];
+  }
+
+  Map<String, dynamic> toJson() {
+    final Map<String, dynamic> data = Map<String, dynamic>();
+    data['id'] = this.id;
+    data['productName'] = this.productName;
+    data['price'] = this.price;
+    data['quantity'] = this.quantity;
+    data['note'] = this.note;
+    // data['dateTime'] = this.dateTime;
+    // data['referenceOrder'] = this.referenceOrder;
+    // data['cashierName'] = this.cashierName;
+    // data['discount'] = this.discount;
+
+    return data;
+  }
 }

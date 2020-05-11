@@ -21,6 +21,22 @@ class OrderListProvider with ChangeNotifier {
 
   double _extraDiscount = 0;
 
+  // OrderListProvider.fromJson(Map<String, dynamic> json) {
+  //   if (json['orderlist'] != null) {
+  //     orderlist = new List<OrderList>();
+  //     json['orderlist'].forEach((v) {
+  //       orderlist.add(new OrderList.fromJson(v));
+  //     });
+  //   }
+  // }
+
+  Map<String, dynamic> toJson() {
+    final Map<String, dynamic> data = Map<String, dynamic>();
+    if (this.orderlist != null)
+      data['orderlist'] = this.orderlist.map((d) => d.toJson()).toList();
+    return data;
+  }
+
   String get orderID => _orderID;
   set orderID(String newValue) {
     _orderID = newValue;
