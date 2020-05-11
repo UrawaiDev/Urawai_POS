@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:connectivity/connectivity.dart';
 import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
 import 'package:provider/provider.dart';
@@ -8,6 +9,8 @@ import 'package:urawai_pos/core/Provider/general_provider.dart';
 import 'package:urawai_pos/core/Provider/orderList_provider.dart';
 import 'package:urawai_pos/core/Provider/postedOrder_provider.dart';
 import 'package:urawai_pos/core/Provider/transactionOrder_provider.dart';
+import 'package:urawai_pos/core/Services/connectivity_service.dart';
+import 'package:urawai_pos/core/enums/connectivity_status.dart';
 import 'package:urawai_pos/ui/Pages/payment_success/payment_success.dart';
 import 'package:urawai_pos/ui/Pages/pos/pos_Page.dart';
 import 'package:urawai_pos/ui/Widgets/costum_DialogBox.dart';
@@ -36,102 +39,131 @@ class PaymentScreen extends StatelessWidget {
         child: SafeArea(
           child: Scaffold(
             resizeToAvoidBottomPadding: false,
-            body: Container(
-              child: Row(
-                children: <Widget>[
-                  //LEFT SIDE
-                  (itemList is PostedOrder)
-                      ? PaymentScreenLeftPostedOrder(itemList)
-                      : PaymentScreenLeftOrderList(itemList),
+            body: Provider<ConnectivityService>(
+              create: (context) => ConnectivityService(),
+              child: StreamProvider<ConnectivityResult>.value(
+                value: ConnectivityService().networkStatusController.stream,
+                child: Container(
+                  child: Row(
+                    children: <Widget>[
+                      //LEFT SIDE
+                      (itemList is PostedOrder)
+                          ? PaymentScreenLeftPostedOrder(itemList)
+                          : PaymentScreenLeftOrderList(itemList),
 
-                  //RIGHT SIDE
-                  Expanded(
-                      flex: 2,
-                      child: Container(
-                          // color: Colors.blue,
-                          child: Padding(
-                        padding: const EdgeInsets.fromLTRB(20, 10, 20, 20),
-                        child: Column(
-                          children: <Widget>[
-                            Expanded(
-                                flex: 2,
-                                child: Container(
-                                  child: ListView.builder(
-                                    scrollDirection: Axis.horizontal,
-                                    itemCount: PaymentType.values.length,
-                                    itemBuilder: (context, index) {
-                                      return Padding(
-                                        padding: const EdgeInsets.all(8.0),
-                                        child: Consumer<GeneralProvider>(
-                                          builder: (context, state, _) =>
-                                              GestureDetector(
-                                            child: AnimatedContainer(
-                                              duration:
-                                                  Duration(milliseconds: 700),
-                                              curve: Curves.easeIn,
-                                              alignment: Alignment.center,
-                                              width: 200,
-                                              decoration: BoxDecoration(
-                                                  color: index ==
-                                                          state
-                                                              .paymentType.index
-                                                      ? kSelectedColor
-                                                      : Colors.grey[200],
-                                                  borderRadius:
-                                                      BorderRadius.circular(
-                                                          10)),
-                                              margin: EdgeInsets.symmetric(
-                                                  vertical: 10),
-                                              child: Column(
-                                                mainAxisAlignment:
-                                                    MainAxisAlignment.center,
-                                                children: <Widget>[
-                                                  Icon(
-                                                      PaymentHelper
-                                                          .getPaymentTypeIcon(
-                                                              PaymentType
-                                                                      .values[
-                                                                  index]),
-                                                      size: 35),
-                                                  SizedBox(height: 10),
-                                                  Text(
-                                                    PaymentHelper
-                                                        .getPaymentType(
-                                                            PaymentType
-                                                                .values[index]),
-                                                    style: kPriceTextStyle,
+                      //RIGHT SIDE
+                      Expanded(
+                          flex: 2,
+                          child: Container(
+                              // color: Colors.blue,
+                              child: Padding(
+                            padding: const EdgeInsets.fromLTRB(20, 10, 20, 20),
+                            child: Column(
+                              children: <Widget>[
+                                Container(
+                                  alignment: Alignment.centerRight,
+                                  child: Consumer<ConnectivityResult>(
+                                    builder: (context, value, _) => Row(
+                                      mainAxisAlignment: MainAxisAlignment.end,
+                                      children: <Widget>[
+                                        Text('Connection Status:',
+                                            style: kPriceTextStyle),
+                                        SizedBox(width: 10),
+                                        CircleAvatar(
+                                          maxRadius: 8,
+                                          backgroundColor:
+                                              value == ConnectivityResult.none
+                                                  ? Colors.red
+                                                  : Colors.green,
+                                        )
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                                Expanded(
+                                    flex: 2,
+                                    child: Container(
+                                      child: ListView.builder(
+                                        scrollDirection: Axis.horizontal,
+                                        itemCount: PaymentType.values.length,
+                                        itemBuilder: (context, index) {
+                                          return Padding(
+                                            padding: const EdgeInsets.all(8.0),
+                                            child: Consumer<GeneralProvider>(
+                                              builder: (context, state, _) =>
+                                                  GestureDetector(
+                                                child: AnimatedContainer(
+                                                  duration: Duration(
+                                                      milliseconds: 700),
+                                                  curve: Curves.easeIn,
+                                                  alignment: Alignment.center,
+                                                  width: 200,
+                                                  decoration: BoxDecoration(
+                                                      color: index ==
+                                                              state.paymentType
+                                                                  .index
+                                                          ? kSelectedColor
+                                                          : Colors.grey[200],
+                                                      borderRadius:
+                                                          BorderRadius.circular(
+                                                              10)),
+                                                  margin: EdgeInsets.symmetric(
+                                                      vertical: 10),
+                                                  child: Column(
+                                                    mainAxisAlignment:
+                                                        MainAxisAlignment
+                                                            .center,
+                                                    children: <Widget>[
+                                                      Icon(
+                                                          PaymentHelper
+                                                              .getPaymentTypeIcon(
+                                                                  PaymentType
+                                                                          .values[
+                                                                      index]),
+                                                          size: 35),
+                                                      SizedBox(height: 10),
+                                                      Text(
+                                                        PaymentHelper
+                                                            .getPaymentType(
+                                                                PaymentType
+                                                                        .values[
+                                                                    index]),
+                                                        style: kPriceTextStyle,
+                                                      ),
+                                                    ],
                                                   ),
-                                                ],
+                                                ),
+                                                onTap: () {
+                                                  state.paymentType =
+                                                      PaymentType.values[index];
+                                                },
                                               ),
                                             ),
-                                            onTap: () {
-                                              state.paymentType =
-                                                  PaymentType.values[index];
-                                            },
-                                          ),
-                                        ),
-                                      );
-                                    },
+                                          );
+                                        },
+                                      ),
+                                    )),
+                                SizedBox(height: 20),
+                                Expanded(
+                                  flex: 7,
+                                  child: Container(
+                                    decoration: BoxDecoration(
+                                      border: Border.all(
+                                        color: Colors.blue,
+                                        width: 2,
+                                      ),
+                                      color: Color(0xFFf5f6f7),
+                                    ),
+                                    child: _paymentMethod(
+                                        generalState.paymentType),
                                   ),
-                                )),
-                            SizedBox(height: 20),
-                            Expanded(
-                              flex: 7,
-                              child: Container(
-                                decoration: BoxDecoration(
-                                  border: Border.all(
-                                    color: Colors.blue,
-                                    width: 2,
-                                  ),
-                                  color: Color(0xFFf5f6f7),
                                 ),
-                                child: _paymentMethod(generalState.paymentType),
-                              ),
+                              ],
                             ),
-                          ],
-                        ),
-                      ))),
-                ],
+                          ))),
+                    ],
+                  ),
+                ),
               ),
             ),
           ),
@@ -218,26 +250,27 @@ class PaymentScreen extends StatelessWidget {
                     final transactionProvider =
                         Provider.of<TransactionOrderProvider>(context,
                             listen: false);
+                    final connectionStatus =
+                        Provider.of<ConnectivityResult>(context, listen: false);
 
-                    //TODO:When offline use these codes.
-                    // //Add Transaction to HIVE DB when offline
-                    // Provider.of<TransactionOrderProvider>(context,
-                    //         listen: false)
-                    //     .addTransactionOrder(
-                    //   stateProvider: state,
-                    //   paymentStatus: PaymentStatus.COMPLETED,
-                    //   paymentType: generalProvider.paymentType,
-                    // );
-
-                    // Add Transaction to Firestore
-                    transactionProvider.addTransactionToFirestore(
-                      stateProvider: state,
-                      paymentStatus: PaymentStatus.COMPLETED,
-                      paymentType: generalProvider.paymentType,
-                      shopName: shopName,
-                    );
-
-                    // TODO: will check if posted on not into FireStore
+                    if (connectionStatus == ConnectivityResult.none) {
+                      //Add Transaction to HIVE DB when offline
+                      Provider.of<TransactionOrderProvider>(context,
+                              listen: false)
+                          .addTransactionOrder(
+                        stateProvider: state,
+                        paymentStatus: PaymentStatus.COMPLETED,
+                        paymentType: generalProvider.paymentType,
+                      );
+                    } else {
+                      // Add Transaction to Firestore When Online
+                      transactionProvider.addTransactionToFirestore(
+                        stateProvider: state,
+                        paymentStatus: PaymentStatus.COMPLETED,
+                        paymentType: generalProvider.paymentType,
+                        shopName: shopName,
+                      );
+                    }
 
                     //delete Posted Order
                     if (itemList is PostedOrder) {
@@ -544,22 +577,26 @@ class PaymentScreen extends StatelessWidget {
                               final transactionProvider =
                                   Provider.of<TransactionOrderProvider>(context,
                                       listen: false);
-
-                              // //Add Transaction to Hive DB when Offline
-                              // Provider.of<TransactionOrderProvider>(context,
-                              //         listen: false)
-                              //     .addTransactionOrder(
-                              //   stateProvider: state,
-                              //   paymentStatus: PaymentStatus.COMPLETED,
-                              //   paymentType: PaymentType.CASH,
-                              // );
-
-                              // add to Firestore DB
-                              transactionProvider.addTransactionToFirestore(
+                              final connectionStatus =
+                                  Provider.of<ConnectivityResult>(context,
+                                      listen: false);
+                              if (connectionStatus == ConnectivityResult.none) {
+                                //Add Transaction to Hive DB when Offline
+                                Provider.of<TransactionOrderProvider>(context,
+                                        listen: false)
+                                    .addTransactionOrder(
                                   stateProvider: state,
                                   paymentStatus: PaymentStatus.COMPLETED,
                                   paymentType: PaymentType.CASH,
-                                  shopName: shopName);
+                                );
+                              } else {
+                                // add to Firestore DB when Online
+                                transactionProvider.addTransactionToFirestore(
+                                    stateProvider: state,
+                                    paymentStatus: PaymentStatus.COMPLETED,
+                                    paymentType: PaymentType.CASH,
+                                    shopName: shopName);
+                              }
 
                               //delete Posted Order
                               if (itemList is PostedOrder) {

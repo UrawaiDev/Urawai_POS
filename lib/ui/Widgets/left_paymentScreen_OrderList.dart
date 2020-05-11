@@ -1,3 +1,4 @@
+import 'package:connectivity/connectivity.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:urawai_pos/core/Models/orderList.dart';
@@ -207,21 +208,28 @@ class _PaymentScreenLeftOrderListState
                           final transactionProvider =
                               Provider.of<TransactionOrderProvider>(context,
                                   listen: false);
+                          final connectionStatus =
+                              Provider.of<ConnectivityResult>(context,
+                                  listen: false);
+                          if (connectionStatus == ConnectivityResult.none) {
+                            // Add to HIVE db When Offline
+                            Provider.of<TransactionOrderProvider>(context,
+                                    listen: false)
+                                .addTransactionOrder(
+                                    stateProvider: stateProvider,
+                                    paymentStatus: PaymentStatus.VOID,
+                                    paymentType: PaymentType.CASH);
+                          } else {
+                            //Add to cloud FireStore when Online
+                            transactionProvider.addTransactionToFirestore(
+                                stateProvider: stateProvider,
+                                paymentStatus: PaymentStatus.VOID,
+                                paymentType: PaymentType.CASH,
+                                shopName:
+                                    shopName); //TODO; will replace with dynamic shopname
 
-                          // Will be use when Offline only
-                          // Provider.of<TransactionOrderProvider>(context,
-                          //         listen: false)
-                          //     .addTransactionOrder(
-                          //         stateProvider: stateProvider,
-                          //         paymentStatus: PaymentStatus.VOID,
-                          //         paymentType: PaymentType.CASH);
+                          }
 
-                          transactionProvider.addTransactionToFirestore(
-                              stateProvider: stateProvider,
-                              paymentStatus: PaymentStatus.VOID,
-                              paymentType: PaymentType.CASH,
-                              shopName:
-                                  shopName); //TODO; will replace with dynamic shopname
                           Navigator.pop(context); //close Hapus dialogBOx
 
                           CostumDialogBox.showDialogInformation(

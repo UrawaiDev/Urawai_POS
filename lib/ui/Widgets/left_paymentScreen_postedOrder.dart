@@ -1,3 +1,4 @@
+import 'package:connectivity/connectivity.dart';
 import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
 import 'package:provider/provider.dart';
@@ -218,21 +219,27 @@ class _PaymentScreenLeftPostedOrderState
                           final transactionProvider =
                               Provider.of<TransactionOrderProvider>(context,
                                   listen: false);
+                          final connectionStatus =
+                              Provider.of<ConnectivityResult>(context,
+                                  listen: false);
 
-                          //Will be use when offline only
-                          // Provider.of<TransactionOrderProvider>(context,
-                          //         listen: false)
-                          //     .addTransactionOrder(
-                          //         stateProvider: stateProvider,
-                          //         paymentStatus: PaymentStatus.VOID,
-                          //         paymentType: PaymentType.CASH);
-
-                          transactionProvider.addTransactionToFirestore(
-                            stateProvider: stateProvider,
-                            paymentStatus: PaymentStatus.VOID,
-                            paymentType: PaymentType.CASH,
-                            shopName: shopName,
-                          );
+                          if (connectionStatus == ConnectivityResult.none) {
+                            // add to HIVE db When Offline
+                            Provider.of<TransactionOrderProvider>(context,
+                                    listen: false)
+                                .addTransactionOrder(
+                                    stateProvider: stateProvider,
+                                    paymentStatus: PaymentStatus.VOID,
+                                    paymentType: PaymentType.CASH);
+                          } else {
+                            //Add to cloud FireStore when Online
+                            transactionProvider.addTransactionToFirestore(
+                              stateProvider: stateProvider,
+                              paymentStatus: PaymentStatus.VOID,
+                              paymentType: PaymentType.CASH,
+                              shopName: shopName,
+                            );
+                          }
 
                           stateProvider
                               .deletePostedOrder(stateProvider.postedOrder.id);
