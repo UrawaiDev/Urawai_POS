@@ -1,4 +1,5 @@
 import 'package:hive/hive.dart';
+import '../Models/orderList.dart';
 
 part 'transaction.g.dart';
 
@@ -44,6 +45,27 @@ class TransactionOrder {
     this.change,
     this.tender,
   });
+
+  TransactionOrder.fromJson(Map<String, dynamic> json) {
+    id = json['id'];
+    cashierName = json['cashierName'];
+    referenceOrder = json['referenceOrder'];
+    date = json['orderDate'];
+    grandTotal = json['grandTotal'];
+    paymentType = json['paymentType'];
+    paymentStatus = json['paymentStatus'];
+    if (json['orderlist'] != null) {
+      itemList = new List<OrderList>();
+      json['orderlist'].forEach((v) {
+        itemList.add(new OrderList.fromJson(v));
+      });
+    }
+
+    discount = json['discount'];
+    subtotal = json['subtotal'];
+    change = json['change'];
+    tender = json['tender'];
+  }
 }
 
 @HiveType(typeId: 4)

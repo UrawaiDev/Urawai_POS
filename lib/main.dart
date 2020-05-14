@@ -1,3 +1,4 @@
+import 'package:connectivity/connectivity.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:hive/hive.dart';
@@ -10,6 +11,7 @@ import 'package:urawai_pos/core/Provider/general_provider.dart';
 import 'package:urawai_pos/core/Provider/orderList_provider.dart';
 import 'package:urawai_pos/core/Provider/postedOrder_provider.dart';
 import 'package:urawai_pos/core/Provider/transactionOrder_provider.dart';
+import 'package:urawai_pos/core/Services/connectivity_service.dart';
 import 'package:urawai_pos/ui/utils/functions/routeGenerator.dart';
 
 import 'core/Models/transaction.dart';
@@ -46,6 +48,11 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider(create: (context) => GeneralProvider()),
         ChangeNotifierProvider(create: (context) => PostedOrderProvider()),
         ChangeNotifierProvider(create: (context) => TransactionOrderProvider()),
+
+        //not sure if this the best Practice
+        StreamProvider<ConnectivityResult>(
+            create: (context) =>
+                ConnectivityService().networkStatusController.stream),
       ],
       child: MaterialApp(
         debugShowCheckedModeBanner: false,

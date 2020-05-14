@@ -43,10 +43,10 @@ class OrderList {
     price = json['price'];
     quantity = json['quantity'];
     note = json['note'];
-    // dateTime = json['dateTime'];
-    // referenceOrder = json['referenceOrder'];
-    // cashierName = json['cashierName'];
-    // discount = json['discount'];
+    dateTime = json['dateTime'];
+    referenceOrder = json['referenceOrder'];
+    cashierName = json['cashierName'];
+    discount = json['discount'];
   }
 
   Map<String, dynamic> toJson() {

@@ -21,6 +21,25 @@ class PaymentHelper {
     }
   }
 
+  static String getPaymentTypeAsString(String paymentType) {
+    switch (paymentType) {
+      case 'PaymentType.CASH':
+        return 'Tunai';
+        break;
+      case 'PaymentType.CREDIT_CARD':
+        return 'Kartu Kredit';
+        break;
+      case 'PaymentType.DEBIT_CARD':
+        return 'Kartu Debit';
+        break;
+      case 'PaymentType.EMONEY':
+        return 'eMoney';
+        break;
+      default:
+        return '-';
+    }
+  }
+
   static IconData getPaymentTypeIcon(PaymentType paymentType) {
     switch (paymentType) {
       case PaymentType.CASH:
@@ -49,6 +68,22 @@ class PaymentHelper {
         return 'Belum Lunas';
         break;
       case PaymentStatus.VOID:
+        return 'Batal';
+        break;
+      default:
+        return '-';
+    }
+  }
+
+  static String getPaymentStatusAsString(String paymentStatus) {
+    switch (paymentStatus) {
+      case 'PaymentStatus.COMPLETED':
+        return 'Lunas';
+        break;
+      case 'PaymentStatus.PENDING':
+        return 'Belum Lunas';
+        break;
+      case 'PaymentStatus.VOID':
         return 'Batal';
         break;
       default:

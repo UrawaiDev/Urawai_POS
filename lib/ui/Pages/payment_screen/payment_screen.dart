@@ -1,4 +1,3 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:connectivity/connectivity.dart';
 import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
@@ -10,9 +9,9 @@ import 'package:urawai_pos/core/Provider/orderList_provider.dart';
 import 'package:urawai_pos/core/Provider/postedOrder_provider.dart';
 import 'package:urawai_pos/core/Provider/transactionOrder_provider.dart';
 import 'package:urawai_pos/core/Services/connectivity_service.dart';
-import 'package:urawai_pos/core/enums/connectivity_status.dart';
 import 'package:urawai_pos/ui/Pages/payment_success/payment_success.dart';
 import 'package:urawai_pos/ui/Pages/pos/pos_Page.dart';
+import 'package:urawai_pos/ui/Widgets/connection_status.dart';
 import 'package:urawai_pos/ui/Widgets/costum_DialogBox.dart';
 import 'package:urawai_pos/ui/Widgets/left_paymentScreen_OrderList.dart';
 import 'package:urawai_pos/ui/Widgets/left_paymentScreen_postedOrder.dart';
@@ -20,14 +19,29 @@ import 'package:urawai_pos/ui/utils/constans/formatter.dart';
 import 'package:urawai_pos/ui/utils/constans/utils.dart';
 import 'package:urawai_pos/ui/utils/functions/paymentHelpers.dart';
 
-class PaymentScreen extends StatelessWidget {
+class PaymentScreen extends StatefulWidget {
   final dynamic itemList;
   static const String postedOrderBox = "Posted_Order";
   static const String routeName = "PaymentScreen";
 
   PaymentScreen(this.itemList);
 
+  @override
+  _PaymentScreenState createState() => _PaymentScreenState();
+}
+
+class _PaymentScreenState extends State<PaymentScreen> {
   final String shopName = 'WarungMakyos';
+
+  @override
+  void dispose() {
+    super.dispose();
+  }
+
+  @override
+  void initState() {
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -39,130 +53,108 @@ class PaymentScreen extends StatelessWidget {
         child: SafeArea(
           child: Scaffold(
             resizeToAvoidBottomPadding: false,
-            body: Provider<ConnectivityService>(
-              create: (context) => ConnectivityService(),
-              child: StreamProvider<ConnectivityResult>.value(
-                value: ConnectivityService().networkStatusController.stream,
-                child: Container(
-                  child: Row(
-                    children: <Widget>[
-                      //LEFT SIDE
-                      (itemList is PostedOrder)
-                          ? PaymentScreenLeftPostedOrder(itemList)
-                          : PaymentScreenLeftOrderList(itemList),
+            body: StreamProvider<ConnectivityResult>(
+              create: (builder) =>
+                  ConnectivityService().networkStatusController.stream,
+              child: Container(
+                child: Row(
+                  children: <Widget>[
+                    //LEFT SIDE
+                    (widget.itemList is PostedOrder)
+                        ? PaymentScreenLeftPostedOrder(widget.itemList)
+                        : PaymentScreenLeftOrderList(widget.itemList),
 
-                      //RIGHT SIDE
-                      Expanded(
-                          flex: 2,
-                          child: Container(
-                              // color: Colors.blue,
-                              child: Padding(
-                            padding: const EdgeInsets.fromLTRB(20, 10, 20, 20),
-                            child: Column(
-                              children: <Widget>[
-                                Container(
-                                  alignment: Alignment.centerRight,
-                                  child: Consumer<ConnectivityResult>(
-                                    builder: (context, value, _) => Row(
-                                      mainAxisAlignment: MainAxisAlignment.end,
-                                      children: <Widget>[
-                                        Text('Connection Status:',
-                                            style: kPriceTextStyle),
-                                        SizedBox(width: 10),
-                                        CircleAvatar(
-                                          maxRadius: 8,
-                                          backgroundColor:
-                                              value == ConnectivityResult.none
-                                                  ? Colors.red
-                                                  : Colors.green,
-                                        )
-                                      ],
-                                    ),
-                                  ),
-                                ),
-                                Expanded(
-                                    flex: 2,
-                                    child: Container(
-                                      child: ListView.builder(
-                                        scrollDirection: Axis.horizontal,
-                                        itemCount: PaymentType.values.length,
-                                        itemBuilder: (context, index) {
-                                          return Padding(
-                                            padding: const EdgeInsets.all(8.0),
-                                            child: Consumer<GeneralProvider>(
-                                              builder: (context, state, _) =>
-                                                  GestureDetector(
-                                                child: AnimatedContainer(
-                                                  duration: Duration(
-                                                      milliseconds: 700),
-                                                  curve: Curves.easeIn,
-                                                  alignment: Alignment.center,
-                                                  width: 200,
-                                                  decoration: BoxDecoration(
-                                                      color: index ==
-                                                              state.paymentType
-                                                                  .index
-                                                          ? kSelectedColor
-                                                          : Colors.grey[200],
-                                                      borderRadius:
-                                                          BorderRadius.circular(
-                                                              10)),
-                                                  margin: EdgeInsets.symmetric(
-                                                      vertical: 10),
-                                                  child: Column(
-                                                    mainAxisAlignment:
-                                                        MainAxisAlignment
-                                                            .center,
-                                                    children: <Widget>[
-                                                      Icon(
-                                                          PaymentHelper
-                                                              .getPaymentTypeIcon(
-                                                                  PaymentType
-                                                                          .values[
-                                                                      index]),
-                                                          size: 35),
-                                                      SizedBox(height: 10),
-                                                      Text(
+                    //RIGHT SIDE
+                    Expanded(
+                        flex: 2,
+                        child: Container(
+                            // color: Colors.blue,
+                            child: Padding(
+                          padding: const EdgeInsets.fromLTRB(20, 10, 20, 20),
+                          child: Column(
+                            children: <Widget>[
+                              ConnectionStatusWidget(),
+                              Expanded(
+                                  flex: 2,
+                                  child: Container(
+                                    child: ListView.builder(
+                                      scrollDirection: Axis.horizontal,
+                                      itemCount: PaymentType.values.length,
+                                      itemBuilder: (context, index) {
+                                        return Padding(
+                                          padding: const EdgeInsets.all(8.0),
+                                          child: Consumer<GeneralProvider>(
+                                            builder: (context, state, _) =>
+                                                GestureDetector(
+                                              child: AnimatedContainer(
+                                                duration:
+                                                    Duration(milliseconds: 700),
+                                                curve: Curves.easeIn,
+                                                alignment: Alignment.center,
+                                                width: 200,
+                                                decoration: BoxDecoration(
+                                                    color: index ==
+                                                            state.paymentType
+                                                                .index
+                                                        ? kSelectedColor
+                                                        : Colors.grey[200],
+                                                    borderRadius:
+                                                        BorderRadius.circular(
+                                                            10)),
+                                                margin: EdgeInsets.symmetric(
+                                                    vertical: 10),
+                                                child: Column(
+                                                  mainAxisAlignment:
+                                                      MainAxisAlignment.center,
+                                                  children: <Widget>[
+                                                    Icon(
                                                         PaymentHelper
-                                                            .getPaymentType(
+                                                            .getPaymentTypeIcon(
                                                                 PaymentType
                                                                         .values[
                                                                     index]),
-                                                        style: kPriceTextStyle,
-                                                      ),
-                                                    ],
-                                                  ),
+                                                        size: 35),
+                                                    SizedBox(height: 10),
+                                                    Text(
+                                                      PaymentHelper
+                                                          .getPaymentType(
+                                                              PaymentType
+                                                                      .values[
+                                                                  index]),
+                                                      style: kPriceTextStyle,
+                                                    ),
+                                                  ],
                                                 ),
-                                                onTap: () {
-                                                  state.paymentType =
-                                                      PaymentType.values[index];
-                                                },
                                               ),
+                                              onTap: () {
+                                                state.paymentType =
+                                                    PaymentType.values[index];
+                                              },
                                             ),
-                                          );
-                                        },
-                                      ),
-                                    )),
-                                SizedBox(height: 20),
-                                Expanded(
-                                  flex: 7,
-                                  child: Container(
-                                    decoration: BoxDecoration(
-                                      border: Border.all(
-                                        color: Colors.blue,
-                                        width: 2,
-                                      ),
-                                      color: Color(0xFFf5f6f7),
+                                          ),
+                                        );
+                                      },
                                     ),
-                                    child: _paymentMethod(
-                                        generalState.paymentType),
+                                  )),
+                              SizedBox(height: 20),
+                              Expanded(
+                                flex: 7,
+                                child: Container(
+                                  decoration: BoxDecoration(
+                                    border: Border.all(
+                                      color: Colors.blue,
+                                      width: 2,
+                                    ),
+                                    color: Color(0xFFf5f6f7),
                                   ),
+                                  child:
+                                      _paymentMethod(generalState.paymentType),
                                 ),
-                              ],
-                            ),
-                          ))),
-                    ],
-                  ),
+                              ),
+                            ],
+                          ),
+                        ))),
+                  ],
                 ),
               ),
             ),
@@ -183,7 +175,7 @@ class PaymentScreen extends StatelessWidget {
     return Consumer2<PostedOrderProvider, OrderListProvider>(
         builder: (context, statePostedOrder, stateOrderList, _) {
       var state;
-      if (itemList is PostedOrder)
+      if (widget.itemList is PostedOrder)
         state = statePostedOrder;
       else
         state = stateOrderList;
@@ -273,7 +265,7 @@ class PaymentScreen extends StatelessWidget {
                     }
 
                     //delete Posted Order
-                    if (itemList is PostedOrder) {
+                    if (widget.itemList is PostedOrder) {
                       Hive.box<PostedOrder>(POSPage.postedBoxName)
                           .delete(state.postedOrder.id);
                     }
@@ -293,7 +285,7 @@ class PaymentScreen extends StatelessWidget {
     return Consumer2<PostedOrderProvider, OrderListProvider>(
         builder: (context, statePostedOrder, stateOrderList, _) {
       var state;
-      if (itemList is PostedOrder)
+      if (widget.itemList is PostedOrder)
         state = statePostedOrder;
       else
         state = stateOrderList;
@@ -419,7 +411,7 @@ class PaymentScreen extends StatelessWidget {
           Consumer2<PostedOrderProvider, OrderListProvider>(
               builder: (context, statePostedOrder, stateOrderList, _) {
             var state;
-            if (itemList is PostedOrder)
+            if (widget.itemList is PostedOrder)
               state = statePostedOrder;
             else
               state = stateOrderList;
@@ -515,7 +507,7 @@ class PaymentScreen extends StatelessWidget {
           Consumer2<PostedOrderProvider, OrderListProvider>(
               builder: (context, statePostedOrder, stateOrderList, _) {
             var state;
-            if (itemList is PostedOrder)
+            if (widget.itemList is PostedOrder)
               state = statePostedOrder;
             else
               state = stateOrderList;
@@ -599,7 +591,7 @@ class PaymentScreen extends StatelessWidget {
                               }
 
                               //delete Posted Order
-                              if (itemList is PostedOrder) {
+                              if (widget.itemList is PostedOrder) {
                                 Hive.box<PostedOrder>(POSPage.postedBoxName)
                                     .delete(state.postedOrder.id);
                               }

@@ -1,3 +1,6 @@
+import 'dart:async';
+
+import 'package:connectivity/connectivity.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:hive/hive.dart';
@@ -8,10 +11,10 @@ import 'package:urawai_pos/core/Models/products.dart';
 import 'package:urawai_pos/core/Provider/general_provider.dart';
 import 'package:urawai_pos/core/Provider/orderList_provider.dart';
 import 'package:urawai_pos/core/Provider/postedOrder_provider.dart';
+import 'package:urawai_pos/core/Services/connectivity_service.dart';
 import 'package:urawai_pos/ui/Pages/Transacation_history/transaction_history.dart';
 import 'package:urawai_pos/ui/Pages/payment_screen/payment_screen.dart';
 import 'package:urawai_pos/ui/Pages/transaction_report/transaction_report.dart';
-
 import 'package:urawai_pos/ui/Widgets/costum_DialogBox.dart';
 import 'package:urawai_pos/ui/Widgets/detail_itemOrder.dart';
 import 'package:urawai_pos/ui/Widgets/extraDiscount.dart';
@@ -188,6 +191,9 @@ class _POSPageState extends State<POSPage> with SingleTickerProviderStateMixin {
                       child: Column(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: <Widget>[
+                            Consumer<ConnectivityResult>(
+                                builder: (context, value, _) =>
+                                    Text('$value' ?? '[null]')),
                             Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: <Widget>[_headerOrderList()],
