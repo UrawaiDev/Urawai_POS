@@ -29,6 +29,7 @@ dependencies:
   provider: ^4.0.4
   cloud_firestore: ^0.13.5
   connectivity: ^0.4.8+5
+  date_range_picker: ^1.0.5
 
 dev_dependencies:
   flutter_test:

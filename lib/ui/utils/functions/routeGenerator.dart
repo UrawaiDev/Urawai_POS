@@ -26,8 +26,7 @@ class RouteGenerator {
         break;
       case PaymentSuccess.routeName:
         return MaterialPageRoute(builder: (context) {
-          var generalProvider =
-              Provider.of<GeneralProvider>(context, listen: false);
+          var generalProvider = Provider.of<GeneralProvider>(context);
 
           if (args is PostedOrderProvider) {
             return PaymentSuccess(

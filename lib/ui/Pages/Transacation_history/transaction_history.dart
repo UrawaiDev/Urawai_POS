@@ -17,6 +17,7 @@ import 'package:urawai_pos/ui/utils/constans/const.dart';
 import 'package:urawai_pos/ui/utils/constans/formatter.dart';
 import 'package:urawai_pos/ui/utils/constans/utils.dart';
 import 'package:urawai_pos/ui/utils/functions/paymentHelpers.dart';
+import 'package:date_range_picker/date_range_picker.dart' as dateRangePicker;
 
 class TransactionHistoryPage extends StatelessWidget {
   static const String routeName = '/transactionHistory';
@@ -25,7 +26,8 @@ class TransactionHistoryPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     var box = Hive.box<TransactionOrder>(POSPage.transactionBoxName);
-    int _transactionLength;
+    final generalProvider =
+        Provider.of<GeneralProvider>(context, listen: false);
 
     return SafeArea(
         child: Scaffold(
@@ -66,6 +68,28 @@ class TransactionHistoryPage extends StatelessWidget {
                                   style: kProductNameSmallScreenTextStyle),
                               Row(
                                 children: <Widget>[
+                                  Consumer<GeneralProvider>(
+                                      builder: (_, value, __) {
+                                    String text;
+                                    if (value.selectedDate == null ||
+                                        value.selectedDate.isEmpty)
+                                      text = 'Semua Transaksi';
+                                    else if (value.selectedDate.length == 1)
+                                      text = Formatter.dateFormat(
+                                          value.selectedDate[0]);
+                                    else if (value.selectedDate.length == 2)
+                                      text = Formatter.dateFormat(
+                                              value.selectedDate[0]) +
+                                          ' s/d ' +
+                                          Formatter.dateFormat(
+                                              value.selectedDate[1]);
+
+                                    return Text(
+                                      'Tanggal: $text',
+                                      style: kPriceTextStyle,
+                                    );
+                                  }),
+                                  SizedBox(width: 20),
                                   GestureDetector(
                                     child: FaIcon(
                                       FontAwesomeIcons.calendarDay,
@@ -73,16 +97,36 @@ class TransactionHistoryPage extends StatelessWidget {
                                       size: 35,
                                     ),
                                     onTap: () async {
-                                      DateTime selectedDate =
-                                          await showDatePicker(
-                                              context: context,
-                                              initialDate: DateTime.now(),
-                                              firstDate: DateTime(2020),
-                                              lastDate: DateTime(2040));
+                                      //================ [ Single Date ] ================
+                                      // DateTime selectedDate =
+                                      //     await showDatePicker(
+                                      //         context: context,
+                                      //         initialDate: DateTime.now(),
+                                      //         firstDate: DateTime(2020),
+                                      //         lastDate: DateTime(2040));
 
-                                      Provider.of<GeneralProvider>(context,
-                                              listen: false)
-                                          .selectedDate = selectedDate;
+                                      // Provider.of<GeneralProvider>(context,
+                                      //         listen: false)
+                                      //     .selectedDate = selectedDate;
+                                      //===================================================
+                                      var pickedDate =
+                                          await dateRangePicker.showDatePicker(
+                                        context: context,
+                                        initialFirstDate: DateTime.now(),
+                                        initialLastDate: DateTime.now()
+                                            .add(Duration(days: 7)),
+                                        firstDate: DateTime(2020),
+                                        lastDate: DateTime(2040),
+                                      );
+                                      if (pickedDate != null &&
+                                          pickedDate.length == 2) {
+                                        generalProvider.selectedDate =
+                                            pickedDate;
+                                      } else if (pickedDate != null &&
+                                          pickedDate.length == 1) {
+                                        generalProvider.selectedDate =
+                                            pickedDate;
+                                      }
                                     },
                                   ),
                                   SizedBox(width: 20),
@@ -92,10 +136,10 @@ class TransactionHistoryPage extends StatelessWidget {
                                       color: Colors.green,
                                       size: 35,
                                     ),
-                                    onTap: () async {
+                                    onTap: () {
                                       Provider.of<GeneralProvider>(context,
                                               listen: false)
-                                          .selectedDate = null;
+                                          .selectedDate = [];
                                     },
                                   ),
                                 ],
@@ -112,30 +156,42 @@ class TransactionHistoryPage extends StatelessWidget {
                                   style: kProductNameSmallScreenTextStyle,
                                 ),
                                 SizedBox(width: 15),
-                                StreamBuilder<QuerySnapshot>(
-                                    stream: _firestoreServices
-                                        .getDocumentLength(kShopName),
-                                    builder: (context, snapshot) {
-                                      if (snapshot.hasError)
-                                        return Text(
-                                          'An Error has Occured ${snapshot.error}',
-                                          style: kPriceTextStyle,
-                                        );
-                                      switch (snapshot.connectionState) {
-                                        case ConnectionState.waiting:
-                                          return CircularProgressIndicator();
+                                Consumer<GeneralProvider>(
+                                  builder: (_, value, __) =>
+                                      StreamBuilder<QuerySnapshot>(
+                                          stream: value.selectedDate.isEmpty
+                                              ? _firestoreServices
+                                                  .getDocumentLength(kShopName)
+                                              : _firestoreServices
+                                                  .getDocumentByDate(kShopName,
+                                                      value.selectedDate),
+                                          builder: (context, snapshot) {
+                                            if (snapshot.hasError)
+                                              return Text(
+                                                'An Error has Occured ${snapshot.error}',
+                                                style: kPriceTextStyle,
+                                              );
+                                            else if (!snapshot.hasData)
+                                              return Text(
+                                                '0',
+                                                style: kPriceTextStyle,
+                                              );
+                                            switch (snapshot.connectionState) {
+                                              case ConnectionState.waiting:
+                                                return CircularProgressIndicator();
 
-                                          break;
-                                        default:
-                                          return Text(
-                                            snapshot.data.documents.length
-                                                    .toString() ??
-                                                ['null'],
-                                            style:
-                                                kProductNameSmallScreenTextStyle,
-                                          );
-                                      }
-                                    }),
+                                                break;
+                                              default:
+                                                return Text(
+                                                  snapshot.data.documents.length
+                                                          .toString() ??
+                                                      ['null'],
+                                                  style:
+                                                      kProductNameSmallScreenTextStyle,
+                                                );
+                                            }
+                                          }),
+                                ),
                               ],
                             ),
                           ),
@@ -173,62 +229,82 @@ class TransactionHistoryPage extends StatelessWidget {
                       //           ))
                       // ==========================================================
 
-                      StreamBuilder<QuerySnapshot>(
-                        stream: _firestoreServices.getAllDocuments(kShopName),
-                        builder: (context, snapshot) {
-                          if (snapshot.hasError)
-                            return Text(
-                              'An Error has Occured ${snapshot.error}',
-                              style: kPriceTextStyle,
-                            );
-                          switch (snapshot.connectionState) {
-                            case ConnectionState.waiting:
-                              return Center(child: CircularProgressIndicator());
-                              break;
-                            default:
-                              if (snapshot.data.documents.length == 0)
+                      Consumer<GeneralProvider>(
+                        builder: (_, value, __) => StreamBuilder<QuerySnapshot>(
+                          stream: value.selectedDate.isEmpty
+                              ? _firestoreServices.getAllDocuments(kShopName)
+                              : _firestoreServices.getDocumentByDate(
+                                  kShopName, value.selectedDate),
+                          builder: (context, snapshot) {
+                            if (snapshot.hasError)
+                              return Text(
+                                'An Error has Occured ${snapshot.error}',
+                                style: kPriceTextStyle,
+                              );
+                            if (!snapshot.hasData)
+                              return Expanded(
+                                child: Container(
+                                  alignment: Alignment.center,
+                                  child: Consumer<GeneralProvider>(
+                                    builder: (_, value, __) =>
+                                        _noTransactionDataResult(
+                                            value.selectedDate),
+                                  ),
+                                ),
+                              );
+                            switch (snapshot.connectionState) {
+                              case ConnectionState.waiting:
                                 return Expanded(
-                                  child: Container(
-                                    alignment: Alignment.center,
-                                    child: Text(
-                                      'Belum Ada Transaksi',
-                                      style: kProductNameBigScreenTextStyle,
+                                  child: Center(
+                                      child: CircularProgressIndicator()),
+                                );
+                                break;
+                              default:
+                                if (snapshot.data.documents.length == 0)
+                                  return Expanded(
+                                    child: Container(
+                                      alignment: Alignment.center,
+                                      child: Consumer<GeneralProvider>(
+                                        builder: (_, value, __) =>
+                                            _noTransactionDataResult(
+                                                value.selectedDate),
+                                      ),
                                     ),
-                                  ),
-                                );
-                              else
-                                return Expanded(
-                                  // =============== [ LISTVIEW STYLE ] ===================
-                                  // child: ListView.builder(
-                                  //     itemCount: snapshot.data.documents.length,
-                                  //     itemBuilder: (context, index) {
-                                  //       var data =
-                                  //           snapshot.data.documents[index];
+                                  );
+                                else
+                                  return Expanded(
+                                    // =============== [ LISTVIEW STYLE ] ===================
+                                    // child: ListView.builder(
+                                    //     itemCount: snapshot.data.documents.length,
+                                    //     itemBuilder: (context, index) {
+                                    //       var data =
+                                    //           snapshot.data.documents[index];
 
-                                  //       return _buildCardFromFirestore(data);
-                                  //     }),
-                                  // ======================================================
-                                  child: GridView.count(
-                                    crossAxisCount: 4,
-                                    children: snapshot.data.documents
-                                        .map((data) =>
-                                            _buildCardFromFirestore(data))
-                                        .toList(),
-                                  ),
-                                );
-                            // return ListView(
-                            //   children: snapshot.data.documents
-                            //       .map((DocumentSnapshot document) {
-                            //     return ListTile(
-                            //       title: Text(document['id']),
-                            //       subtitle: Text(document['cashierName']),
-                            //       trailing:
-                            //           Text(document['grandTotal'].toString()),
-                            //     );
-                            //   }).toList(),
-                            // );
-                          }
-                        },
+                                    //       return _buildCardFromFirestore(data);
+                                    //     }),
+                                    // ======================================================
+                                    child: GridView.count(
+                                      crossAxisCount: 4,
+                                      children: snapshot.data.documents
+                                          .map((data) =>
+                                              _buildCardFromFirestore(data))
+                                          .toList(),
+                                    ),
+                                  );
+                              // return ListView(
+                              //   children: snapshot.data.documents
+                              //       .map((DocumentSnapshot document) {
+                              //     return ListTile(
+                              //       title: Text(document['id']),
+                              //       subtitle: Text(document['cashierName']),
+                              //       trailing:
+                              //           Text(document['grandTotal'].toString()),
+                              //     );
+                              //   }).toList(),
+                              // );
+                            }
+                          },
+                        ),
                       ),
                     ],
                   ),
@@ -241,37 +317,73 @@ class TransactionHistoryPage extends StatelessWidget {
     ));
   }
 
-  List<Widget> _loadTransactionList(
-      Box<TransactionOrder> box, GeneralProvider state) {
-    if (state.selectedDate == null) {
-      var result = box.values
-          .map((itemList) => _buildCardTransaction(itemList))
-          .toList();
-      return result;
-    } else {
-      var result = box.values
-          .where((item) {
-            bool result = DateFormat("dMy").format(item.date) ==
-                DateFormat("dMy").format(state.selectedDate);
-            return result;
-          })
-          .map((itemList) => _buildCardTransaction(itemList))
-          .toList();
-
-      // if (result.length == 0) {
-      //   return [
-      //     Container(
-      //       alignment: Alignment.center,
-      //       child: Text("Belum Anda Transasksi",
-      //           style: kProductNameBigScreenTextStyle),
-      //     )
-      //   ];
-      // } else
-      //   return result;
-
-      return result;
-    }
+  Widget _noTransactionDataResult(List<DateTime> selectedData) {
+    if (selectedData.length == 1)
+      return Text(
+        'Tidak Ada Data pada Tanggal ${Formatter.dateFormat(selectedData[0])}',
+        style: kProductNameBigScreenTextStyle,
+      );
+    else if (selectedData.length == 2)
+      return Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: <Widget>[
+          Text(
+            'Tidak Ada Data pada Tanggal ',
+            style: kProductNameBigScreenTextStyle,
+          ),
+          SizedBox(height: 20),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: <Widget>[
+              Text(
+                '${Formatter.dateFormat(selectedData[0])} S/D ',
+                style: kProductNameBigScreenTextStyle,
+              ),
+              Text(
+                '${Formatter.dateFormat(selectedData[1])}',
+                style: kProductNameBigScreenTextStyle,
+              ),
+            ],
+          )
+        ],
+      );
+    return Text(
+      'Ada Error',
+      style: kProductNameBigScreenTextStyle,
+    );
   }
+
+  // List<Widget> _loadTransactionList(
+  //     Box<TransactionOrder> box, GeneralProvider state) {
+  //   if (state.selectedDate == null) {
+  //     var result = box.values
+  //         .map((itemList) => _buildCardTransaction(itemList))
+  //         .toList();
+  //     return result;
+  //   } else {
+  //     var result = box.values
+  //         .where((item) {
+  //           bool result = DateFormat("dMy").format(item.date) ==
+  //               DateFormat("dMy").format(state.selectedDate);
+  //           return result;
+  //         })
+  //         .map((itemList) => _buildCardTransaction(itemList))
+  //         .toList();
+
+  //     // if (result.length == 0) {
+  //     //   return [
+  //     //     Container(
+  //     //       alignment: Alignment.center,
+  //     //       child: Text("Belum Anda Transasksi",
+  //     //           style: kProductNameBigScreenTextStyle),
+  //     //     )
+  //     //   ];
+  //     // } else
+  //     //   return result;
+
+  //     return result;
+  //   }
+  // }
 
   Container _buildCardTransaction(TransactionOrder item) {
     return Container(

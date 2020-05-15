@@ -1,3 +1,5 @@
+import 'dart:ffi';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
@@ -298,8 +300,9 @@ class DetailTransactionPage extends StatelessWidget {
                               ),
                               Text(
                                 data['paymentType'] == 'PaymentType.CASH'
-                                    ? Formatter.currencyFormat(data['change'])
-                                    : Formatter.currencyFormat(0),
+                                    ? Formatter.currencyFormat(
+                                        data['change'].toDouble())
+                                    : 'Rp. 0',
                                 style: kPriceTextStyle,
                               ),
                             ],

@@ -3,7 +3,7 @@ import 'package:urawai_pos/core/Models/transaction.dart';
 
 class GeneralProvider with ChangeNotifier {
   bool _isDrawerShow = true;
-  DateTime _selectedDate;
+  List<DateTime> _selectedDate = List<DateTime>();
   PaymentType _paymentType = PaymentType.CASH;
 
   PaymentType get paymentType => _paymentType;
@@ -12,9 +12,10 @@ class GeneralProvider with ChangeNotifier {
     notifyListeners();
   }
 
-  DateTime get selectedDate => _selectedDate;
-  set selectedDate(DateTime newValue) {
-    _selectedDate = newValue;
+  List<DateTime> get selectedDate => _selectedDate;
+  set selectedDate(List<DateTime> newValue) {
+    _selectedDate = [];
+    for (var date in newValue) _selectedDate.add(date);
     notifyListeners();
   }
 

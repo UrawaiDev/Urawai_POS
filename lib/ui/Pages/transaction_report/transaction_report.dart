@@ -1,13 +1,21 @@
+import 'dart:collection';
+
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
+import 'package:urawai_pos/core/Models/products.dart';
 import 'package:urawai_pos/core/Models/transaction.dart';
+import 'package:urawai_pos/core/Services/firestore_service.dart';
+import 'package:urawai_pos/ui/Pages/pos/pos_Page.dart';
 import 'package:urawai_pos/ui/Widgets/costum_button.dart';
 import 'package:urawai_pos/ui/Widgets/drawerMenu.dart';
+import 'package:urawai_pos/ui/utils/constans/const.dart';
 import 'package:urawai_pos/ui/utils/constans/formatter.dart';
 import 'package:urawai_pos/ui/utils/constans/utils.dart';
 
 class TransactionReport extends StatelessWidget {
   static const String routeName = '/transaction_Report';
+  final FirestoreServices _firestoreServices = FirestoreServices();
   @override
   Widget build(BuildContext context) {
     var box = Hive.box<TransactionOrder>(TransactionOrder.boxName);
@@ -31,31 +39,48 @@ class TransactionReport extends StatelessWidget {
                       ],
                     ),
                     SizedBox(height: 20),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceAround,
-                      children: <Widget>[
-                        _headerCard(
-                          'Total Penjualan Kotor',
-                          Colors.lightGreen,
-                          _getBruto(box),
-                        ),
-                        _headerCard(
-                          'Total Keuntungan',
-                          Colors.amber,
-                          _getNetto(box),
-                        ),
-                        _headerCard(
-                          'Total Transaksi',
-                          Colors.blue,
-                          box.length.toString(),
-                        ),
-                        _headerCard(
-                          'Rata-Rata Nilai Transaksi',
-                          Colors.red,
-                          _getAverage(box),
-                        ),
-                      ],
-                    ),
+                    StreamBuilder<QuerySnapshot>(
+                        stream: _firestoreServices.getAllDocuments(kShopName),
+                        builder: (context, snapshot) {
+                          if (snapshot.hasError)
+                            return Text(
+                              'An Error has Occured ${snapshot.error}',
+                              style: kProductNameBigScreenTextStyle,
+                            );
+                          if (!snapshot.hasData)
+                            return Text(
+                              'Belum Ada data Penjualan.',
+                              style: kProductNameBigScreenTextStyle,
+                            );
+                          if (snapshot.connectionState ==
+                              ConnectionState.waiting)
+                            return CircularProgressIndicator();
+                          return Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceAround,
+                            children: <Widget>[
+                              _headerCard(
+                                'Total Penjualan Kotor',
+                                Colors.lightGreen,
+                                _getBruto(snapshot),
+                              ),
+                              _headerCard(
+                                'Total Keuntungan',
+                                Colors.amber,
+                                _getNetto(snapshot),
+                              ),
+                              _headerCard(
+                                'Total Transaksi',
+                                Colors.blue,
+                                snapshot.data.documents.length.toString(),
+                              ),
+                              _headerCard(
+                                'Rata-Rata Nilai Transaksi',
+                                Colors.red,
+                                _getAverage(snapshot),
+                              ),
+                            ],
+                          );
+                        }),
                     SizedBox(height: 20),
                     Expanded(
                       child: Row(
@@ -85,42 +110,62 @@ class TransactionReport extends StatelessWidget {
                                         Divider(thickness: 4),
                                       ],
                                     ),
-                                    Expanded(
-                                      child: ListView(
-                                        children: <Widget>[
-                                          ListTile(
-                                            title: Text(
-                                              'Mie Ayam',
-                                              style: kPriceTextStyle,
-                                            ),
-                                            trailing: Text(
-                                              '20',
-                                              style: kPriceTextStyle,
-                                            ),
-                                          ),
-                                          ListTile(
-                                            title: Text(
-                                              'Bakso Tenis',
-                                              style: kPriceTextStyle,
-                                            ),
-                                            trailing: Text(
-                                              '15',
-                                              style: kPriceTextStyle,
-                                            ),
-                                          ),
-                                          ListTile(
-                                            title: Text(
-                                              'Nasi Kucing',
-                                              style: kPriceTextStyle,
-                                            ),
-                                            trailing: Text(
-                                              '10',
-                                              style: kPriceTextStyle,
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    )
+                                    StreamBuilder<QuerySnapshot>(
+                                        stream: _firestoreServices
+                                            .getAllDocuments(kShopName),
+                                        builder: (context, snapshot) {
+                                          //TODO: refactory this widget since use multiple area
+                                          if (snapshot.hasError)
+                                            return Text(
+                                              'An Error has Occured ${snapshot.error}',
+                                              style:
+                                                  kProductNameBigScreenTextStyle,
+                                            );
+                                          if (!snapshot.hasData)
+                                            return Text(
+                                              'Belum Ada data Penjualan.',
+                                              style:
+                                                  kProductNameBigScreenTextStyle,
+                                            );
+                                          if (snapshot.connectionState ==
+                                              ConnectionState.waiting)
+                                            return CircularProgressIndicator();
+                                          return Expanded(
+                                              child: ListView.builder(
+                                                  itemCount:
+                                                      _getTopSellingProducts(
+                                                              snapshot)
+                                                          .length,
+                                                  itemBuilder:
+                                                      (context, index) {
+                                                    var data =
+                                                        _getTopSellingProducts(
+                                                            snapshot);
+
+                                                    return ListTile(
+                                                      leading: Chip(
+                                                        label: Text(
+                                                          (index + 1)
+                                                              .toString(),
+                                                          style:
+                                                              kProductNameSmallScreenTextStyle,
+                                                        ),
+                                                      ),
+                                                      title: Text(
+                                                        data.keys
+                                                            .elementAt(index),
+                                                        style: kPriceTextStyle,
+                                                      ),
+                                                      trailing: Text(
+                                                        data.values
+                                                            .elementAt(index)
+                                                            .toString(),
+                                                        style:
+                                                            kProductNameSmallScreenTextStyle,
+                                                      ),
+                                                    );
+                                                  }));
+                                        })
                                   ],
                                 ),
                               ),
@@ -147,27 +192,59 @@ class TransactionReport extends StatelessWidget {
             )));
   }
 
-  String _getBruto(Box<TransactionOrder> box) {
-    double result =
-        box.values.fold(0, (prev, element) => prev + element.grandTotal);
+  LinkedHashMap<dynamic, dynamic> _getTopSellingProducts(
+      AsyncSnapshot<QuerySnapshot> snapshot) {
+    int total = 0;
+    int count = 0;
+    Map<String, int> mapper = Map<String, int>();
+    for (var product in POSPage.products) {
+      snapshot.data.documents.forEach((element) {
+        if (element['paymentStatus'] != 'PaymentStatus.VOID') {
+          for (var data in element['orderlist']) {
+            if (data['productName'].toString().trim().toUpperCase() ==
+                product.name.trim().toUpperCase()) {
+              count++;
+              total = total + data['quantity'];
+            }
+          }
+        }
+      });
+
+      mapper.addAll({product.name: total});
+
+      count = 0;
+      total = 0;
+    }
+
+    var sortedKeys = mapper.keys.toList(growable: false)
+      ..sort((k1, k2) => mapper[k2].compareTo(mapper[k1]));
+    LinkedHashMap sortedMap = new LinkedHashMap.fromIterable(sortedKeys,
+        key: (k) => k, value: (k) => mapper[k]);
+
+    return sortedMap;
+  }
+
+  String _getBruto(AsyncSnapshot<QuerySnapshot> snapshot) {
+    double result = snapshot.data.documents
+        .fold(0, (prev, element) => prev + element['grandTotal']);
 
     return Formatter.currencyFormat(result);
   }
 
-  String _getNetto(Box<TransactionOrder> box) {
-    double total =
-        box.values.fold(0, (prev, element) => prev + element.grandTotal);
+  String _getNetto(AsyncSnapshot<QuerySnapshot> snapshot) {
+    double total = snapshot.data.documents
+        .fold(0, (prev, element) => prev + element['grandTotal']);
 
     double result = (total * 100 / 110);
 
     return Formatter.currencyFormat(result);
   }
 
-  String _getAverage(Box<TransactionOrder> box) {
-    double total =
-        box.values.fold(0, (prev, element) => prev + element.grandTotal);
+  String _getAverage(AsyncSnapshot<QuerySnapshot> snapshot) {
+    double total = snapshot.data.documents
+        .fold(0, (prev, element) => prev + element['grandTotal']);
 
-    double result = total / box.length;
+    double result = total / snapshot.data.documents.length;
 
     return Formatter.currencyFormat(result);
   }

@@ -28,18 +28,7 @@ class POSPage extends StatefulWidget {
   static const String routeName = '/pos';
   static const String postedBoxName = "posted_order";
   static const String transactionBoxName = "TransactionOrder";
-}
-
-class _POSPageState extends State<POSPage> with SingleTickerProviderStateMixin {
-  final TextEditingController _textReferenceOrder = TextEditingController();
-  final TextEditingController _textNote = TextEditingController();
-  final TextEditingController _textExtraDiscount = TextEditingController();
-  final _formKey = GlobalKey<FormState>();
-
-  AnimationController _animationController;
-  Animation<double> _animationScale;
-
-  List<Product> products = [
+  static List<Product> products = [
     Product(
       id: 1,
       name: 'Nasi Goreng',
@@ -98,6 +87,16 @@ class _POSPageState extends State<POSPage> with SingleTickerProviderStateMixin {
       category: 1,
     ),
   ];
+}
+
+class _POSPageState extends State<POSPage> with SingleTickerProviderStateMixin {
+  final TextEditingController _textReferenceOrder = TextEditingController();
+  final TextEditingController _textNote = TextEditingController();
+  final TextEditingController _textExtraDiscount = TextEditingController();
+  final _formKey = GlobalKey<FormState>();
+
+  AnimationController _animationController;
+  Animation<double> _animationScale;
 
   @override
   void initState() {
@@ -168,7 +167,8 @@ class _POSPageState extends State<POSPage> with SingleTickerProviderStateMixin {
                                               generalState.isDrawerShow ? 2 : 3,
                                           mainAxisSpacing: 10,
                                           crossAxisSpacing: 10,
-                                          children: products.map((itemProduct) {
+                                          children: POSPage.products
+                                              .map((itemProduct) {
                                             return _cardMenu(itemProduct);
                                           }).toList(),
                                         ),
