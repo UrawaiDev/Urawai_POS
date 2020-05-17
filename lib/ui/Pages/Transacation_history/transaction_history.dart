@@ -1,16 +1,10 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:hive/hive.dart';
-import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
-import 'package:urawai_pos/core/Models/orderList.dart';
-import 'package:urawai_pos/core/Models/transaction.dart';
 import 'package:urawai_pos/core/Provider/general_provider.dart';
-import 'package:urawai_pos/core/Provider/transactionOrder_provider.dart';
 import 'package:urawai_pos/core/Services/firestore_service.dart';
 import 'package:urawai_pos/ui/Pages/Transacation_history/detail_transaction.dart';
-import 'package:urawai_pos/ui/Pages/pos/pos_Page.dart';
 import 'package:urawai_pos/ui/Widgets/costum_DialogBox.dart';
 import 'package:urawai_pos/ui/Widgets/drawerMenu.dart';
 import 'package:urawai_pos/ui/utils/constans/const.dart';
@@ -25,7 +19,7 @@ class TransactionHistoryPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    var box = Hive.box<TransactionOrder>(POSPage.transactionBoxName);
+    // var box = Hive.box<TransactionOrder>(POSPage.transactionBoxName);
     final generalProvider =
         Provider.of<GeneralProvider>(context, listen: false);
 
@@ -252,6 +246,16 @@ class TransactionHistoryPage extends StatelessWidget {
                                   ),
                                 ),
                               );
+                            if (snapshot.data.documents.isEmpty)
+                              return Expanded(
+                                child: Container(
+                                  alignment: Alignment.center,
+                                  child: Text(
+                                    'Belum Ada Transaksi',
+                                    style: kProductNameBigScreenTextStyle,
+                                  ),
+                                ),
+                              );
                             switch (snapshot.connectionState) {
                               case ConnectionState.waiting:
                                 return Expanded(
@@ -347,10 +351,7 @@ class TransactionHistoryPage extends StatelessWidget {
           )
         ],
       );
-    return Text(
-      'Ada Error',
-      style: kProductNameBigScreenTextStyle,
-    );
+    return CircularProgressIndicator();
   }
 
   // List<Widget> _loadTransactionList(
@@ -385,138 +386,140 @@ class TransactionHistoryPage extends StatelessWidget {
   //   }
   // }
 
-  Container _buildCardTransaction(TransactionOrder item) {
-    return Container(
-      decoration: BoxDecoration(
-        color: Color(0xFFf4f4f4),
-        border: Border.all(color: Colors.black),
-        borderRadius: BorderRadius.circular(10),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(
-          horizontal: 8.0,
-          vertical: 10,
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-          children: <Widget>[
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: <Widget>[
-                Text(
-                  'Order ID:',
-                  style: kPriceTextStyle,
-                ),
-                Text(
-                  item.id,
-                  style: kPriceTextStyle,
-                ),
-              ],
-            ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: <Widget>[
-                Text(
-                  'Waktu:',
-                  style: kPriceTextStyle,
-                ),
-                Text(
-                  Formatter.dateFormat(item.date),
-                  style: kPriceTextStyle,
-                ),
-              ],
-            ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: <Widget>[
-                Text(
-                  'Status:',
-                  style: kPriceTextStyle,
-                ),
-                Text(
-                  PaymentHelper.getPaymentStatus(item.paymentStatus),
-                  style: kPriceTextStyle,
-                ),
-              ],
-            ),
-            Divider(
-              color: item.paymentStatus == PaymentStatus.VOID
-                  ? Colors.red
-                  : item.paymentStatus == PaymentStatus.PENDING
-                      ? Colors.blue
-                      : Colors.green,
-              thickness: 2,
-            ),
-            Text(
-              'Nama Kasir:',
-              style: kPriceTextStyle,
-            ),
-            Text(
-              item.cashierName ?? '[null]',
-              style: kPriceTextStyle,
-            ),
-            SizedBox(height: 5),
-            Text(
-              'Transaksi:',
-              style: kPriceTextStyle,
-            ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: <Widget>[
-                Text(
-                  Formatter.currencyFormat(item.grandTotal),
-                  style: kProductNameBigScreenTextStyle,
-                ),
-                Builder(
-                  builder: (context) => Row(
-                    children: <Widget>[
-                      GestureDetector(
-                        child: Icon(
-                          Icons.info,
-                          color: Colors.blue,
-                          size: 25,
-                        ),
-                        onTap: () => Navigator.pushNamed(
-                          context,
-                          DetailTransactionPage.routeName,
-                          arguments: item.id,
-                        ),
-                      ),
-                      SizedBox(width: 5),
-                      GestureDetector(
-                          child: Icon(
-                            Icons.delete,
-                            color: Colors.red,
-                            size: 25,
-                          ),
-                          onTap: () {
-                            CostumDialogBox.showCostumDialogBox(
-                                title: 'Konfirmasi',
-                                context: context,
-                                contentString:
-                                    'Anda Akan menhapus Transaksi ID.[${item.id}], Hapus ?',
-                                icon: Icons.delete,
-                                iconColor: Colors.red,
-                                confirmButtonTitle: 'Hapus',
-                                onConfirmPressed: () {
-                                  Provider.of<TransactionOrderProvider>(context,
-                                          listen: false)
-                                      .deleteTransaction(item.id);
+  //==================[ Build Card From Hive Offline DB ]=======================
+  // Container _buildCardTransaction(TransactionOrder item) {
+  //   return Container(
+  //     decoration: BoxDecoration(
+  //       color: Color(0xFFf4f4f4),
+  //       border: Border.all(color: Colors.black),
+  //       borderRadius: BorderRadius.circular(10),
+  //     ),
+  //     child: Padding(
+  //       padding: const EdgeInsets.symmetric(
+  //         horizontal: 8.0,
+  //         vertical: 10,
+  //       ),
+  //       child: Column(
+  //         crossAxisAlignment: CrossAxisAlignment.start,
+  //         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+  //         children: <Widget>[
+  //           Row(
+  //             mainAxisAlignment: MainAxisAlignment.spaceBetween,
+  //             children: <Widget>[
+  //               Text(
+  //                 'Order ID:',
+  //                 style: kPriceTextStyle,
+  //               ),
+  //               Text(
+  //                 item.id,
+  //                 style: kPriceTextStyle,
+  //               ),
+  //             ],
+  //           ),
+  //           Row(
+  //             mainAxisAlignment: MainAxisAlignment.spaceBetween,
+  //             children: <Widget>[
+  //               Text(
+  //                 'Waktu:',
+  //                 style: kPriceTextStyle,
+  //               ),
+  //               Text(
+  //                 Formatter.dateFormat(item.date),
+  //                 style: kPriceTextStyle,
+  //               ),
+  //             ],
+  //           ),
+  //           Row(
+  //             mainAxisAlignment: MainAxisAlignment.spaceBetween,
+  //             children: <Widget>[
+  //               Text(
+  //                 'Status:',
+  //                 style: kPriceTextStyle,
+  //               ),
+  //               Text(
+  //                 PaymentHelper.getPaymentStatus(item.paymentStatus),
+  //                 style: kPriceTextStyle,
+  //               ),
+  //             ],
+  //           ),
+  //           Divider(
+  //             color: item.paymentStatus == PaymentStatus.VOID
+  //                 ? Colors.red
+  //                 : item.paymentStatus == PaymentStatus.PENDING
+  //                     ? Colors.blue
+  //                     : Colors.green,
+  //             thickness: 2,
+  //           ),
+  //           Text(
+  //             'Nama Kasir:',
+  //             style: kPriceTextStyle,
+  //           ),
+  //           Text(
+  //             item.cashierName ?? '[null]',
+  //             style: kPriceTextStyle,
+  //           ),
+  //           SizedBox(height: 5),
+  //           Text(
+  //             'Transaksi:',
+  //             style: kPriceTextStyle,
+  //           ),
+  //           Row(
+  //             mainAxisAlignment: MainAxisAlignment.spaceBetween,
+  //             children: <Widget>[
+  //               Text(
+  //                 Formatter.currencyFormat(item.grandTotal),
+  //                 style: kProductNameBigScreenTextStyle,
+  //               ),
+  //               Builder(
+  //                 builder: (context) => Row(
+  //                   children: <Widget>[
+  //                     GestureDetector(
+  //                       child: Icon(
+  //                         Icons.info,
+  //                         color: Colors.blue,
+  //                         size: 25,
+  //                       ),
+  //                       onTap: () => Navigator.pushNamed(
+  //                         context,
+  //                         DetailTransactionPage.routeName,
+  //                         arguments: item.id,
+  //                       ),
+  //                     ),
+  //                     SizedBox(width: 5),
+  //                     GestureDetector(
+  //                         child: Icon(
+  //                           Icons.delete,
+  //                           color: Colors.red,
+  //                           size: 25,
+  //                         ),
+  //                         onTap: () {
+  //                           CostumDialogBox.showCostumDialogBox(
+  //                               title: 'Konfirmasi',
+  //                               context: context,
+  //                               contentString:
+  //                                   'Anda Akan menhapus Transaksi ID.[${item.id}], Hapus ?',
+  //                               icon: Icons.delete,
+  //                               iconColor: Colors.red,
+  //                               confirmButtonTitle: 'Hapus',
+  //                               onConfirmPressed: () {
+  //                                 Provider.of<TransactionOrderProvider>(context,
+  //                                         listen: false)
+  //                                     .deleteTransaction(item.id);
 
-                                  Navigator.pop(context);
-                                });
-                          }),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-          ],
-        ),
-      ),
-    );
-  }
+  //                                 Navigator.pop(context);
+  //                               });
+  //                         }),
+  //                   ],
+  //                 ),
+  //               ),
+  //             ],
+  //           ),
+  //         ],
+  //       ),
+  //     ),
+  //   );
+// }
+  //==========================================================================
 
   Container _buildCardFromFirestore(DocumentSnapshot item) {
     return Container(
@@ -575,14 +578,14 @@ class TransactionHistoryPage extends StatelessWidget {
                 ),
               ],
             ),
-            // Divider(
-            //   color: item.paymentStatus == PaymentStatus.VOID
-            //       ? Colors.red
-            //       : item.paymentStatus == PaymentStatus.PENDING
-            //           ? Colors.blue
-            //           : Colors.green,
-            //   thickness: 2,
-            // ),
+            Divider(
+              color: item['paymentStatus'] == 'PaymentStatus.VOID'
+                  ? Colors.red
+                  : item['paymentStatus'] == 'PaymentStatus.PENDING'
+                      ? Colors.blue
+                      : Colors.green,
+              thickness: 2,
+            ),
             Text(
               'Nama Kasir:',
               style: kPriceTextStyle,

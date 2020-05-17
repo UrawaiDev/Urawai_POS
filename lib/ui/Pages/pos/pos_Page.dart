@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:connectivity/connectivity.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
@@ -11,16 +12,21 @@ import 'package:urawai_pos/core/Models/products.dart';
 import 'package:urawai_pos/core/Provider/general_provider.dart';
 import 'package:urawai_pos/core/Provider/orderList_provider.dart';
 import 'package:urawai_pos/core/Provider/postedOrder_provider.dart';
-import 'package:urawai_pos/core/Services/connectivity_service.dart';
+import 'package:urawai_pos/core/Services/firestore_service.dart';
 import 'package:urawai_pos/ui/Pages/Transacation_history/transaction_history.dart';
 import 'package:urawai_pos/ui/Pages/payment_screen/payment_screen.dart';
+import 'package:urawai_pos/ui/Pages/products/add_products.dart';
 import 'package:urawai_pos/ui/Pages/transaction_report/transaction_report.dart';
+import 'package:urawai_pos/ui/Widgets/connection_status.dart';
 import 'package:urawai_pos/ui/Widgets/costum_DialogBox.dart';
+import 'package:urawai_pos/ui/Widgets/costum_button.dart';
 import 'package:urawai_pos/ui/Widgets/detail_itemOrder.dart';
 import 'package:urawai_pos/ui/Widgets/extraDiscount.dart';
 import 'package:urawai_pos/ui/Widgets/footer_OrderList.dart';
+import 'package:urawai_pos/ui/utils/constans/const.dart';
 import 'package:urawai_pos/ui/utils/constans/formatter.dart';
 import 'package:urawai_pos/ui/utils/constans/utils.dart';
+import 'package:urawai_pos/ui/utils/functions/general_function.dart';
 
 class POSPage extends StatefulWidget {
   @override
@@ -28,65 +34,6 @@ class POSPage extends StatefulWidget {
   static const String routeName = '/pos';
   static const String postedBoxName = "posted_order";
   static const String transactionBoxName = "TransactionOrder";
-  static List<Product> products = [
-    Product(
-      id: 1,
-      name: 'Nasi Goreng',
-      image: 'assets/images/nasi_goreng.jpg',
-      price: 20000,
-      isRecommended: false,
-      category: 1,
-      discount: 10,
-    ),
-    Product(
-      id: 2,
-      name: 'Bakmi Ayam Pedas',
-      image: 'assets/images/bakmi_ayam_pedas.jpg',
-      price: 25030,
-      isRecommended: false,
-      category: 1,
-    ),
-    Product(
-      id: 3,
-      name: 'Bakmi Ayam Spesial',
-      image: 'assets/images/bakmi_ayam_spesial.png',
-      price: 25000,
-      isRecommended: true,
-      category: 1,
-    ),
-    Product(
-      id: 4,
-      name: 'Bakmi Biasa',
-      image: 'assets/images/bakmi.jpg',
-      price: 25000,
-      isRecommended: false,
-      category: 1,
-    ),
-    Product(
-      id: 5,
-      name: 'Bakso Sapi',
-      image: 'assets/images/bakso.jpg',
-      price: 30000,
-      isRecommended: true,
-      category: 1,
-    ),
-    Product(
-      id: 6,
-      name: 'Pizza Double Cheese',
-      image: 'assets/images/pizza_cheese.png',
-      price: 80000,
-      isRecommended: false,
-      category: 1,
-    ),
-    Product(
-      id: 7,
-      name: 'Es Kopi Susu',
-      image: 'assets/images/eskopi_susu.jpg',
-      price: 22000,
-      isRecommended: true,
-      category: 1,
-    ),
-  ];
 }
 
 class _POSPageState extends State<POSPage> with SingleTickerProviderStateMixin {
@@ -94,6 +41,7 @@ class _POSPageState extends State<POSPage> with SingleTickerProviderStateMixin {
   final TextEditingController _textNote = TextEditingController();
   final TextEditingController _textExtraDiscount = TextEditingController();
   final _formKey = GlobalKey<FormState>();
+  final FirestoreServices _firestoreServices = FirestoreServices();
 
   AnimationController _animationController;
   Animation<double> _animationScale;
@@ -161,17 +109,75 @@ class _POSPageState extends State<POSPage> with SingleTickerProviderStateMixin {
                                         color: Color(0xFFfbfcfe),
                                         // color: Colors.yellow,
                                         height: screenHeight - 120,
-                                        child: GridView.count(
-                                          shrinkWrap: true,
-                                          crossAxisCount:
-                                              generalState.isDrawerShow ? 2 : 3,
-                                          mainAxisSpacing: 10,
-                                          crossAxisSpacing: 10,
-                                          children: POSPage.products
-                                              .map((itemProduct) {
-                                            return _cardMenu(itemProduct);
-                                          }).toList(),
-                                        ),
+                                        child: FutureBuilder<List<Product>>(
+                                            future: _firestoreServices
+                                                .getProducts(kShopName),
+                                            builder: (context, snapshot) {
+                                              if (snapshot.hasError)
+                                                return Center(
+                                                  child: Text(
+                                                    'An Error has Occured ${snapshot.error}',
+                                                    style: kErrorTextStyle,
+                                                  ),
+                                                );
+
+                                              if (!snapshot.hasData)
+                                                return Center(
+                                                  child:
+                                                      CircularProgressIndicator(),
+                                                );
+
+                                              if (snapshot.data.isEmpty)
+                                                return Container(
+                                                    alignment: Alignment.center,
+                                                    child: Center(
+                                                      child: Column(
+                                                        mainAxisAlignment:
+                                                            MainAxisAlignment
+                                                                .center,
+                                                        children: <Widget>[
+                                                          Text(
+                                                            'Belum Ada Produk Saat ini.',
+                                                            style:
+                                                                kProductNameBigScreenTextStyle,
+                                                          ),
+                                                          SizedBox(height: 30),
+                                                          CostumButton
+                                                              .squareButton(
+                                                                  'Tambah Produk',
+                                                                  onTap: () {
+                                                            //TODO:will place Navigator to Add Product Page
+                                                          },
+                                                                  prefixIcon:
+                                                                      Icons
+                                                                          .add),
+                                                        ],
+                                                      ),
+                                                    ));
+                                              switch (
+                                                  snapshot.connectionState) {
+                                                case ConnectionState.waiting:
+                                                  return Center(
+                                                    child:
+                                                        CircularProgressIndicator(),
+                                                  );
+                                                  break;
+                                                default:
+                                                  return GridView.count(
+                                                    shrinkWrap: true,
+                                                    crossAxisCount: generalState
+                                                            .isDrawerShow
+                                                        ? 2
+                                                        : 3,
+                                                    mainAxisSpacing: 10,
+                                                    crossAxisSpacing: 10,
+                                                    children: snapshot.data
+                                                        .map((product) =>
+                                                            _cardMenu(product))
+                                                        .toList(),
+                                                  );
+                                              }
+                                            }),
                                       ),
                                     ),
 
@@ -192,8 +198,9 @@ class _POSPageState extends State<POSPage> with SingleTickerProviderStateMixin {
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: <Widget>[
                             Consumer<ConnectivityResult>(
-                                builder: (context, value, _) =>
-                                    Text('$value' ?? '[null]')),
+                              builder: (context, value, _) =>
+                                  ConnectionStatusWidget(),
+                            ),
                             Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: <Widget>[_headerOrderList()],
@@ -349,23 +356,6 @@ class _POSPageState extends State<POSPage> with SingleTickerProviderStateMixin {
                                         icon: Icon(Icons.disc_full),
                                         title: 'Diskon',
                                         onTap: () {
-                                          //   var box = Hive.box<TransactionOrder>(
-                                          //       POSPage.transactionBoxName);
-
-                                          //   print('------------------');
-                                          //   print(
-                                          //       'Jumlah Transaction Order (${box.length})');
-                                          //   print('------------------');
-
-                                          //   box.values.forEach((f) {
-                                          //     print(f.id);
-                                          //     // box.delete(f.id);
-                                          //     print('Order Date : ${f.date}');
-                                          //     print(
-                                          //         'Jumlah item : ${f.itemList.length}');
-                                          //     print(f.paymentStatus);
-                                          //   });
-
                                           if (orderlistState
                                               .orderlist.isNotEmpty) {
                                             showDialog(
@@ -494,12 +484,12 @@ class _POSPageState extends State<POSPage> with SingleTickerProviderStateMixin {
                 ],
               ),
             ),
-            Consumer<OrderListProvider>(
-              builder: (_, orderlistState, __) => Text(
-                'Pesanan (${orderlistState.orderlist.length})',
+            Consumer<OrderListProvider>(builder: (_, orderlistState, __) {
+              return Text(
+                'Pesanan (${totalOrderLength(orderlistState.orderlist)})',
                 style: TextStyle(fontSize: 25, fontWeight: FontWeight.bold),
-              ),
-            ),
+              );
+            }),
             ScaleTransition(
               scale: _animationScale,
               child: IconButton(
@@ -708,7 +698,7 @@ class _POSPageState extends State<POSPage> with SingleTickerProviderStateMixin {
                       decoration: BoxDecoration(
                           shape: BoxShape.circle,
                           image: DecorationImage(
-                            image: AssetImage(
+                            image: NetworkImage(
                               product.image,
                             ),
                             fit: BoxFit.cover,
@@ -851,6 +841,8 @@ class _POSPageState extends State<POSPage> with SingleTickerProviderStateMixin {
                   'Pengaturan',
                   style: kMainMenuStyle,
                 )),
+                onTap: () =>
+                    Navigator.pushNamed(context, AddProductPage.routeName),
               ),
               ListTile(
                 leading: FaIcon(FontAwesomeIcons.lifeRing),

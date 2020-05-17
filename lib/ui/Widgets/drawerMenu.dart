@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:urawai_pos/ui/Pages/Transacation_history/transaction_history.dart';
 import 'package:urawai_pos/ui/Pages/pos/pos_Page.dart';
+import 'package:urawai_pos/ui/Pages/products/add_products.dart';
 import 'package:urawai_pos/ui/Pages/transaction_report/transaction_report.dart';
 import 'package:urawai_pos/ui/utils/constans/utils.dart';
 
@@ -29,32 +30,41 @@ class DrawerMenu extends StatelessWidget {
             'Transaksi',
             style: kMainMenuStyle,
           )),
-          onTap: () => Navigator.pushNamed(context, POSPage.routeName),
+          onTap: () {
+            Navigator.pop(context);
+            Navigator.pushNamed(context, POSPage.routeName);
+          },
         ),
         ListTile(
-          leading: FaIcon(FontAwesomeIcons.clipboardList),
-          title: (Text(
-            'Riwayat Transaksi',
-            style: kMainMenuStyle,
-          )),
-          onTap: () =>
-              Navigator.pushNamed(context, TransactionHistoryPage.routeName),
-        ),
+            leading: FaIcon(FontAwesomeIcons.clipboardList),
+            title: (Text(
+              'Riwayat Transaksi',
+              style: kMainMenuStyle,
+            )),
+            onTap: () {
+              Navigator.pop(context);
+              Navigator.pushNamed(context, TransactionHistoryPage.routeName);
+            }),
         ListTile(
-          leading: FaIcon(FontAwesomeIcons.book),
-          title: (Text(
-            'Laporan',
-            style: kMainMenuStyle,
-          )),
-          onTap: () =>
-              Navigator.pushNamed(context, TransactionReport.routeName),
-        ),
+            leading: FaIcon(FontAwesomeIcons.book),
+            title: (Text(
+              'Laporan',
+              style: kMainMenuStyle,
+            )),
+            onTap: () {
+              Navigator.pop(context);
+              Navigator.pushNamed(context, TransactionReport.routeName);
+            }),
         ListTile(
           leading: FaIcon(FontAwesomeIcons.cog),
           title: (Text(
             'Pengaturan',
             style: kMainMenuStyle,
           )),
+          onTap: () {
+            Navigator.pop(context);
+            Navigator.pushNamed(context, AddProductPage.routeName);
+          },
         ),
         ListTile(
           leading: FaIcon(FontAwesomeIcons.lifeRing),

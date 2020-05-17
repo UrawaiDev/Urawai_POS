@@ -58,7 +58,14 @@ class CostumDialogBox {
             child: TextFormField(
               controller: textEditingController,
               autofocus: true,
+              autocorrect: false,
               maxLength: 20,
+              style: kPriceTextStyle,
+              textInputAction: TextInputAction.done,
+              textCapitalization: TextCapitalization.sentences,
+              decoration: InputDecoration(
+                errorStyle: kErrorTextStyle,
+              ),
               validator: (value) {
                 if (value.isEmpty)
                   return 'Rereferensi tidak boleh kosong.';

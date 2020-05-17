@@ -5,9 +5,11 @@ import 'package:urawai_pos/core/Provider/orderList_provider.dart';
 import 'package:urawai_pos/core/Provider/postedOrder_provider.dart';
 import 'package:urawai_pos/ui/Pages/Transacation_history/detail_transaction.dart';
 import 'package:urawai_pos/ui/Pages/Transacation_history/transaction_history.dart';
+import 'package:urawai_pos/ui/Pages/payment_screen/addtional_itemOrder.dart';
 import 'package:urawai_pos/ui/Pages/payment_screen/payment_screen.dart';
 import 'package:urawai_pos/ui/Pages/payment_success/payment_success.dart';
 import 'package:urawai_pos/ui/Pages/pos/pos_Page.dart';
+import 'package:urawai_pos/ui/Pages/products/add_products.dart';
 import 'package:urawai_pos/ui/Pages/transaction_report/transaction_report.dart';
 
 class RouteGenerator {
@@ -23,6 +25,13 @@ class RouteGenerator {
       case TransactionHistoryPage.routeName:
         return MaterialPageRoute(
             builder: (context) => TransactionHistoryPage());
+        break;
+      case AddProductPage.routeName:
+        return MaterialPageRoute(builder: (context) => AddProductPage());
+        break;
+      case AddtionalItemOrderPage.routeName:
+        return MaterialPageRoute(
+            builder: (context) => AddtionalItemOrderPage(args));
         break;
       case PaymentSuccess.routeName:
         return MaterialPageRoute(builder: (context) {

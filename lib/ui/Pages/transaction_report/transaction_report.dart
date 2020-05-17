@@ -2,9 +2,7 @@ import 'dart:collection';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:hive/hive.dart';
 import 'package:urawai_pos/core/Models/products.dart';
-import 'package:urawai_pos/core/Models/transaction.dart';
 import 'package:urawai_pos/core/Services/firestore_service.dart';
 import 'package:urawai_pos/ui/Pages/pos/pos_Page.dart';
 import 'package:urawai_pos/ui/Widgets/costum_button.dart';
@@ -18,7 +16,7 @@ class TransactionReport extends StatelessWidget {
   final FirestoreServices _firestoreServices = FirestoreServices();
   @override
   Widget build(BuildContext context) {
-    var box = Hive.box<TransactionOrder>(TransactionOrder.boxName);
+    // var box = Hive.box<TransactionOrder>(TransactionOrder.boxName);
 
     return SafeArea(
         child: Scaffold(
@@ -110,62 +108,134 @@ class TransactionReport extends StatelessWidget {
                                         Divider(thickness: 4),
                                       ],
                                     ),
-                                    StreamBuilder<QuerySnapshot>(
-                                        stream: _firestoreServices
-                                            .getAllDocuments(kShopName),
-                                        builder: (context, snapshot) {
-                                          //TODO: refactory this widget since use multiple area
-                                          if (snapshot.hasError)
-                                            return Text(
-                                              'An Error has Occured ${snapshot.error}',
-                                              style:
-                                                  kProductNameBigScreenTextStyle,
-                                            );
-                                          if (!snapshot.hasData)
-                                            return Text(
-                                              'Belum Ada data Penjualan.',
-                                              style:
-                                                  kProductNameBigScreenTextStyle,
-                                            );
-                                          if (snapshot.connectionState ==
-                                              ConnectionState.waiting)
-                                            return CircularProgressIndicator();
-                                          return Expanded(
-                                              child: ListView.builder(
-                                                  itemCount:
-                                                      _getTopSellingProducts(
-                                                              snapshot)
-                                                          .length,
-                                                  itemBuilder:
-                                                      (context, index) {
-                                                    var data =
-                                                        _getTopSellingProducts(
-                                                            snapshot);
+                                    Expanded(
+                                      child: StreamBuilder<QuerySnapshot>(
+                                          stream: _firestoreServices
+                                              .getAllDocuments(kShopName),
+                                          builder: (context, snapshot) {
+                                            //TODO: refactory this widget since use multiple area
+                                            if (snapshot.hasError)
+                                              return Text(
+                                                'An Error has Occured ${snapshot.error}',
+                                                style:
+                                                    kProductNameBigScreenTextStyle,
+                                              );
+                                            if (!snapshot.hasData)
+                                              return Text(
+                                                'Belum Ada data Penjualan.',
+                                                style:
+                                                    kProductNameBigScreenTextStyle,
+                                              );
+                                            if (snapshot.connectionState ==
+                                                ConnectionState.waiting)
+                                              return CircularProgressIndicator();
 
-                                                    return ListTile(
-                                                      leading: Chip(
-                                                        label: Text(
-                                                          (index + 1)
-                                                              .toString(),
-                                                          style:
-                                                              kProductNameSmallScreenTextStyle,
-                                                        ),
-                                                      ),
-                                                      title: Text(
-                                                        data.keys
-                                                            .elementAt(index),
-                                                        style: kPriceTextStyle,
-                                                      ),
-                                                      trailing: Text(
-                                                        data.values
-                                                            .elementAt(index)
-                                                            .toString(),
-                                                        style:
-                                                            kProductNameSmallScreenTextStyle,
+                                            return FutureBuilder<List<Product>>(
+                                                future: _firestoreServices
+                                                    .getProducts(kShopName),
+                                                builder: (context, products) {
+                                                  if (products.hasError ||
+                                                      !products.hasData)
+                                                    return Container(
+                                                      alignment:
+                                                          Alignment.center,
+                                                      child: Column(
+                                                        mainAxisAlignment:
+                                                            MainAxisAlignment
+                                                                .center,
+                                                        children: <Widget>[
+                                                          CircularProgressIndicator(),
+                                                          SizedBox(height: 20),
+                                                          Text(
+                                                            'Loading...',
+                                                            style:
+                                                                kPriceTextStyle,
+                                                          ),
+                                                        ],
                                                       ),
                                                     );
-                                                  }));
-                                        })
+
+                                                  if (products.data.isEmpty)
+                                                    return Container(
+                                                        alignment:
+                                                            Alignment.center,
+                                                        child: Center(
+                                                          child: Column(
+                                                            mainAxisAlignment:
+                                                                MainAxisAlignment
+                                                                    .center,
+                                                            children: <Widget>[
+                                                              Text(
+                                                                'Belum Ada Produk Saat ini.',
+                                                                style:
+                                                                    kProductNameBigScreenTextStyle,
+                                                              ),
+                                                              SizedBox(
+                                                                  height: 30),
+                                                              CostumButton
+                                                                  .squareButtonSmall(
+                                                                      'Buat',
+                                                                      onTap:
+                                                                          () {
+                                                                //TODO:will place Navigator to Add Product Page
+                                                              },
+                                                                      prefixIcon:
+                                                                          Icons
+                                                                              .add),
+                                                            ],
+                                                          ),
+                                                        ));
+
+                                                  switch (products
+                                                      .connectionState) {
+                                                    case ConnectionState
+                                                        .waiting:
+                                                      return Center(
+                                                          child:
+                                                              CircularProgressIndicator());
+                                                      break;
+                                                    default:
+                                                      return ListView.builder(
+                                                          itemCount: products
+                                                              .data
+                                                              .length ??= 0,
+                                                          itemBuilder:
+                                                              (context, index) {
+                                                            var data =
+                                                                _getTopSellingProducts(
+                                                                    snapshot,
+                                                                    products);
+
+                                                            return ListTile(
+                                                              leading: Chip(
+                                                                label: Text(
+                                                                  (index + 1)
+                                                                      .toString(),
+                                                                  style:
+                                                                      kProductNameSmallScreenTextStyle,
+                                                                ),
+                                                              ),
+                                                              title: Text(
+                                                                data.keys
+                                                                    .elementAt(
+                                                                        index),
+                                                                style:
+                                                                    kPriceTextStyle,
+                                                              ),
+                                                              trailing: Text(
+                                                                data.values
+                                                                    .elementAt(
+                                                                        index)
+                                                                    .toString(),
+                                                                style:
+                                                                    kProductNameSmallScreenTextStyle,
+                                                              ),
+                                                            );
+                                                          });
+                                                  }
+                                                });
+                                          }),
+                                    )
                                   ],
                                 ),
                               ),
@@ -193,11 +263,13 @@ class TransactionReport extends StatelessWidget {
   }
 
   LinkedHashMap<dynamic, dynamic> _getTopSellingProducts(
-      AsyncSnapshot<QuerySnapshot> snapshot) {
+      AsyncSnapshot<QuerySnapshot> snapshot,
+      AsyncSnapshot<List<Product>> products) {
     int total = 0;
     int count = 0;
+
     Map<String, int> mapper = Map<String, int>();
-    for (var product in POSPage.products) {
+    for (var product in products.data) {
       snapshot.data.documents.forEach((element) {
         if (element['paymentStatus'] != 'PaymentStatus.VOID') {
           for (var data in element['orderlist']) {

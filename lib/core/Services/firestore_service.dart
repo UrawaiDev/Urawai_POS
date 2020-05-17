@@ -1,18 +1,34 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:urawai_pos/core/Models/orderList.dart';
-import 'package:urawai_pos/core/Models/transaction.dart';
+import 'package:urawai_pos/core/Models/products.dart';
 
 class FirestoreServices {
   Firestore _firestore = Firestore.instance;
 
   // get All Documents
   Stream<QuerySnapshot> getAllDocuments(String shopName) {
-    var result = _firestore
-        .collection(shopName)
-        .orderBy('orderDate', descending: true)
-        .snapshots();
+    var result = _firestore.collection(shopName).snapshots();
 
     return result;
+  }
+
+  Future<List<Product>> getProducts(String shopName) async {
+    List<Product> products = [];
+
+    QuerySnapshot result = await _firestore
+        .collection(shopName + '_products')
+        .orderBy('productName', descending: false)
+        .getDocuments();
+
+    for (var data in result.documents)
+      products.add(Product(
+          category: data['category'],
+          discount: data['discount'].toDouble(),
+          image: data['photo_url'],
+          isRecommended: data['isPopuler'],
+          name: data['productName'],
+          price: data['price']));
+
+    return products;
   }
 
   Stream<QuerySnapshot> getDocumentLength(String shopName) {

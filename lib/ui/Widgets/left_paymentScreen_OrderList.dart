@@ -6,10 +6,15 @@ import 'package:urawai_pos/core/Models/products.dart';
 import 'package:urawai_pos/core/Models/transaction.dart';
 import 'package:urawai_pos/core/Provider/orderList_provider.dart';
 import 'package:urawai_pos/core/Provider/transactionOrder_provider.dart';
+import 'package:urawai_pos/core/Services/firestore_service.dart';
+import 'package:urawai_pos/ui/Pages/payment_screen/addtional_itemOrder.dart';
 import 'package:urawai_pos/ui/Pages/pos/pos_Page.dart';
+import 'package:urawai_pos/ui/Widgets/card_menu.dart';
 import 'package:urawai_pos/ui/Widgets/costum_DialogBox.dart';
 import 'package:urawai_pos/ui/Widgets/footer_OrderList.dart';
+import 'package:urawai_pos/ui/utils/constans/const.dart';
 import 'package:urawai_pos/ui/utils/constans/utils.dart';
+import 'package:urawai_pos/ui/utils/functions/general_function.dart';
 
 import 'detail_itemOrder.dart';
 
@@ -25,8 +30,7 @@ class PaymentScreenLeftOrderList extends StatefulWidget {
 class _PaymentScreenLeftOrderListState
     extends State<PaymentScreenLeftOrderList> {
   TextEditingController _textNote = TextEditingController();
-
-  static const String shopName = 'WarungMakyos';
+  FirestoreServices _firestoreServices;
 
   @override
   void dispose() {
@@ -52,29 +56,18 @@ class _PaymentScreenLeftOrderListState
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: <Widget>[
-                  Consumer<OrderListProvider>(
-                    builder: (context, state, _) => Text(
-                      'Pesanan (${state.orderlist.length})',
+                  Consumer<OrderListProvider>(builder: (context, state, _) {
+                    return Text(
+                      'Pesanan (${totalOrderLength(state.orderlist)})',
                       style: kHeaderTextStyle,
-                    ),
-                  ),
+                    );
+                  }),
                   IconButton(
                     icon: Icon(Icons.add),
                     onPressed: () {
-                      var state = Provider.of<OrderListProvider>(context,
-                          listen: false);
-                      //TEMPORARY
-                      state.addToList(
-                        item: Product(
-                          id: 0,
-                          category: 1,
-                          image: 'dummy path',
-                          isRecommended: true,
-                          name: 'Nasi Putih',
-                          price: 5000,
-                        ),
-                        referenceOrder: orderListProvider.referenceOrder,
-                      );
+                      Navigator.pushNamed(
+                          context, AddtionalItemOrderPage.routeName,
+                          arguments: orderListProvider);
                     },
                   ),
                   GestureDetector(
@@ -226,7 +219,7 @@ class _PaymentScreenLeftOrderListState
                                 paymentStatus: PaymentStatus.VOID,
                                 paymentType: PaymentType.CASH,
                                 shopName:
-                                    shopName); //TODO; will replace with dynamic shopname
+                                    kShopName); //TODO; will replace with dynamic shopname
 
                           }
 

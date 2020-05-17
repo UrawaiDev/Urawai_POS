@@ -25,7 +25,7 @@ class OrderListAdapter extends TypeAdapter<OrderList> {
       dateTime: fields[5] as DateTime,
       referenceOrder: fields[7] as String,
       cashierName: fields[6] as String,
-      discount: fields[8] as int,
+      discount: fields[8] as double,
     );
   }
 

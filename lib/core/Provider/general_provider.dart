@@ -3,6 +3,7 @@ import 'package:urawai_pos/core/Models/transaction.dart';
 
 class GeneralProvider with ChangeNotifier {
   bool _isDrawerShow = true;
+  bool _isLoading = false;
   List<DateTime> _selectedDate = List<DateTime>();
   PaymentType _paymentType = PaymentType.CASH;
 
@@ -22,6 +23,12 @@ class GeneralProvider with ChangeNotifier {
   bool get isDrawerShow => _isDrawerShow;
   set isDrawerShow(bool newValue) {
     _isDrawerShow = newValue;
+    notifyListeners();
+  }
+
+  bool get isLoading => _isLoading;
+  set isLoading(bool newValue) {
+    _isLoading = newValue;
     notifyListeners();
   }
 }

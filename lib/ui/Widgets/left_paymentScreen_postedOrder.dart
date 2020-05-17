@@ -7,11 +7,16 @@ import 'package:urawai_pos/core/Models/postedOrder.dart';
 import 'package:urawai_pos/core/Models/transaction.dart';
 import 'package:urawai_pos/core/Provider/postedOrder_provider.dart';
 import 'package:urawai_pos/core/Provider/transactionOrder_provider.dart';
+import 'package:urawai_pos/core/Services/firestore_service.dart';
+import 'package:urawai_pos/ui/Pages/payment_screen/addtional_itemOrder.dart';
 import 'package:urawai_pos/ui/Pages/pos/pos_Page.dart';
+import 'package:urawai_pos/ui/Widgets/card_menu.dart';
 import 'package:urawai_pos/ui/Widgets/costum_DialogBox.dart';
 import 'package:urawai_pos/ui/Widgets/detail_itemOrder.dart';
 import 'package:urawai_pos/ui/Widgets/footer_OrderList.dart';
+import 'package:urawai_pos/ui/utils/constans/const.dart';
 import 'package:urawai_pos/ui/utils/constans/utils.dart';
+import 'package:urawai_pos/ui/utils/functions/general_function.dart';
 
 class PaymentScreenLeftPostedOrder extends StatefulWidget {
   final PostedOrder postedOrder;
@@ -25,7 +30,7 @@ class PaymentScreenLeftPostedOrder extends StatefulWidget {
 class _PaymentScreenLeftPostedOrderState
     extends State<PaymentScreenLeftPostedOrder> {
   TextEditingController _textNote = TextEditingController();
-  static const String shopName = 'WarungMakyos';
+  FirestoreServices _firestoreServices;
 
   @override
   void dispose() {
@@ -53,23 +58,18 @@ class _PaymentScreenLeftPostedOrderState
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: <Widget>[
-                  Consumer<PostedOrderProvider>(
-                    builder: (context, state, _) => Text(
-                      'Pesanan (${state.postedOrder.orderList.length})',
+                  Consumer<PostedOrderProvider>(builder: (context, state, _) {
+                    return Text(
+                      'Pesanan (${totalOrderLength(state.postedOrder.orderList)})',
                       style: kHeaderTextStyle,
-                    ),
-                  ),
+                    );
+                  }),
                   IconButton(
                     icon: Icon(Icons.add),
                     onPressed: () {
-                      postedOrderProvider.addItem(
-                        widget.postedOrder,
-                        OrderList(
-                          productName: 'Nasi Putih',
-                          price: 5000,
-                          quantity: 2,
-                        ),
-                      );
+                      Navigator.pushNamed(
+                          context, AddtionalItemOrderPage.routeName,
+                          arguments: postedOrderProvider);
                     },
                   ),
                   GestureDetector(
@@ -237,7 +237,7 @@ class _PaymentScreenLeftPostedOrderState
                               stateProvider: stateProvider,
                               paymentStatus: PaymentStatus.VOID,
                               paymentType: PaymentType.CASH,
-                              shopName: shopName,
+                              shopName: kShopName,
                             );
                           }
 

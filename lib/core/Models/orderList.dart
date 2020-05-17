@@ -21,7 +21,7 @@ class OrderList {
   @HiveField(7)
   String referenceOrder;
   @HiveField(8)
-  int discount;
+  double discount;
 
   //TODO: delete column cashier Name , Reference Order , dateTime
 

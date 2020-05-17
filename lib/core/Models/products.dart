@@ -4,8 +4,8 @@ class Product {
   String image;
   double price;
   bool isRecommended = false;
-  int category;
-  int discount = 0;
+  String category;
+  double discount = 0;
 
   Product({
     this.id,

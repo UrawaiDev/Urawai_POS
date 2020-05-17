@@ -30,6 +30,11 @@ TextStyle kProductNameSmallScreenTextStyle = TextStyle(
   fontSize: 20,
 );
 
+TextStyle kErrorTextStyle = TextStyle(
+  color: Colors.red,
+  fontSize: 20,
+);
+
 TextStyle kGrandTotalTextStyle = TextStyle(
   fontWeight: FontWeight.bold,
   fontSize: 20,
