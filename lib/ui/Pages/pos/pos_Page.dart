@@ -7,6 +7,7 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:hive/hive.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:provider/provider.dart';
+import 'package:shimmer/shimmer.dart';
 import 'package:urawai_pos/core/Models/postedOrder.dart';
 import 'package:urawai_pos/core/Models/products.dart';
 import 'package:urawai_pos/core/Provider/general_provider.dart';
@@ -40,6 +41,7 @@ class _POSPageState extends State<POSPage> with SingleTickerProviderStateMixin {
   final TextEditingController _textReferenceOrder = TextEditingController();
   final TextEditingController _textNote = TextEditingController();
   final TextEditingController _textExtraDiscount = TextEditingController();
+  final TextEditingController _textQuery = TextEditingController();
   final _formKey = GlobalKey<FormState>();
   final FirestoreServices _firestoreServices = FirestoreServices();
 
@@ -66,6 +68,7 @@ class _POSPageState extends State<POSPage> with SingleTickerProviderStateMixin {
     _textNote.dispose();
     _textExtraDiscount.dispose();
     _animationController.dispose();
+    _textQuery.dispose();
     super.dispose();
   }
 
@@ -92,7 +95,7 @@ class _POSPageState extends State<POSPage> with SingleTickerProviderStateMixin {
                           // width: MediaQuery.of(context).size.width * 0.6,
                           child: Column(
                             children: <Widget>[
-                              MyAppBar(),
+                              MyAppBar(_textQuery),
                               Consumer<GeneralProvider>(
                                 builder: (context, generalState, _) => Row(
                                   children: <Widget>[
@@ -110,8 +113,14 @@ class _POSPageState extends State<POSPage> with SingleTickerProviderStateMixin {
                                         // color: Colors.yellow,
                                         height: screenHeight - 120,
                                         child: FutureBuilder<List<Product>>(
-                                            future: _firestoreServices
-                                                .getProducts(kShopName),
+                                            future: _textQuery.text.isEmpty ||
+                                                    _textQuery.text.length < 3
+                                                ? _firestoreServices
+                                                    .getProducts(kShopName)
+                                                : _firestoreServices
+                                                    .getDocumentByProductName(
+                                                        kShopName,
+                                                        _textQuery.text),
                                             builder: (context, snapshot) {
                                               if (snapshot.hasError)
                                                 return Center(
@@ -121,11 +130,11 @@ class _POSPageState extends State<POSPage> with SingleTickerProviderStateMixin {
                                                   ),
                                                 );
 
-                                              if (!snapshot.hasData)
-                                                return Center(
-                                                  child:
-                                                      CircularProgressIndicator(),
-                                                );
+                                              if (!snapshot.hasData ||
+                                                  snapshot.connectionState ==
+                                                      ConnectionState.waiting)
+                                                return _shimmerLoading(
+                                                    generalState.isDrawerShow);
 
                                               if (snapshot.data.isEmpty)
                                                 return Container(
@@ -154,29 +163,19 @@ class _POSPageState extends State<POSPage> with SingleTickerProviderStateMixin {
                                                         ],
                                                       ),
                                                     ));
-                                              switch (
-                                                  snapshot.connectionState) {
-                                                case ConnectionState.waiting:
-                                                  return Center(
-                                                    child:
-                                                        CircularProgressIndicator(),
-                                                  );
-                                                  break;
-                                                default:
-                                                  return GridView.count(
-                                                    shrinkWrap: true,
-                                                    crossAxisCount: generalState
-                                                            .isDrawerShow
+
+                                              return GridView.count(
+                                                crossAxisCount:
+                                                    generalState.isDrawerShow
                                                         ? 2
                                                         : 3,
-                                                    mainAxisSpacing: 10,
-                                                    crossAxisSpacing: 10,
-                                                    children: snapshot.data
-                                                        .map((product) =>
-                                                            _cardMenu(product))
-                                                        .toList(),
-                                                  );
-                                              }
+                                                crossAxisSpacing: 10,
+                                                mainAxisSpacing: 10,
+                                                children: snapshot.data
+                                                    .map((product) =>
+                                                        _cardMenu(product))
+                                                    .toList(),
+                                              );
                                             }),
                                       ),
                                     ),
@@ -672,6 +671,69 @@ class _POSPageState extends State<POSPage> with SingleTickerProviderStateMixin {
         });
   }
 
+  Widget _shimmerLoading(bool isDrawerShow) {
+    return GridView.count(
+      crossAxisCount: isDrawerShow ? 2 : 3,
+      crossAxisSpacing: 10,
+      children: <Widget>[
+        _shimmerCard(),
+        _shimmerCard(),
+        _shimmerCard(),
+        _shimmerCard(),
+      ],
+    );
+  }
+
+  Widget _shimmerCard() {
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: <Widget>[
+        Expanded(
+          child: Shimmer.fromColors(
+            baseColor: Colors.grey[300],
+            highlightColor: Colors.grey[100],
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Expanded(
+                  child: Container(
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(10),
+                      color: Colors.white,
+                    ),
+                  ),
+                ),
+                const Padding(
+                  padding: EdgeInsets.symmetric(vertical: 7.0),
+                ),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: <Widget>[
+                      Container(
+                        width: 200,
+                        height: 20.0,
+                        color: Colors.white,
+                      ),
+                      const Padding(
+                        padding: EdgeInsets.symmetric(vertical: 5.0),
+                      ),
+                      Container(
+                        width: 150,
+                        height: 20.0,
+                        color: Colors.white,
+                      ),
+                    ],
+                  ),
+                )
+              ],
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
   Widget _cardMenu(Product product) {
     var orderlistProvider =
         Provider.of<OrderListProvider>(context, listen: false);
@@ -956,8 +1018,12 @@ class _POSPageState extends State<POSPage> with SingleTickerProviderStateMixin {
 }
 
 class MyAppBar extends StatelessWidget {
+  final textController;
+  MyAppBar(this.textController);
   @override
   Widget build(BuildContext context) {
+    var state = Provider.of<GeneralProvider>(context, listen: false);
+
     return Padding(
       padding: const EdgeInsets.fromLTRB(0, 8, 5, 8),
       child: Container(
@@ -970,8 +1036,6 @@ class MyAppBar extends StatelessWidget {
               iconSize: 35,
               color: Color(0xFFcdd3d6),
               onPressed: () {
-                var state =
-                    Provider.of<GeneralProvider>(context, listen: false);
                 state.isDrawerShow = !state.isDrawerShow;
               },
             ),
@@ -993,10 +1057,22 @@ class MyAppBar extends StatelessWidget {
               child: Padding(
                 padding: const EdgeInsets.all(8.0),
                 child: TextField(
+                  controller: textController,
                   decoration: InputDecoration(
                     border: InputBorder.none,
                     hintText: 'Cari menu, Makanan , dll',
-                    suffixIcon: Icon(Icons.search),
+                    suffixIcon: textController.text.isEmpty
+                        ? IconButton(
+                            icon: Icon(Icons.search),
+                            onPressed: () => state.isDrawerShow = false,
+                          )
+                        : IconButton(
+                            icon: Icon(Icons.clear),
+                            onPressed: () {
+                              textController.clear();
+
+                              state.isDrawerShow = false;
+                            }),
                   ),
                 ),
               ),

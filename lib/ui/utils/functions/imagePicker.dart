@@ -7,11 +7,13 @@ import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:image_cropper/image_cropper.dart';
 import 'package:urawai_pos/core/Provider/general_provider.dart';
 import 'package:path/path.dart' as path;
+import 'package:uuid/uuid.dart';
 
 Future<bool> uploadAndSavetoFirebase({
   GeneralProvider appState,
   @required String shopName,
   File imageFile,
+  String id,
   String productName,
   double productPrice,
   double discount,
@@ -19,18 +21,6 @@ Future<bool> uploadAndSavetoFirebase({
   bool isPopular,
 }) async {
   try {
-    // var croppedImage = await ImageCropper.cropImage(
-    //   sourcePath: imageFile.path,
-    //   androidUiSettings: AndroidUiSettings(
-    //       toolbarTitle: 'Image Cropper',
-    //       toolbarColor: Colors.blue[300],
-    //       toolbarWidgetColor: Colors.white,
-    //       initAspectRatio: CropAspectRatioPreset.original,
-    //       lockAspectRatio: false),
-    // );
-
-    // imageFile = croppedImage ?? imageFile;
-
     File compressedImage = await FlutterImageCompress.compressAndGetFile(
       imageFile.path,
       imageFile.path + '.jpg',
@@ -55,6 +45,7 @@ Future<bool> uploadAndSavetoFirebase({
             .collection(shopName + '_products')
             .document()
             .setData({
+          'id': Uuid().v1(),
           'productName': productName,
           'price': productPrice,
           'discount': discount ?? 0,

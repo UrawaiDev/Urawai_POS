@@ -11,6 +11,14 @@ class FirestoreServices {
     return result;
   }
 
+  // get All Documents exclude Void Trnsaction
+  // Stream<QuerySnapshot> getAllDocumentsWithoutVOID(String shopName) {
+  //   var result = _firestore.collection(shopName).where('paymentStatus',i)
+  //   .snapshots();
+
+  //   return result;
+  // }
+
   Future<List<Product>> getProducts(String shopName) async {
     List<Product> products = [];
 
@@ -21,6 +29,7 @@ class FirestoreServices {
 
     for (var data in result.documents)
       products.add(Product(
+          id: data['id'],
           category: data['category'],
           discount: data['discount'].toDouble(),
           image: data['photo_url'],
@@ -64,6 +73,38 @@ class FirestoreServices {
   ) {
     Stream<DocumentSnapshot> result =
         _firestore.collection(shopName).document(id).snapshots();
+
+    return result;
+  }
+
+  // get Document by Product Name
+  Future<List<Product>> getDocumentByProductName(
+    String shopName,
+    String query,
+  ) async {
+    List<Product> result = [];
+
+    _firestore
+        .collection(shopName + '_products')
+        .reference()
+        .snapshots()
+        .forEach((data) {
+      data.documents.forEach((product) {
+        if (product.data['productName']
+            .toString()
+            .toUpperCase()
+            .contains(query.toUpperCase())) {
+          result.add(Product(
+              id: product.data['id'],
+              name: product.data['productName'],
+              price: product.data['price'],
+              category: product.data['category'],
+              image: product.data['photo_url'],
+              discount: product.data['discount'].toDouble(),
+              isRecommended: product.data['isPopuler']));
+        }
+      });
+    });
 
     return result;
   }

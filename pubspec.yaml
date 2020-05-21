@@ -34,6 +34,7 @@ dependencies:
   firebase_storage: ^3.0.0
   image_cropper: ^1.2.1
   flutter_image_compress: ^0.6.5+1
+  shimmer: ^1.1.1
 
 dev_dependencies:
   flutter_test:
@@ -64,6 +65,8 @@ flutter:
    - assets/images/nasi_goreng.jpg
    - assets/images/eskopi_susu.jpg
    - assets/images/pizza_cheese.png
+   - assets/images/noimage.png
+   - assets/images/placeholder.gif
   #  - images/a_dot_ham.jpeg
 
   # An image asset can refer to one or more resolution-specific "variants", see

@@ -65,7 +65,6 @@ class AddtionalItemOrderPage extends StatelessWidget {
                                 product,
                                 onDoubleTap: () {
                                   if (stateProvider is OrderListProvider) {
-                                    print('from Order List');
                                     stateProvider.addToList(
                                       item: product,
                                       referenceOrder:
@@ -74,13 +73,13 @@ class AddtionalItemOrderPage extends StatelessWidget {
                                     Navigator.pop(context);
                                   } else if (stateProvider
                                       is PostedOrderProvider) {
-                                    print('From Posted Order');
-                                    //TODO: accumulate qty when item name , price is same
                                     stateProvider.addItem(
                                       stateProvider.postedOrder,
                                       OrderList(
                                         productName: product.name,
                                         price: product.price,
+                                        id: product.id,
+                                        discount: product.discount,
                                         quantity: 1,
                                       ),
                                     );

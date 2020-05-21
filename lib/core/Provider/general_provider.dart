@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:urawai_pos/core/Models/transaction.dart';
 
 class GeneralProvider with ChangeNotifier {
-  bool _isDrawerShow = true;
+  bool _isDrawerShow = false;
   bool _isLoading = false;
   List<DateTime> _selectedDate = List<DateTime>();
   PaymentType _paymentType = PaymentType.CASH;

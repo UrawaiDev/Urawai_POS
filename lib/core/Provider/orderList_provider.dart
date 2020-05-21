@@ -21,15 +21,6 @@ class OrderListProvider with ChangeNotifier {
 
   double _extraDiscount = 0;
 
-  // OrderListProvider.fromJson(Map<String, dynamic> json) {
-  //   if (json['orderlist'] != null) {
-  //     orderlist = new List<OrderList>();
-  //     json['orderlist'].forEach((v) {
-  //       orderlist.add(new OrderList.fromJson(v));
-  //     });
-  //   }
-  // }
-
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = Map<String, dynamic>();
     if (this.orderlist != null)
@@ -112,13 +103,13 @@ class OrderListProvider with ChangeNotifier {
 
   void addToList({Product item, String referenceOrder}) {
     int index = orderlist.indexWhere((data) {
-      return data.productName == item.name && data.price == item.price;
+      return data.productName == item.name && data.id == item.id;
     });
 
     //-1 item not found in orderlist
     if (index == -1) {
       orderlist.add(OrderList(
-        id: _orderID,
+        id: item.id,
         productName: item.name,
         price: item.price,
         dateTime: DateTime.now(),
@@ -126,12 +117,11 @@ class OrderListProvider with ChangeNotifier {
         referenceOrder: referenceOrder,
         discount: item.discount,
       ));
-      notifyListeners();
     } else {
       int prevQty = orderlist[index].quantity;
 
       orderlist[index] = OrderList(
-        id: _orderID,
+        id: item.id,
         productName: item.name,
         price: item.price,
         dateTime: DateTime.now(),
@@ -139,8 +129,8 @@ class OrderListProvider with ChangeNotifier {
         referenceOrder: referenceOrder,
         discount: item.discount,
       );
-      notifyListeners();
     }
+    notifyListeners();
   }
 
   void removeFromList(int index) {

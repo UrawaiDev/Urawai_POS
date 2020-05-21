@@ -110,6 +110,7 @@ class TransactionReport extends StatelessWidget {
                                     ),
                                     Expanded(
                                       child: StreamBuilder<QuerySnapshot>(
+                                          // TODO: create function to return All document without Transaction VOID
                                           stream: _firestoreServices
                                               .getAllDocuments(kShopName),
                                           builder: (context, snapshot) {

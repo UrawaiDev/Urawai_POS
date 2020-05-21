@@ -42,7 +42,22 @@ class PostedOrderProvider with ChangeNotifier {
   }
 
   addItem(PostedOrder pOrder, OrderList orderList) {
-    pOrder.orderList.add(orderList);
+    int index = pOrder.orderList.indexWhere((element) =>
+        element.productName == orderList.productName &&
+        element.id == orderList.id);
+
+    if (index == -1)
+      pOrder.orderList.add(orderList);
+    else {
+      OrderList data = pOrder.orderList[index];
+      data.id = orderList.id;
+      data.note = orderList.note;
+      data.productName = orderList.productName;
+      data.price = orderList.price;
+      data.quantity = data.quantity + 1;
+      data.discount = orderList.discount;
+    }
+
     notifyListeners();
   }
 
@@ -63,16 +78,18 @@ class PostedOrderProvider with ChangeNotifier {
   }
 
   double get discountTotal {
-    // var hasDiscount = _postedOrder.orderList.where((item) {
-    //   return item.discount != null && item.discount != 0;
-    // });
+    var hasDiscount = _postedOrder.orderList.where((item) {
+      return item.discount != null && item.discount != 0;
+    });
 
-    // double result = hasDiscount.fold(0, (prev, item) {
-    //   //perlu dikonfirmasi apakah diskon berlakuk kelipatan
-    //   return prev + ((item.price * (item.discount / 100)) * item.quantity);
-    // });
+    double result = hasDiscount.fold(0, (prev, item) {
+      //perlu dikonfirmasi apakah diskon berlakuk kelipatan
+      return prev + ((item.price * (item.discount / 100)) * item.quantity);
+    });
+
+    return result;
     //just return value from db
-    return _postedOrder.discount;
+    // return _postedOrder.discount;
   }
 
   double get subTotal {
