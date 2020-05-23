@@ -2,9 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:urawai_pos/core/Provider/orderList_provider.dart';
+import 'package:urawai_pos/core/Provider/postedOrder_provider.dart';
 import 'package:urawai_pos/ui/utils/constans/utils.dart';
 
 class ExtraDiscoutDialog extends StatefulWidget {
+  final dynamic state;
+  ExtraDiscoutDialog(this.state);
   @override
   _ExtraDiscoutDialogState createState() => _ExtraDiscoutDialogState();
 }
@@ -115,14 +118,21 @@ class _ExtraDiscoutDialogState extends State<ExtraDiscoutDialog> {
             style: kDialogTextStyle,
           ),
           onPressed: () {
-            final state =
-                Provider.of<OrderListProvider>(context, listen: false);
             if (_formKey.currentState.validate()) {
               if (_currentIndex == 0) {
-                state.extraDicount = double.tryParse(_textExtraDiscount.text);
+                if (widget.state is OrderListProvider)
+                  widget.state.extraDicount =
+                      double.tryParse(_textExtraDiscount.text);
+                else if (widget.state is PostedOrderProvider)
+                  widget.state.extraDicount =
+                      double.tryParse(_textExtraDiscount.text);
               } else if (_currentIndex == 1) {
-                state.extraDicount = state.subTotal *
-                    (double.tryParse(_textExtraDiscount.text) / 100);
+                if (widget.state is OrderListProvider)
+                  widget.state.extraDicount = widget.state.subTotal *
+                      (double.tryParse(_textExtraDiscount.text) / 100);
+                else if (widget.state is PostedOrderProvider)
+                  widget.state.extraDicount = widget.state.subTotal *
+                      (double.tryParse(_textExtraDiscount.text) / 100);
               }
 
               Navigator.pop(context);

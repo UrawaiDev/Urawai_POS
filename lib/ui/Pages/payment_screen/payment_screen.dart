@@ -9,7 +9,6 @@ import 'package:urawai_pos/core/Provider/orderList_provider.dart';
 import 'package:urawai_pos/core/Provider/postedOrder_provider.dart';
 import 'package:urawai_pos/core/Provider/transactionOrder_provider.dart';
 import 'package:urawai_pos/core/Services/connectivity_service.dart';
-import 'package:urawai_pos/ui/Pages/payment_success/payment_success.dart';
 import 'package:urawai_pos/ui/Pages/pos/pos_Page.dart';
 import 'package:urawai_pos/ui/Widgets/connection_status.dart';
 import 'package:urawai_pos/ui/Widgets/costum_DialogBox.dart';
@@ -18,11 +17,11 @@ import 'package:urawai_pos/ui/Widgets/left_paymentScreen_postedOrder.dart';
 import 'package:urawai_pos/ui/utils/constans/formatter.dart';
 import 'package:urawai_pos/ui/utils/constans/utils.dart';
 import 'package:urawai_pos/ui/utils/functions/paymentHelpers.dart';
+import 'package:urawai_pos/ui/utils/functions/routeGenerator.dart';
 
 class PaymentScreen extends StatefulWidget {
   final dynamic itemList;
   static const String postedOrderBox = "Posted_Order";
-  static const String routeName = "PaymentScreen";
 
   PaymentScreen(this.itemList);
 
@@ -271,7 +270,8 @@ class _PaymentScreenState extends State<PaymentScreen> {
                     }
 
                     //Navigate to Payment Success Screen
-                    Navigator.pushNamed(context, PaymentSuccess.routeName,
+                    Navigator.pushNamed(
+                        context, RouteGenerator.kRoutePaymentSuccessPage,
                         arguments: state);
                   },
                 );
@@ -597,8 +597,8 @@ class _PaymentScreenState extends State<PaymentScreen> {
                               }
 
                               //Navigate to Payment Success Screen
-                              Navigator.pushNamed(
-                                  context, PaymentSuccess.routeName,
+                              Navigator.pushNamed(context,
+                                  RouteGenerator.kRoutePaymentSuccessPage,
                                   arguments: state);
                             },
                           );

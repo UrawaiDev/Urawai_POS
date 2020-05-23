@@ -1,18 +1,14 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:urawai_pos/core/Models/orderList.dart';
 import 'package:urawai_pos/core/Services/firestore_service.dart';
 import 'package:urawai_pos/ui/Widgets/costum_button.dart';
 import 'package:urawai_pos/ui/Widgets/footer_OrderList.dart';
 import 'package:urawai_pos/ui/utils/constans/const.dart';
 import 'package:urawai_pos/ui/utils/constans/formatter.dart';
 import 'package:urawai_pos/ui/utils/constans/utils.dart';
-import 'package:urawai_pos/ui/utils/functions/general_function.dart';
 import 'package:urawai_pos/ui/utils/functions/paymentHelpers.dart';
 
 class DetailTransactionPage extends StatelessWidget {
-  static const String routeName = '/DetailTransactionPage';
-
   final String boxKey;
 
   DetailTransactionPage({@required this.boxKey});

@@ -4,7 +4,6 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:urawai_pos/core/Models/products.dart';
 import 'package:urawai_pos/core/Services/firestore_service.dart';
-import 'package:urawai_pos/ui/Pages/pos/pos_Page.dart';
 import 'package:urawai_pos/ui/Widgets/costum_button.dart';
 import 'package:urawai_pos/ui/Widgets/drawerMenu.dart';
 import 'package:urawai_pos/ui/utils/constans/const.dart';
@@ -12,7 +11,6 @@ import 'package:urawai_pos/ui/utils/constans/formatter.dart';
 import 'package:urawai_pos/ui/utils/constans/utils.dart';
 
 class TransactionReport extends StatelessWidget {
-  static const String routeName = '/transaction_Report';
   final FirestoreServices _firestoreServices = FirestoreServices();
   @override
   Widget build(BuildContext context) {

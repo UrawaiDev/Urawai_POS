@@ -9,7 +9,6 @@ import 'package:urawai_pos/ui/utils/constans/const.dart';
 import 'package:urawai_pos/ui/utils/constans/utils.dart';
 
 class AddtionalItemOrderPage extends StatelessWidget {
-  static const String routeName = '/AddtionalItemOrderPage';
   final FirestoreServices _firestoreServices = FirestoreServices();
   final dynamic stateProvider;
 

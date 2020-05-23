@@ -8,27 +8,20 @@ import 'package:provider/provider.dart';
 import 'package:urawai_pos/core/Provider/general_provider.dart';
 import 'package:urawai_pos/ui/Widgets/costum_button.dart';
 import 'package:urawai_pos/ui/utils/constans/const.dart';
+import 'package:urawai_pos/ui/utils/constans/products.dart';
 import 'package:urawai_pos/ui/utils/constans/utils.dart';
 import 'package:urawai_pos/ui/utils/functions/imagePicker.dart';
 
 class AddProductPage extends StatefulWidget {
   @override
   _AddProductPageState createState() => _AddProductPageState();
-
-  static const String routeName = '/addProductPage';
 }
 
 class _AddProductPageState extends State<AddProductPage> {
   bool _isPopular = false;
   String _categoryValue;
   String _imageMsg = '';
-  final List<String> productCategories = [
-    'MAKANAN',
-    'MINUMAN',
-    'MAKANAN RINGAN',
-    'MAKANAN PEMBUKA',
-    'MAKANAN PENUTUP',
-  ];
+
   File _imageFile;
   final _formKey = GlobalKey<FormState>();
   final _textProductName = TextEditingController();
@@ -45,11 +38,11 @@ class _AddProductPageState extends State<AddProductPage> {
 
   @override
   Widget build(BuildContext context) {
-    final screenHeight = MediaQuery.of(context).size.height;
-
     return SafeArea(
         child: Scaffold(
       body: Stack(
+        alignment: Alignment.center,
+        fit: StackFit.expand,
         children: <Widget>[
           Padding(
             padding: const EdgeInsets.all(10.0),
@@ -236,14 +229,16 @@ class _AddProductPageState extends State<AddProductPage> {
                                                 hint: Text('Kategori',
                                                     style: kPriceTextStyle),
                                                 value: _categoryValue,
-                                                items: productCategories
+                                                items: ProductsEntity
+                                                    .productCategories
                                                     .map((data) =>
                                                         DropdownMenuItem<
                                                             String>(
                                                           child:
                                                               _buildDropdownMenu(
                                                                   data),
-                                                          value: data,
+                                                          value:
+                                                              data.categoryName,
                                                         ))
                                                     .toList(),
                                                 onChanged: (value) {
@@ -408,39 +403,16 @@ class _AddProductPageState extends State<AddProductPage> {
     ));
   }
 
-  Widget _buildDropdownMenu(String data) {
-    IconData iconData;
-
-    switch (data.toUpperCase()) {
-      case 'MAKANAN':
-        iconData = FontAwesomeIcons.utensils;
-        break;
-      case 'MINUMAN':
-        iconData = FontAwesomeIcons.glassMartiniAlt;
-        break;
-      case 'MAKANAN RINGAN':
-        iconData = FontAwesomeIcons.cookieBite;
-        break;
-      case 'MAKANAN PEMBUKA':
-        iconData = FontAwesomeIcons.stroopwafel;
-        break;
-      case 'MAKANAN PENUTUP':
-        iconData = FontAwesomeIcons.iceCream;
-        break;
-
-      default:
-        iconData = FontAwesomeIcons.questionCircle;
-        break;
-    }
+  Widget _buildDropdownMenu(ProductCategories data) {
     return Row(
       children: <Widget>[
         FaIcon(
-          iconData,
+          data.icon,
           size: 25,
           color: Colors.blue,
         ),
         SizedBox(width: 15),
-        Text(data, style: kPriceTextStyle),
+        Text(data.categoryName, style: kPriceTextStyle),
       ],
     );
   }

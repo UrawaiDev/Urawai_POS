@@ -24,8 +24,6 @@ class PaymentSuccess extends StatelessWidget {
     @required this.state,
   });
 
-  static const String routeName = "PaymentSuccessPage";
-
   @override
   Widget build(BuildContext context) {
     String _cashierName;

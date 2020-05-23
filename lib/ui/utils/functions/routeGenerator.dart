@@ -10,30 +10,49 @@ import 'package:urawai_pos/ui/Pages/payment_screen/payment_screen.dart';
 import 'package:urawai_pos/ui/Pages/payment_success/payment_success.dart';
 import 'package:urawai_pos/ui/Pages/pos/pos_Page.dart';
 import 'package:urawai_pos/ui/Pages/products/add_products.dart';
+import 'package:urawai_pos/ui/Pages/products/edit_products.dart';
+import 'package:urawai_pos/ui/Pages/products/list_products.dart';
 import 'package:urawai_pos/ui/Pages/transaction_report/transaction_report.dart';
 
 class RouteGenerator {
+  static const String kRouteProductListPage = 'ProductListPage';
+  static const String kRoutePOSPage = 'POS_Page';
+  static const String kRoutePaymentScreen = 'Payment_Screen';
+  static const String kRouteTransactionHistory = 'Transaction_History';
+  static const String kRouteAddProductPage = 'Add_Product_Page';
+  static const String kRouteEditProductPage = 'Edit_Product_Page';
+  static const String kRouteAddtionalItemOrderPage = 'Addtional_Item_Page';
+  static const String kRoutePaymentSuccessPage = 'Payment_Success_Page';
+  static const String kRouteDetailTransaction = 'Detail_Transaction_Page';
+  static const String kRouteTransactionReport = 'Transaction_Report_Page';
+
   static Route<dynamic> onGenerate(settings) {
     final args = settings.arguments;
     switch (settings.name) {
-      case POSPage.routeName:
+      case kRoutePOSPage:
         return MaterialPageRoute(builder: (context) => POSPage());
         break;
-      case PaymentScreen.routeName:
+      case kRoutePaymentScreen:
         return MaterialPageRoute(builder: (context) => PaymentScreen(args));
         break;
-      case TransactionHistoryPage.routeName:
+      case kRouteTransactionHistory:
         return MaterialPageRoute(
             builder: (context) => TransactionHistoryPage());
         break;
-      case AddProductPage.routeName:
+      case kRouteAddProductPage:
         return MaterialPageRoute(builder: (context) => AddProductPage());
         break;
-      case AddtionalItemOrderPage.routeName:
+      case kRouteEditProductPage:
+        return MaterialPageRoute(builder: (context) => EditProductPage(args));
+        break;
+      case kRouteProductListPage:
+        return MaterialPageRoute(builder: (context) => ProductListPage());
+        break;
+      case kRouteAddtionalItemOrderPage:
         return MaterialPageRoute(
             builder: (context) => AddtionalItemOrderPage(args));
         break;
-      case PaymentSuccess.routeName:
+      case kRoutePaymentSuccessPage:
         return MaterialPageRoute(builder: (context) {
           var generalProvider = Provider.of<GeneralProvider>(context);
 
@@ -58,12 +77,12 @@ class RouteGenerator {
         });
 
         break;
-      case DetailTransactionPage.routeName:
+      case kRouteDetailTransaction:
         if (args is String)
           return MaterialPageRoute(
               builder: (context) => DetailTransactionPage(boxKey: args));
         break;
-      case TransactionReport.routeName:
+      case kRouteTransactionReport:
         return MaterialPageRoute(builder: (context) => TransactionReport());
         break;
       default:

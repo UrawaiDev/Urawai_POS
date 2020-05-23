@@ -2,19 +2,17 @@ import 'package:connectivity/connectivity.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:urawai_pos/core/Models/orderList.dart';
-import 'package:urawai_pos/core/Models/products.dart';
 import 'package:urawai_pos/core/Models/transaction.dart';
 import 'package:urawai_pos/core/Provider/orderList_provider.dart';
 import 'package:urawai_pos/core/Provider/transactionOrder_provider.dart';
-import 'package:urawai_pos/core/Services/firestore_service.dart';
-import 'package:urawai_pos/ui/Pages/payment_screen/addtional_itemOrder.dart';
 import 'package:urawai_pos/ui/Pages/pos/pos_Page.dart';
-import 'package:urawai_pos/ui/Widgets/card_menu.dart';
 import 'package:urawai_pos/ui/Widgets/costum_DialogBox.dart';
+import 'package:urawai_pos/ui/Widgets/extraDiscount.dart';
 import 'package:urawai_pos/ui/Widgets/footer_OrderList.dart';
 import 'package:urawai_pos/ui/utils/constans/const.dart';
 import 'package:urawai_pos/ui/utils/constans/utils.dart';
 import 'package:urawai_pos/ui/utils/functions/general_function.dart';
+import 'package:urawai_pos/ui/utils/functions/routeGenerator.dart';
 
 import 'detail_itemOrder.dart';
 
@@ -30,7 +28,6 @@ class PaymentScreenLeftOrderList extends StatefulWidget {
 class _PaymentScreenLeftOrderListState
     extends State<PaymentScreenLeftOrderList> {
   TextEditingController _textNote = TextEditingController();
-  FirestoreServices _firestoreServices;
 
   @override
   void dispose() {
@@ -66,7 +63,7 @@ class _PaymentScreenLeftOrderListState
                     icon: Icon(Icons.add),
                     onPressed: () {
                       Navigator.pushNamed(
-                          context, AddtionalItemOrderPage.routeName,
+                          context, RouteGenerator.kRouteAddtionalItemOrderPage,
                           arguments: orderListProvider);
                     },
                   ),
@@ -174,75 +171,105 @@ class _PaymentScreenLeftOrderListState
                   Divider(
                     thickness: 2.5,
                   ),
-                  GestureDetector(
-                    child: Container(
-                      alignment: Alignment.center,
-                      height: 50,
-                      width: 400,
-                      decoration: BoxDecoration(
-                        color: Colors.red,
-                        border: Border.all(color: Colors.grey),
-                      ),
-                      child: Text('Void Traksaksi',
-                          style: TextStyle(
-                            fontSize: 25,
-                            color: Colors.white,
-                            fontWeight: FontWeight.bold,
-                          )),
-                    ),
-                    onTap: () => CostumDialogBox.showCostumDialogBox(
-                        context: context,
-                        icon: Icons.delete,
-                        iconColor: Colors.red,
-                        title: 'Konfirmasi',
-                        contentString: 'Anda akan menghapus transaksi ini?',
-                        confirmButtonTitle: 'Hapus',
-                        onConfirmPressed: () {
-                          final transactionProvider =
-                              Provider.of<TransactionOrderProvider>(context,
-                                  listen: false);
-                          final connectionStatus =
-                              Provider.of<ConnectivityResult>(context,
-                                  listen: false);
-                          if (connectionStatus == ConnectivityResult.none) {
-                            // Add to HIVE db When Offline
-                            Provider.of<TransactionOrderProvider>(context,
-                                    listen: false)
-                                .addTransactionOrder(
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: <Widget>[
+                      GestureDetector(
+                        child: Container(
+                          alignment: Alignment.center,
+                          height: 50,
+                          width:
+                              (MediaQuery.of(context).size.width * 0.4) * 0.6,
+                          decoration: BoxDecoration(
+                            color: Colors.red,
+                            border: Border.all(color: Colors.grey),
+                          ),
+                          child: Text('Void Traksaksi',
+                              style: TextStyle(
+                                fontSize: 25,
+                                color: Colors.white,
+                                fontWeight: FontWeight.bold,
+                              )),
+                        ),
+                        onTap: () => CostumDialogBox.showCostumDialogBox(
+                            context: context,
+                            icon: Icons.delete,
+                            iconColor: Colors.red,
+                            title: 'Konfirmasi',
+                            contentString: 'Anda akan menghapus transaksi ini?',
+                            confirmButtonTitle: 'Hapus',
+                            onConfirmPressed: () {
+                              final transactionProvider =
+                                  Provider.of<TransactionOrderProvider>(context,
+                                      listen: false);
+                              final connectionStatus =
+                                  Provider.of<ConnectivityResult>(context,
+                                      listen: false);
+                              if (connectionStatus == ConnectivityResult.none) {
+                                // Add to HIVE db When Offline
+                                Provider.of<TransactionOrderProvider>(context,
+                                        listen: false)
+                                    .addTransactionOrder(
+                                        stateProvider: stateProvider,
+                                        paymentStatus: PaymentStatus.VOID,
+                                        paymentType: PaymentType.CASH);
+                              } else {
+                                //Add to cloud FireStore when Online
+                                transactionProvider.addTransactionToFirestore(
                                     stateProvider: stateProvider,
                                     paymentStatus: PaymentStatus.VOID,
-                                    paymentType: PaymentType.CASH);
-                          } else {
-                            //Add to cloud FireStore when Online
-                            transactionProvider.addTransactionToFirestore(
-                                stateProvider: stateProvider,
-                                paymentStatus: PaymentStatus.VOID,
-                                paymentType: PaymentType.CASH,
-                                shopName:
-                                    kShopName); //TODO; will replace with dynamic shopname
+                                    paymentType: PaymentType.CASH,
+                                    shopName:
+                                        kShopName); //TODO; will replace with dynamic shopname
 
-                          }
+                              }
 
-                          Navigator.pop(context); //close Hapus dialogBOx
+                              Navigator.pop(context); //close Hapus dialogBOx
 
-                          CostumDialogBox.showDialogInformation(
-                              context: context,
-                              icon: Icons.info,
-                              iconColor: Colors.blue,
-                              title: 'Informasi',
-                              contentText: 'Transaksi berhasil di Hapus.',
-                              onTap: () {
-                                //clear list
-                                stateProvider.resetOrderList();
-                                //back to main page
-                                Navigator.pushAndRemoveUntil(
-                                  context,
-                                  MaterialPageRoute(
-                                      builder: (context) => POSPage()),
-                                  ModalRoute.withName(POSPage.routeName),
-                                );
-                              });
-                        }),
+                              CostumDialogBox.showDialogInformation(
+                                  context: context,
+                                  icon: Icons.info,
+                                  iconColor: Colors.blue,
+                                  title: 'Informasi',
+                                  contentText: 'Transaksi berhasil di Hapus.',
+                                  onTap: () {
+                                    //clear list
+                                    stateProvider.resetOrderList();
+                                    //back to main page
+                                    Navigator.pushAndRemoveUntil(
+                                      context,
+                                      MaterialPageRoute(
+                                          builder: (context) => POSPage()),
+                                      ModalRoute.withName(
+                                          RouteGenerator.kRoutePOSPage),
+                                    );
+                                  });
+                            }),
+                      ),
+                      Container(
+                        width: (MediaQuery.of(context).size.width * 0.4) * 0.2,
+                        height: 50,
+                        decoration: BoxDecoration(
+                          border: Border.all(color: Colors.grey),
+                        ),
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: <Widget>[
+                            GestureDetector(
+                                child: Icon(
+                                  Icons.disc_full,
+                                ),
+                                onTap: () => showDialog(
+                                      context: context,
+                                      barrierDismissible: false,
+                                      builder: (context) =>
+                                          ExtraDiscoutDialog(orderListProvider),
+                                    )),
+                            Text('Diskon'),
+                          ],
+                        ),
+                      ),
+                    ],
                   ),
                 ],
               ),

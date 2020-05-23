@@ -9,6 +9,7 @@ class PostedOrderProvider with ChangeNotifier {
   String _totalPayment = '';
   double _finalPayment = 0;
   String _cashierName = '';
+  double _extraDiscount = 0;
 
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = Map<String, dynamic>();
@@ -26,6 +27,12 @@ class PostedOrderProvider with ChangeNotifier {
   double get finalPayment => _finalPayment;
   set finalPayment(double newValue) {
     _finalPayment = newValue;
+    notifyListeners();
+  }
+
+  double get extraDicount => _extraDiscount;
+  set extraDicount(double newValue) {
+    _extraDiscount = newValue;
     notifyListeners();
   }
 
@@ -87,7 +94,7 @@ class PostedOrderProvider with ChangeNotifier {
       return prev + ((item.price * (item.discount / 100)) * item.quantity);
     });
 
-    return result;
+    return result + _extraDiscount;
     //just return value from db
     // return _postedOrder.discount;
   }

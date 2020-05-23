@@ -4,7 +4,6 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:provider/provider.dart';
 import 'package:urawai_pos/core/Provider/general_provider.dart';
 import 'package:urawai_pos/core/Services/firestore_service.dart';
-import 'package:urawai_pos/ui/Pages/Transacation_history/detail_transaction.dart';
 import 'package:urawai_pos/ui/Widgets/costum_DialogBox.dart';
 import 'package:urawai_pos/ui/Widgets/drawerMenu.dart';
 import 'package:urawai_pos/ui/utils/constans/const.dart';
@@ -12,9 +11,9 @@ import 'package:urawai_pos/ui/utils/constans/formatter.dart';
 import 'package:urawai_pos/ui/utils/constans/utils.dart';
 import 'package:urawai_pos/ui/utils/functions/paymentHelpers.dart';
 import 'package:date_range_picker/date_range_picker.dart' as dateRangePicker;
+import 'package:urawai_pos/ui/utils/functions/routeGenerator.dart';
 
 class TransactionHistoryPage extends StatelessWidget {
-  static const String routeName = '/transactionHistory';
   final FirestoreServices _firestoreServices = FirestoreServices();
 
   @override
@@ -617,7 +616,7 @@ class TransactionHistoryPage extends StatelessWidget {
                         ),
                         onTap: () => Navigator.pushNamed(
                           context,
-                          DetailTransactionPage.routeName,
+                          RouteGenerator.kRouteDetailTransaction,
                           arguments: item['id'],
                         ),
                       ),
