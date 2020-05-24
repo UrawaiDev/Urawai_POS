@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:hive/hive.dart';
 import '../Models/orderList.dart';
 
@@ -30,6 +31,8 @@ class TransactionOrder {
   double tender;
   @HiveField(11)
   double change;
+  @HiveField(12)
+  double vat;
 
   TransactionOrder({
     this.id,
@@ -44,16 +47,47 @@ class TransactionOrder {
     this.subtotal,
     this.change,
     this.tender,
+    this.vat,
   });
 
   TransactionOrder.fromJson(Map<String, dynamic> json) {
     id = json['id'];
     cashierName = json['cashierName'];
     referenceOrder = json['referenceOrder'];
-    date = json['orderDate'];
+    date = (json['orderDate'] as Timestamp).toDate();
     grandTotal = json['grandTotal'];
-    paymentType = json['paymentType'];
-    paymentStatus = json['paymentStatus'];
+
+    switch (json['paymentType']) {
+      case 'PaymentType.CASH':
+        paymentType = PaymentType.CASH;
+        break;
+      case 'PaymentType.CREDIT_CARD':
+        paymentType = PaymentType.CREDIT_CARD;
+        break;
+      case 'PaymentType.DEBIT_CARD':
+        paymentType = PaymentType.DEBIT_CARD;
+        break;
+      case 'PaymentType.EMONEY':
+        paymentType = PaymentType.EMONEY;
+        break;
+      default:
+        paymentType = PaymentType.CASH;
+    }
+
+    switch (json['paymentStatus']) {
+      case 'PaymentStatus.COMPLETED':
+        paymentStatus = PaymentStatus.COMPLETED;
+        break;
+      case 'PaymentStatus.PENDING':
+        paymentStatus = PaymentStatus.PENDING;
+        break;
+      case 'PaymentStatus.VOID':
+        paymentStatus = PaymentStatus.VOID;
+        break;
+      default:
+        paymentStatus = PaymentStatus.COMPLETED;
+    }
+
     if (json['orderlist'] != null) {
       itemList = new List<OrderList>();
       json['orderlist'].forEach((v) {
@@ -61,10 +95,11 @@ class TransactionOrder {
       });
     }
 
-    discount = json['discount'];
-    subtotal = json['subtotal'];
-    change = json['change'];
-    tender = json['tender'];
+    discount = json['discount'].toDouble();
+    subtotal = json['subtotal'].toDouble();
+    change = json['change'].toDouble();
+    tender = json['tender'].toDouble();
+    vat = json['vat'].toDouble();
   }
 }
 

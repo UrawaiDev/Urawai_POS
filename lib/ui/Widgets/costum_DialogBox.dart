@@ -43,6 +43,7 @@ class CostumDialogBox {
     Key formKey,
     String title,
     String confirmButtonTitle,
+    String hint = '',
     Function onConfirmPressed,
   }) {
     showDialog(
@@ -64,6 +65,8 @@ class CostumDialogBox {
               textInputAction: TextInputAction.done,
               textCapitalization: TextCapitalization.sentences,
               decoration: InputDecoration(
+                hintStyle: kPriceTextStyle,
+                hintText: hint,
                 errorStyle: kErrorTextStyle,
               ),
               validator: (value) {

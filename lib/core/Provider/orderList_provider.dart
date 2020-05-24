@@ -11,6 +11,7 @@ class OrderListProvider with ChangeNotifier {
   List<OrderList> orderlist = [];
   int _quantity = 1;
   double _finalPayment = 0;
+  double _vat = 0;
   String _totalPayment = '';
   String _note = '-';
 
@@ -20,6 +21,7 @@ class OrderListProvider with ChangeNotifier {
   String _referenceOrder = '';
 
   double _extraDiscount = 0;
+  double _taxFinal = 0;
 
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = Map<String, dynamic>();
@@ -37,6 +39,12 @@ class OrderListProvider with ChangeNotifier {
   String get totalPayment => _totalPayment;
   set totalPayment(String newValue) {
     _totalPayment = newValue;
+    notifyListeners();
+  }
+
+  double get vat => _vat;
+  set vat(double newValue) {
+    _vat = newValue;
     notifyListeners();
   }
 
@@ -77,6 +85,12 @@ class OrderListProvider with ChangeNotifier {
     notifyListeners();
   }
 
+  double get taxFinal => _taxFinal;
+  // set taxFinal(double newValue) {
+  //   _taxFinal = newValue;
+  //   notifyListeners();
+  // }
+
   double get discountTotal {
     var hasDiscount = orderlist.where((item) {
       return item.discount != null && item.discount != 0;
@@ -101,7 +115,7 @@ class OrderListProvider with ChangeNotifier {
     _finalPayment = 0;
   }
 
-  void addToList({Product item, String referenceOrder}) {
+  void addToList({Product item, String referenceOrder, bool vat = false}) {
     int index = orderlist.indexWhere((data) {
       return data.productName == item.name && data.id == item.id;
     });
@@ -130,6 +144,9 @@ class OrderListProvider with ChangeNotifier {
         discount: item.discount,
       );
     }
+
+    if (vat) _vat = 0.1;
+
     notifyListeners();
   }
 
@@ -173,17 +190,21 @@ class OrderListProvider with ChangeNotifier {
 
   double get grandTotal {
     double _grandTotal = 0;
-    double _tax = 0;
     double _subtotal = 0;
+    double _tax = 0;
 
     orderlist.forEach((order) {
       _subtotal = order.quantity * order.price;
       _grandTotal = _grandTotal + _subtotal;
     });
     _subtotal = _grandTotal;
+    _tax = _subtotal * _vat; // ppn ( VAT )
+    _taxFinal = _tax;
 
-    _tax = _subtotal * 0.1;
-    _grandTotal = (_subtotal + _tax) - discountTotal;
+    if (_vat != 0)
+      _grandTotal = (_subtotal + _tax) - discountTotal;
+    else
+      _grandTotal = _subtotal - discountTotal;
 
     //proses pembulatan kebawah
     _grandTotal = _grandTotal - (_grandTotal % 100);

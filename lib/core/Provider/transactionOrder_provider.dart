@@ -29,6 +29,7 @@ class TransactionOrderProvider with ChangeNotifier {
           'paymentStatus': paymentStatus.toString(),
           'paymentType': paymentType.toString(),
           'tender': stateProvider.finalPayment,
+          'vat': stateProvider.taxFinal,
           'change': paymentType == PaymentType.CASH &&
                   paymentStatus != PaymentStatus.VOID
               ? stateProvider.finalPayment - stateProvider.grandTotal
@@ -49,6 +50,7 @@ class TransactionOrderProvider with ChangeNotifier {
           'paymentStatus': paymentStatus.toString(),
           'paymentType': paymentType.toString(),
           'tender': stateProvider.finalPayment,
+          'vat': stateProvider.taxFinal,
           'change': paymentType == PaymentType.CASH &&
                   paymentStatus != PaymentStatus.VOID
               ? stateProvider.finalPayment - stateProvider.grandTotal
@@ -88,6 +90,7 @@ class TransactionOrderProvider with ChangeNotifier {
           paymentStatus: paymentStatus,
           paymentType: paymentType,
           tender: stateProvider.finalPayment,
+          vat: stateProvider.taxFinal,
           change: paymentType == PaymentType.CASH
               ? stateProvider.finalPayment - stateProvider.grandTotal
               : 0,
@@ -105,6 +108,7 @@ class TransactionOrderProvider with ChangeNotifier {
           paymentStatus: paymentStatus,
           paymentType: paymentType,
           tender: stateProvider.finalPayment,
+          vat: stateProvider.vat,
           change: paymentType == PaymentType.CASH
               ? stateProvider.finalPayment - stateProvider.grandTotal
               : 0,

@@ -366,16 +366,6 @@ class _EditProductPageState extends State<EditProductPage> {
                   SizedBox(height: 30),
                   CostumButton.squareButton('Simpan', prefixIcon: Icons.save,
                       onTap: () async {
-                    // if (_imageFile == null)
-                    //   setState(() {
-                    //     _imageMsg = 'Foto Produk Tidak Boleh Kosong.';
-                    //   });
-                    // else {
-                    //   setState(() {
-                    //     _imageMsg = '';
-                    //   });
-                    // }
-
                     if (_formKey.currentState.validate()) {
                       var result = await uploadAndEditDocument(
                         id: widget.product.id,

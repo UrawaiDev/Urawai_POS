@@ -263,7 +263,7 @@ class DetailTransactionPage extends StatelessWidget {
                           dicount: data['discount'],
                           grandTotal: data['grandTotal'],
                           subtotal: data['subtotal'],
-                          tax: 0.1,
+                          vat: data['vat'],
                         ),
                         Padding(
                           padding: const EdgeInsets.symmetric(horizontal: 8.0),

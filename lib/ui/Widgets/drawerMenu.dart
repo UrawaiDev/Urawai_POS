@@ -61,7 +61,8 @@ class DrawerMenu extends StatelessWidget {
               'Pengaturan',
               style: kMainMenuStyle,
             )),
-            onTap: () {},
+            onTap: () =>
+                Navigator.pushNamed(context, RouteGenerator.kRouteSettingsPage),
           ),
           ExpansionTile(
             title: Text(

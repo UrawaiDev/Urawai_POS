@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:urawai_pos/core/Models/transaction.dart';
 import 'package:urawai_pos/core/Provider/orderList_provider.dart';
 import 'package:urawai_pos/core/Provider/postedOrder_provider.dart';
+import 'package:urawai_pos/core/Provider/settings_provider.dart';
 import 'package:urawai_pos/ui/Pages/pos/pos_Page.dart';
 import 'package:urawai_pos/ui/Widgets/costum_button.dart';
 import 'package:urawai_pos/ui/Widgets/footer_OrderList.dart';
@@ -163,7 +164,7 @@ class PaymentSuccess extends StatelessWidget {
                               dicount: state.discountTotal,
                               grandTotal: state.grandTotal,
                               subtotal: state.subTotal,
-                              tax: 0.1,
+                              vat: state.taxFinal,
                             ),
                             Padding(
                               padding:

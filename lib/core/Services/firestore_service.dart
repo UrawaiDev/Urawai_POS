@@ -1,5 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:intl/intl.dart';
 import 'package:urawai_pos/core/Models/products.dart';
+import 'package:urawai_pos/core/Models/transaction.dart';
 
 class FirestoreServices {
   Firestore _firestore = Firestore.instance;
@@ -12,12 +14,17 @@ class FirestoreServices {
   }
 
   // get All Documents exclude Void Trnsaction
-  // Stream<QuerySnapshot> getAllDocumentsWithoutVOID(String shopName) {
-  //   var result = _firestore.collection(shopName).where('paymentStatus',i)
-  //   .snapshots();
+  Future<List<TransactionOrder>> getAllDocumentsWithoutVOID(
+      String shopName) async {
+    List<TransactionOrder> transactions = [];
+    var snapshot = await _firestore.collection(shopName).getDocuments();
+    for (var data in snapshot.documents) {
+      if (data['paymentStatus'] != 'PaymentStatus.VOID')
+        transactions.add(TransactionOrder.fromJson(data.data));
+    }
 
-  //   return result;
-  // }
+    return transactions;
+  }
 
   Future<List<Product>> getProducts(String shopName) async {
     List<Product> products = [];
@@ -40,30 +47,69 @@ class FirestoreServices {
     return products;
   }
 
-  Stream<QuerySnapshot> getDocumentLength(String shopName) {
-    return _firestore.collection(shopName).snapshots();
+  Future<QuerySnapshot> getDocumentLength(String shopName) {
+    return _firestore.collection(shopName).getDocuments();
+  }
+
+  Future<List<TransactionOrder>> getAllTransactionOrder(String shopName) async {
+    List<TransactionOrder> transactions = [];
+    var documents = await _firestore
+        .collection(shopName)
+        .orderBy('orderDate')
+        .getDocuments();
+    for (var data in documents.documents)
+      transactions.add(TransactionOrder.fromJson(data.data));
+
+    return transactions;
   }
 
   // get Document by selected Date
-  Stream<QuerySnapshot> getDocumentByDate(
-      String shopName, List<DateTime> date) {
-    Stream<QuerySnapshot> result;
+  Future<List<TransactionOrder>> getDocumentByDate(
+      String shopName, List<DateTime> date,
+      {bool includeVoid = true}) async {
+    List<TransactionOrder> transactions = [];
+    var snapshot = await _firestore
+        .collection(shopName)
+        .orderBy('orderDate')
+        .getDocuments();
+
+    //pick 1 date
     if (date.length == 1) {
-      result = _firestore
-          .collection(shopName)
-          .where('orderDate',
-              isEqualTo:
-                  date[0]) // TODO: Will compare the Date only wihout Time
-          .snapshots();
+      for (var transaction in snapshot.documents) {
+        var formatedDate = DateFormat("yMd")
+            .format((transaction['orderDate'] as Timestamp).toDate());
+        if (includeVoid == true) {
+          if (formatedDate == DateFormat("yMd").format(date[0]))
+            transactions.add(TransactionOrder.fromJson(transaction.data));
+        } else if (includeVoid == false) {
+          if (formatedDate == DateFormat("yMd").format(date[0]) &&
+              transaction['paymentStatus'] != 'PaymentStatus.VOID')
+            transactions.add(TransactionOrder.fromJson(transaction.data));
+        }
+      }
+      //pick 2 dates
     } else if (date.length == 2) {
-      result = _firestore
-          .collection(shopName)
-          .where('orderDate', isGreaterThanOrEqualTo: date[0])
-          .where('orderDate', isLessThanOrEqualTo: date[1])
-          .snapshots();
+      for (var transaction in snapshot.documents) {
+        DateTime orderDate = (transaction['orderDate'] as Timestamp).toDate();
+        var formatedDate = DateFormat("yMd")
+            .format((transaction['orderDate'] as Timestamp).toDate());
+        if (includeVoid == true) {
+          if (formatedDate == DateFormat("yMd").format(date[0]) ||
+              formatedDate == DateFormat("yMd").format(date[1]) ||
+              (orderDate.isAfter(date[0]) && orderDate.isBefore(date[1])))
+            transactions.add(TransactionOrder.fromJson(transaction.data));
+        } else if (includeVoid == false) {
+          if (transaction['paymentStatus'] != 'PaymentStatus.VOID') {
+            if (formatedDate == DateFormat("yMd").format(date[0]) ||
+                formatedDate == DateFormat("yMd").format(date[1]) ||
+                (orderDate.isAfter(date[0]) && orderDate.isBefore(date[1])))
+              transactions.add(TransactionOrder.fromJson(transaction.data));
+          }
+        }
+      }
     }
 
-    return result;
+    return transactions;
   }
 
   // get Document by Document ID

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:urawai_pos/ui/utils/constans/formatter.dart';
 import 'package:urawai_pos/ui/utils/constans/utils.dart';
 
@@ -7,9 +8,9 @@ class FooterOrderList extends StatelessWidget {
   final double subtotal;
   final double grandTotal;
   final double dicount;
-  final double tax;
+  final double vat;
 
-  FooterOrderList({this.grandTotal, this.subtotal, this.dicount, this.tax});
+  FooterOrderList({this.grandTotal, this.subtotal, this.dicount, this.vat});
 
   @override
   Widget build(BuildContext context) {
@@ -25,9 +26,19 @@ class FooterOrderList extends StatelessWidget {
           _bottomInfo(
               title: 'Diskon', value: Formatter.currencyFormat(dicount)),
           SizedBox(height: 8),
-          _bottomInfo(
-              title: 'Pajak (10%)',
-              value: Formatter.currencyFormat(subtotal * tax)),
+          FutureBuilder<bool>(
+            future: getVAT(),
+            builder: (context, snapshot) {
+              if (snapshot.hasData &&
+                  snapshot.connectionState ==
+                      ConnectionState.done) if (snapshot.data == true)
+                return _bottomInfo(
+                    title: 'Pajak (10%)', value: Formatter.currencyFormat(vat));
+              else
+                return Container();
+              return Container();
+            },
+          ),
           SizedBox(height: 8),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -62,5 +73,15 @@ class FooterOrderList extends StatelessWidget {
         ),
       ],
     );
+  }
+
+  Future<bool> getVAT() async {
+    SharedPreferences _prefs = await SharedPreferences.getInstance();
+    return _prefs.getBool('vat');
+    // if (_prefs.getBool('vat') == true)
+    //   return _bottomInfo(
+    //       title: 'Pajak (10%)', value: Formatter.currencyFormat(vat));
+    // else
+    //   return Container();
   }
 }

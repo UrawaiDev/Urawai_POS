@@ -12,7 +12,9 @@ import 'package:urawai_pos/core/Models/products.dart';
 import 'package:urawai_pos/core/Provider/general_provider.dart';
 import 'package:urawai_pos/core/Provider/orderList_provider.dart';
 import 'package:urawai_pos/core/Provider/postedOrder_provider.dart';
+import 'package:urawai_pos/core/Provider/settings_provider.dart';
 import 'package:urawai_pos/core/Services/firestore_service.dart';
+import 'package:urawai_pos/main.dart';
 import 'package:urawai_pos/ui/Widgets/connection_status.dart';
 import 'package:urawai_pos/ui/Widgets/costum_DialogBox.dart';
 import 'package:urawai_pos/ui/Widgets/costum_button.dart';
@@ -157,7 +159,10 @@ class _POSPageState extends State<POSPage> with SingleTickerProviderStateMixin {
                                                             CostumButton.squareButton(
                                                                 'Tambah Produk',
                                                                 onTap: () {
-                                                              //TODO:will place Navigator to Add Product Page
+                                                              Navigator.pushNamed(
+                                                                  context,
+                                                                  RouteGenerator
+                                                                      .kRouteAddProductPage);
                                                             },
                                                                 prefixIcon:
                                                                     Icons.add),
@@ -311,7 +316,7 @@ class _POSPageState extends State<POSPage> with SingleTickerProviderStateMixin {
                                   dicount: orderlistState.discountTotal,
                                   grandTotal: orderlistState.grandTotal,
                                   subtotal: orderlistState.subTotal,
-                                  tax: 0.1,
+                                  vat: orderlistState.taxFinal,
                                 ),
                               ),
                               Row(
@@ -412,7 +417,6 @@ class _POSPageState extends State<POSPage> with SingleTickerProviderStateMixin {
                                               ),
                                             )),
                                         onPressed: () {
-                                          //SEMENTARA
                                           if (orderlistState
                                               .orderlist.isNotEmpty)
                                             Navigator.pushNamed(
@@ -668,7 +672,8 @@ class _POSPageState extends State<POSPage> with SingleTickerProviderStateMixin {
         formKey: _formKey,
         context: context,
         textEditingController: _textReferenceOrder,
-        title: 'Nama Pelanggan / Nomor Meja',
+        title: 'Referensi',
+        hint: 'Nama Pelanggan atau Nomor Meja',
         confirmButtonTitle: 'OK',
         onConfirmPressed: () {
           if (_formKey.currentState.validate()) {
@@ -826,10 +831,13 @@ class _POSPageState extends State<POSPage> with SingleTickerProviderStateMixin {
         ),
       ),
       onDoubleTap: () {
+        final state = Provider.of<SettingProvider>(context, listen: false);
+
         if (orderlistProvider.orderID.isNotEmpty) {
           orderlistProvider.addToList(
             item: product,
             referenceOrder: orderlistProvider.referenceOrder,
+            vat: state.taxActivated,
           );
         } else {
           _animationController.forward();
@@ -949,7 +957,7 @@ class _POSPageState extends State<POSPage> with SingleTickerProviderStateMixin {
                   style: kMainMenuStyle,
                 )),
                 onTap: () => Navigator.pushNamed(
-                    context, RouteGenerator.kRouteAddProductPage),
+                    context, RouteGenerator.kRouteSettingsPage),
               ),
               ListTile(
                 leading: FaIcon(FontAwesomeIcons.lifeRing),

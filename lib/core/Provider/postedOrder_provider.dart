@@ -8,8 +8,10 @@ class PostedOrderProvider with ChangeNotifier {
   PostedOrder _postedOrder;
   String _totalPayment = '';
   double _finalPayment = 0;
+  double _vat = 0;
   String _cashierName = '';
   double _extraDiscount = 0;
+  double _taxFinal = 0;
 
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = Map<String, dynamic>();
@@ -30,6 +32,14 @@ class PostedOrderProvider with ChangeNotifier {
     notifyListeners();
   }
 
+  double get taxFinal => _taxFinal;
+
+  double get vat => _vat;
+  set setVat(double newValue) {
+    _vat = newValue;
+    // notifyListeners();
+  }
+
   double get extraDicount => _extraDiscount;
   set extraDicount(double newValue) {
     _extraDiscount = newValue;
@@ -48,25 +58,29 @@ class PostedOrderProvider with ChangeNotifier {
     notifyListeners();
   }
 
-  addItem(PostedOrder pOrder, OrderList orderList) {
-    int index = pOrder.orderList.indexWhere((element) =>
-        element.productName == orderList.productName &&
-        element.id == orderList.id);
+  // addItem(PostedOrder pOrder, OrderList orderList, {bool vat = false}) {
+  //   int index = pOrder.orderList.indexWhere((element) =>
+  //       element.productName == orderList.productName &&
+  //       element.id == orderList.id);
 
-    if (index == -1)
-      pOrder.orderList.add(orderList);
-    else {
-      OrderList data = pOrder.orderList[index];
-      data.id = orderList.id;
-      data.note = orderList.note;
-      data.productName = orderList.productName;
-      data.price = orderList.price;
-      data.quantity = data.quantity + 1;
-      data.discount = orderList.discount;
-    }
+  //   if (index == -1)
+  //     pOrder.orderList.add(orderList);
+  //   else {
+  //     OrderList data = pOrder.orderList[index];
+  //     data.id = orderList.id;
+  //     data.note = orderList.note;
+  //     data.productName = orderList.productName;
+  //     data.price = orderList.price;
+  //     data.quantity = data.quantity + 1;
+  //     data.discount = orderList.discount;
+  //   }
+  //   if (vat == true)
+  //     _vat = 0.1;
+  //   else
+  //     _vat = 0;
 
-    notifyListeners();
-  }
+  //   notifyListeners();
+  // }
 
   resetFinalPayment() {
     _totalPayment = '';
@@ -112,7 +126,6 @@ class PostedOrderProvider with ChangeNotifier {
 
   double get grandTotal {
     double _grandTotal = 0;
-    double _tax = 0;
     double _subtotal = 0;
 
     _postedOrder.orderList.forEach((order) {
@@ -120,9 +133,12 @@ class PostedOrderProvider with ChangeNotifier {
       _grandTotal = _grandTotal + _subtotal;
     });
     _subtotal = _grandTotal;
+    _taxFinal = _subtotal * _vat;
 
-    _tax = _subtotal * 0.1;
-    _grandTotal = (_subtotal + _tax) - discountTotal;
+    if (_vat != 0)
+      _grandTotal = (_subtotal + _taxFinal) - discountTotal;
+    else
+      _grandTotal = _subtotal - discountTotal;
 
     //proses pembulatan kebawah
     _grandTotal = _grandTotal - (_grandTotal % 100);

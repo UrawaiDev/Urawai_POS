@@ -32,9 +32,9 @@ dependencies:
   date_range_picker: ^1.0.5
   image_picker: ^0.6.3+1
   firebase_storage: ^3.0.0
-  image_cropper: ^1.2.1
   flutter_image_compress: ^0.6.5+1
   shimmer: ^1.1.1
+  shared_preferences: ^0.5.7+3
 
 dev_dependencies:
   flutter_test:

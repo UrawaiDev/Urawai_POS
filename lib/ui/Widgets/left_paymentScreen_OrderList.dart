@@ -166,7 +166,7 @@ class _PaymentScreenLeftOrderListState
                     dicount: stateProvider.discountTotal,
                     grandTotal: stateProvider.grandTotal,
                     subtotal: stateProvider.subTotal,
-                    tax: 0.1,
+                    vat: stateProvider.taxFinal,
                   ),
                   Divider(
                     thickness: 2.5,
@@ -246,27 +246,29 @@ class _PaymentScreenLeftOrderListState
                                   });
                             }),
                       ),
-                      Container(
-                        width: (MediaQuery.of(context).size.width * 0.4) * 0.2,
-                        height: 50,
-                        decoration: BoxDecoration(
-                          border: Border.all(color: Colors.grey),
+                      GestureDetector(
+                        onTap: () => showDialog(
+                          context: context,
+                          barrierDismissible: false,
+                          builder: (context) =>
+                              ExtraDiscoutDialog(orderListProvider),
                         ),
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: <Widget>[
-                            GestureDetector(
-                                child: Icon(
-                                  Icons.disc_full,
-                                ),
-                                onTap: () => showDialog(
-                                      context: context,
-                                      barrierDismissible: false,
-                                      builder: (context) =>
-                                          ExtraDiscoutDialog(orderListProvider),
-                                    )),
-                            Text('Diskon'),
-                          ],
+                        child: Container(
+                          width:
+                              (MediaQuery.of(context).size.width * 0.4) * 0.2,
+                          height: 50,
+                          decoration: BoxDecoration(
+                            border: Border.all(color: Colors.grey),
+                          ),
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: <Widget>[
+                              Icon(
+                                Icons.disc_full,
+                              ),
+                              Text('Diskon'),
+                            ],
+                          ),
                         ),
                       ),
                     ],

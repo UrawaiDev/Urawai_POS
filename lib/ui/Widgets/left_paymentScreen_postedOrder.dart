@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 import 'package:urawai_pos/core/Models/postedOrder.dart';
 import 'package:urawai_pos/core/Models/transaction.dart';
 import 'package:urawai_pos/core/Provider/postedOrder_provider.dart';
+import 'package:urawai_pos/core/Provider/settings_provider.dart';
 import 'package:urawai_pos/core/Provider/transactionOrder_provider.dart';
 import 'package:urawai_pos/ui/Pages/pos/pos_Page.dart';
 import 'package:urawai_pos/ui/Widgets/costum_DialogBox.dart';
@@ -39,8 +40,14 @@ class _PaymentScreenLeftPostedOrderState
   Widget build(BuildContext context) {
     final postedOrderProvider =
         Provider.of<PostedOrderProvider>(context, listen: false);
+    final settingProvider =
+        Provider.of<SettingProvider>(context, listen: false);
 
+    //load Posted Order
     postedOrderProvider.postedorder = widget.postedOrder;
+
+    //set VAT if tax is Activated.
+    if (settingProvider.taxActivated) postedOrderProvider.setVat = 0.1;
 
     return Expanded(
         child: Container(
@@ -184,7 +191,7 @@ class _PaymentScreenLeftPostedOrderState
                     dicount: stateProvider.discountTotal,
                     grandTotal: stateProvider.grandTotal,
                     subtotal: stateProvider.subTotal,
-                    tax: 0.1,
+                    vat: stateProvider.taxFinal,
                   ),
                   Divider(
                     thickness: 2.5,
@@ -249,27 +256,29 @@ class _PaymentScreenLeftPostedOrderState
                               Navigator.pop(context); //Back to HomePage Screen
                             }),
                       ),
-                      Container(
-                        width: (MediaQuery.of(context).size.width * 0.4) * 0.2,
-                        height: 50,
-                        decoration: BoxDecoration(
-                          border: Border.all(color: Colors.grey),
+                      GestureDetector(
+                        onTap: () => showDialog(
+                          context: context,
+                          barrierDismissible: false,
+                          builder: (context) =>
+                              ExtraDiscoutDialog(postedOrderProvider),
                         ),
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: <Widget>[
-                            GestureDetector(
-                                child: Icon(
-                                  Icons.disc_full,
-                                ),
-                                onTap: () => showDialog(
-                                      context: context,
-                                      barrierDismissible: false,
-                                      builder: (context) => ExtraDiscoutDialog(
-                                          postedOrderProvider),
-                                    )),
-                            Text('Diskon'),
-                          ],
+                        child: Container(
+                          width:
+                              (MediaQuery.of(context).size.width * 0.4) * 0.2,
+                          height: 50,
+                          decoration: BoxDecoration(
+                            border: Border.all(color: Colors.grey),
+                          ),
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: <Widget>[
+                              Icon(
+                                Icons.disc_full,
+                              ),
+                              Text('Diskon'),
+                            ],
+                          ),
                         ),
                       ),
                     ],
