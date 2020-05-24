@@ -2,6 +2,7 @@ import 'package:connectivity/connectivity.dart';
 import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
 import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:urawai_pos/core/Models/postedOrder.dart';
 import 'package:urawai_pos/core/Models/transaction.dart';
 import 'package:urawai_pos/core/Provider/postedOrder_provider.dart';
@@ -40,14 +41,12 @@ class _PaymentScreenLeftPostedOrderState
   Widget build(BuildContext context) {
     final postedOrderProvider =
         Provider.of<PostedOrderProvider>(context, listen: false);
-    final settingProvider =
-        Provider.of<SettingProvider>(context, listen: false);
 
     //load Posted Order
     postedOrderProvider.postedorder = widget.postedOrder;
 
     //set VAT if tax is Activated.
-    if (settingProvider.taxActivated) postedOrderProvider.setVat = 0.1;
+    _setTaxPostedOrder(postedOrderProvider);
 
     return Expanded(
         child: Container(
@@ -290,5 +289,12 @@ class _PaymentScreenLeftPostedOrderState
         ],
       ),
     ));
+  }
+
+  Future<void> _setTaxPostedOrder(
+      PostedOrderProvider postedOrderProvider) async {
+    SharedPreferences _prefs = await SharedPreferences.getInstance();
+
+    if (_prefs.getBool('vat') == true) postedOrderProvider.setVat = 0.1;
   }
 }

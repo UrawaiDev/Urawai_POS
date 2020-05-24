@@ -145,7 +145,10 @@ class OrderListProvider with ChangeNotifier {
       );
     }
 
-    if (vat) _vat = 0.1;
+    if (vat)
+      _vat = 0.1;
+    else
+      _vat = 0;
 
     notifyListeners();
   }

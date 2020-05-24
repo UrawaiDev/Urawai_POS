@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
-import 'package:urawai_pos/core/Models/orderList.dart';
 import 'package:urawai_pos/core/Models/postedOrder.dart';
 import 'package:urawai_pos/ui/Pages/pos/pos_Page.dart';
 
@@ -37,7 +36,7 @@ class PostedOrderProvider with ChangeNotifier {
   double get vat => _vat;
   set setVat(double newValue) {
     _vat = newValue;
-    // notifyListeners();
+    notifyListeners();
   }
 
   double get extraDicount => _extraDiscount;

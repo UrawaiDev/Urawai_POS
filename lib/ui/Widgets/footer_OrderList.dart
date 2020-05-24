@@ -78,10 +78,5 @@ class FooterOrderList extends StatelessWidget {
   Future<bool> getVAT() async {
     SharedPreferences _prefs = await SharedPreferences.getInstance();
     return _prefs.getBool('vat');
-    // if (_prefs.getBool('vat') == true)
-    //   return _bottomInfo(
-    //       title: 'Pajak (10%)', value: Formatter.currencyFormat(vat));
-    // else
-    //   return Container();
   }
 }

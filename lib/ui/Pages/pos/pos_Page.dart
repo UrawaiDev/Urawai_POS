@@ -6,15 +6,14 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:hive/hive.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:urawai_pos/core/Models/postedOrder.dart';
 import 'package:urawai_pos/core/Models/products.dart';
 import 'package:urawai_pos/core/Provider/general_provider.dart';
 import 'package:urawai_pos/core/Provider/orderList_provider.dart';
 import 'package:urawai_pos/core/Provider/postedOrder_provider.dart';
-import 'package:urawai_pos/core/Provider/settings_provider.dart';
 import 'package:urawai_pos/core/Services/firestore_service.dart';
-import 'package:urawai_pos/main.dart';
 import 'package:urawai_pos/ui/Widgets/connection_status.dart';
 import 'package:urawai_pos/ui/Widgets/costum_DialogBox.dart';
 import 'package:urawai_pos/ui/Widgets/costum_button.dart';
@@ -830,14 +829,14 @@ class _POSPageState extends State<POSPage> with SingleTickerProviderStateMixin {
           ],
         ),
       ),
-      onDoubleTap: () {
-        final state = Provider.of<SettingProvider>(context, listen: false);
+      onDoubleTap: () async {
+        SharedPreferences _prefs = await SharedPreferences.getInstance();
 
         if (orderlistProvider.orderID.isNotEmpty) {
           orderlistProvider.addToList(
             item: product,
             referenceOrder: orderlistProvider.referenceOrder,
-            vat: state.taxActivated,
+            vat: _prefs.getBool('vat'),
           );
         } else {
           _animationController.forward();

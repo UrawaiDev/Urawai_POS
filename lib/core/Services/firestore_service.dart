@@ -55,7 +55,7 @@ class FirestoreServices {
     List<TransactionOrder> transactions = [];
     var documents = await _firestore
         .collection(shopName)
-        .orderBy('orderDate')
+        .orderBy('orderDate', descending: true)
         .getDocuments();
     for (var data in documents.documents)
       transactions.add(TransactionOrder.fromJson(data.data));
