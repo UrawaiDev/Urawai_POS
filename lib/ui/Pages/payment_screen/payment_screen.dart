@@ -4,6 +4,7 @@ import 'package:hive/hive.dart';
 import 'package:provider/provider.dart';
 import 'package:urawai_pos/core/Models/postedOrder.dart';
 import 'package:urawai_pos/core/Models/transaction.dart';
+import 'package:urawai_pos/core/Models/users.dart';
 import 'package:urawai_pos/core/Provider/general_provider.dart';
 import 'package:urawai_pos/core/Provider/orderList_provider.dart';
 import 'package:urawai_pos/core/Provider/postedOrder_provider.dart';
@@ -30,8 +31,6 @@ class PaymentScreen extends StatefulWidget {
 }
 
 class _PaymentScreenState extends State<PaymentScreen> {
-  final String shopName = 'WarungMakyos';
-
   @override
   void dispose() {
     super.dispose();
@@ -243,6 +242,8 @@ class _PaymentScreenState extends State<PaymentScreen> {
                             listen: false);
                     final connectionStatus =
                         Provider.of<ConnectivityResult>(context, listen: false);
+                    final currentUser =
+                        Provider.of<Users>(context, listen: false);
 
                     if (connectionStatus == ConnectivityResult.none) {
                       //Add Transaction to HIVE DB when offline
@@ -259,7 +260,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
                         stateProvider: state,
                         paymentStatus: PaymentStatus.COMPLETED,
                         paymentType: generalProvider.paymentType,
-                        shopName: shopName,
+                        shopName: currentUser.shopName,
                       );
                     }
 
@@ -572,6 +573,8 @@ class _PaymentScreenState extends State<PaymentScreen> {
                               final connectionStatus =
                                   Provider.of<ConnectivityResult>(context,
                                       listen: false);
+                              final currentUser =
+                                  Provider.of<Users>(context, listen: false);
                               if (connectionStatus == ConnectivityResult.none) {
                                 //Add Transaction to Hive DB when Offline
                                 Provider.of<TransactionOrderProvider>(context,
@@ -587,7 +590,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
                                     stateProvider: state,
                                     paymentStatus: PaymentStatus.COMPLETED,
                                     paymentType: PaymentType.CASH,
-                                    shopName: shopName);
+                                    shopName: currentUser.shopName);
                               }
 
                               //delete Posted Order

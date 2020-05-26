@@ -9,9 +9,9 @@ import 'package:urawai_pos/ui/Pages/pos/pos_Page.dart';
 import 'package:urawai_pos/ui/Widgets/costum_DialogBox.dart';
 import 'package:urawai_pos/ui/Widgets/extraDiscount.dart';
 import 'package:urawai_pos/ui/Widgets/footer_OrderList.dart';
-import 'package:urawai_pos/ui/utils/constans/const.dart';
 import 'package:urawai_pos/ui/utils/constans/utils.dart';
 import 'package:urawai_pos/ui/utils/functions/general_function.dart';
+import 'package:urawai_pos/ui/utils/functions/getCurrentUser.dart';
 import 'package:urawai_pos/ui/utils/functions/routeGenerator.dart';
 
 import 'detail_itemOrder.dart';
@@ -198,7 +198,9 @@ class _PaymentScreenLeftOrderListState
                             title: 'Konfirmasi',
                             contentString: 'Anda akan menghapus transaksi ini?',
                             confirmButtonTitle: 'Hapus',
-                            onConfirmPressed: () {
+                            onConfirmPressed: () async {
+                              var currentUser =
+                                  await CurrentUserLoggedIn.currentUser;
                               final transactionProvider =
                                   Provider.of<TransactionOrderProvider>(context,
                                       listen: false);
@@ -219,9 +221,7 @@ class _PaymentScreenLeftOrderListState
                                     stateProvider: stateProvider,
                                     paymentStatus: PaymentStatus.VOID,
                                     paymentType: PaymentType.CASH,
-                                    shopName:
-                                        kShopName); //TODO; will replace with dynamic shopname
-
+                                    shopName: currentUser.shopName);
                               }
 
                               Navigator.pop(context); //close Hapus dialogBOx

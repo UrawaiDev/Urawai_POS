@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:intl/intl.dart';
 import 'package:urawai_pos/core/Models/products.dart';
 import 'package:urawai_pos/core/Models/transaction.dart';
+import 'package:urawai_pos/core/Models/users.dart';
 
 class FirestoreServices {
   Firestore _firestore = Firestore.instance;
@@ -153,6 +154,18 @@ class FirestoreServices {
     });
 
     return result;
+  }
+
+  Future<Users> currentUser(String id) async {
+    var snapshot = await _firestore
+        .collection('Users')
+        .where('id', isEqualTo: id)
+        .getDocuments();
+    var users =
+        snapshot.documents.map((documents) => Users.fromJson(documents.data));
+    var currentUser = users.firstWhere((element) => element.id == id);
+
+    return currentUser;
   }
 
   //delete transaction by ID

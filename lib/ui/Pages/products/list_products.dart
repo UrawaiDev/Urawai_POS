@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:urawai_pos/core/Models/products.dart';
+import 'package:urawai_pos/core/Models/users.dart';
 import 'package:urawai_pos/core/Provider/general_provider.dart';
 import 'package:urawai_pos/core/Services/firestore_service.dart';
 import 'package:urawai_pos/ui/Widgets/drawerMenu.dart';
-import 'package:urawai_pos/ui/utils/constans/const.dart';
 import 'package:urawai_pos/ui/utils/constans/formatter.dart';
 import 'package:urawai_pos/ui/utils/constans/utils.dart';
 import 'package:urawai_pos/ui/utils/functions/routeGenerator.dart';
@@ -25,8 +25,14 @@ class _ProductListPageState extends State<ProductListPage> {
   }
 
   @override
+  void initState() {
+    super.initState();
+  }
+
+  @override
   Widget build(BuildContext context) {
     final state = Provider.of<GeneralProvider>(context);
+    Users currentUser = Provider.of<Users>(context);
 
     return SafeArea(
         child: GestureDetector(
@@ -89,9 +95,9 @@ class _ProductListPageState extends State<ProductListPage> {
                   child: FutureBuilder<List<Product>>(
                       future: (_textQuery.text.isEmpty ||
                               _textQuery.text.length < 3)
-                          ? _firestoreServices.getProducts(kShopName)
+                          ? _firestoreServices.getProducts(currentUser.shopName)
                           : _firestoreServices.getDocumentByProductName(
-                              kShopName, _textQuery.text),
+                              currentUser.shopName, _textQuery.text),
                       builder: (context, snapshot) {
                         if (snapshot.hasError)
                           return Center(

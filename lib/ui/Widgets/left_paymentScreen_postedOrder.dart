@@ -6,16 +6,15 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:urawai_pos/core/Models/postedOrder.dart';
 import 'package:urawai_pos/core/Models/transaction.dart';
 import 'package:urawai_pos/core/Provider/postedOrder_provider.dart';
-import 'package:urawai_pos/core/Provider/settings_provider.dart';
 import 'package:urawai_pos/core/Provider/transactionOrder_provider.dart';
 import 'package:urawai_pos/ui/Pages/pos/pos_Page.dart';
 import 'package:urawai_pos/ui/Widgets/costum_DialogBox.dart';
 import 'package:urawai_pos/ui/Widgets/detail_itemOrder.dart';
 import 'package:urawai_pos/ui/Widgets/extraDiscount.dart';
 import 'package:urawai_pos/ui/Widgets/footer_OrderList.dart';
-import 'package:urawai_pos/ui/utils/constans/const.dart';
 import 'package:urawai_pos/ui/utils/constans/utils.dart';
 import 'package:urawai_pos/ui/utils/functions/general_function.dart';
+import 'package:urawai_pos/ui/utils/functions/getCurrentUser.dart';
 import 'package:urawai_pos/ui/utils/functions/routeGenerator.dart';
 
 class PaymentScreenLeftPostedOrder extends StatefulWidget {
@@ -222,7 +221,9 @@ class _PaymentScreenLeftPostedOrderState
                             title: 'Konfirmasi',
                             contentString: 'Anda akan menghapus transaksi ini?',
                             confirmButtonTitle: 'Hapus',
-                            onConfirmPressed: () {
+                            onConfirmPressed: () async {
+                              var currentUser =
+                                  await CurrentUserLoggedIn.currentUser;
                               final transactionProvider =
                                   Provider.of<TransactionOrderProvider>(context,
                                       listen: false);
@@ -244,7 +245,7 @@ class _PaymentScreenLeftPostedOrderState
                                   stateProvider: stateProvider,
                                   paymentStatus: PaymentStatus.VOID,
                                   paymentType: PaymentType.CASH,
-                                  shopName: kShopName,
+                                  shopName: currentUser.shopName,
                                 );
                               }
 

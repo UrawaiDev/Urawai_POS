@@ -30,7 +30,7 @@ class SettingPage extends StatelessWidget {
                     child: ListView(
                       children: <Widget>[
                         ListTile(
-                          title: Text('Pajan Pertambahan Nilai (PPN) 10%',
+                          title: Text('Pajak Pertambahan Nilai (PPN) 10%',
                               style: kPriceTextStyle),
                           trailing: FutureBuilder<bool>(
                               future: _getVAT(),

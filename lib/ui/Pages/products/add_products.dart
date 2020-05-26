@@ -7,9 +7,9 @@ import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
 import 'package:urawai_pos/core/Provider/general_provider.dart';
 import 'package:urawai_pos/ui/Widgets/costum_button.dart';
-import 'package:urawai_pos/ui/utils/constans/const.dart';
 import 'package:urawai_pos/ui/utils/constans/products.dart';
 import 'package:urawai_pos/ui/utils/constans/utils.dart';
+import 'package:urawai_pos/ui/utils/functions/getCurrentUser.dart';
 import 'package:urawai_pos/ui/utils/functions/imagePicker.dart';
 
 class AddProductPage extends StatefulWidget {
@@ -353,6 +353,8 @@ class _AddProductPageState extends State<AddProductPage> {
                     SizedBox(height: 30),
                     CostumButton.squareButton('Simpan', prefixIcon: Icons.save,
                         onTap: () async {
+                      var currentUser = await CurrentUserLoggedIn.currentUser;
+
                       if (_imageFile == null)
                         setState(() {
                           _imageMsg = 'Foto Produk Tidak Boleh Kosong.';
@@ -367,7 +369,7 @@ class _AddProductPageState extends State<AddProductPage> {
                           _categoryValue != null &&
                           _imageFile != null) {
                         var result = await uploadAndSavetoFirebase(
-                          shopName: kShopName,
+                          shopName: currentUser.shopName,
                           productName: _textProductName.text,
                           productPrice: double.tryParse(_textProductPrice.text),
                           discount: double.tryParse(_textDiscount.text ?? '0'),

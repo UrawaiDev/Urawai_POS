@@ -1,9 +1,10 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:urawai_pos/core/Models/users.dart';
 import 'package:urawai_pos/core/Services/firestore_service.dart';
 import 'package:urawai_pos/ui/Widgets/costum_button.dart';
 import 'package:urawai_pos/ui/Widgets/footer_OrderList.dart';
-import 'package:urawai_pos/ui/utils/constans/const.dart';
 import 'package:urawai_pos/ui/utils/constans/formatter.dart';
 import 'package:urawai_pos/ui/utils/constans/utils.dart';
 import 'package:urawai_pos/ui/utils/functions/paymentHelpers.dart';
@@ -22,7 +23,7 @@ class DetailTransactionPage extends StatelessWidget {
           Expanded(
               flex: 2,
               child: Container(
-                child: _buildDetailTransactionFromFirestore(),
+                child: _buildDetailTransactionFromFirestore(context),
               )),
           Expanded(
               flex: 3,
@@ -58,9 +59,12 @@ class DetailTransactionPage extends StatelessWidget {
     ));
   }
 
-  Widget _buildDetailTransactionFromFirestore() {
+  Widget _buildDetailTransactionFromFirestore(BuildContext context) {
+    Users currentUser = Provider.of<Users>(context);
+
     return StreamBuilder<DocumentSnapshot>(
-        stream: FirestoreServices().getDocumentByID(kShopName, boxKey),
+        stream:
+            FirestoreServices().getDocumentByID(currentUser.shopName, boxKey),
         builder: (context, document) {
           var data = document.data;
 

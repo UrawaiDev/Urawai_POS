@@ -28,6 +28,7 @@ dependencies:
   uuid: ^2.0.4
   provider: ^4.0.4
   cloud_firestore: ^0.13.5
+  firebase_auth: ^0.16.0
   connectivity: ^0.4.8+5
   date_range_picker: ^1.0.5
   image_picker: ^0.6.3+1
@@ -35,6 +36,8 @@ dependencies:
   flutter_image_compress: ^0.6.5+1
   shimmer: ^1.1.1
   shared_preferences: ^0.5.7+3
+  email_validator: ^1.0.4
+
 
 dev_dependencies:
   flutter_test:

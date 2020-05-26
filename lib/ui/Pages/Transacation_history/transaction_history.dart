@@ -3,13 +3,14 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:urawai_pos/core/Models/transaction.dart';
+import 'package:urawai_pos/core/Models/users.dart';
 import 'package:urawai_pos/core/Provider/general_provider.dart';
 import 'package:urawai_pos/core/Services/firestore_service.dart';
 import 'package:urawai_pos/ui/Widgets/costum_DialogBox.dart';
 import 'package:urawai_pos/ui/Widgets/drawerMenu.dart';
-import 'package:urawai_pos/ui/utils/constans/const.dart';
 import 'package:urawai_pos/ui/utils/constans/formatter.dart';
 import 'package:urawai_pos/ui/utils/constans/utils.dart';
+import 'package:urawai_pos/ui/utils/functions/getCurrentUser.dart';
 import 'package:urawai_pos/ui/utils/functions/paymentHelpers.dart';
 import 'package:date_range_picker/date_range_picker.dart' as dateRangePicker;
 import 'package:urawai_pos/ui/utils/functions/routeGenerator.dart';
@@ -21,6 +22,8 @@ class TransactionHistoryPage extends StatelessWidget {
   Widget build(BuildContext context) {
     final generalProvider =
         Provider.of<GeneralProvider>(context, listen: false);
+
+    Users currentUser = Provider.of<Users>(context);
 
     return SafeArea(
         child: Scaffold(
@@ -129,39 +132,42 @@ class TransactionHistoryPage extends StatelessWidget {
                                 ),
                                 SizedBox(width: 15),
                                 Consumer<GeneralProvider>(
-                                  builder: (_, value, __) => FutureBuilder<
-                                          List<TransactionOrder>>(
-                                      future: value.selectedDate.isEmpty
-                                          ? _firestoreServices
-                                              .getAllTransactionOrder(kShopName)
-                                          : _firestoreServices
-                                              .getDocumentByDate(kShopName,
-                                                  value.selectedDate),
-                                      builder: (context, snapshot) {
-                                        if (snapshot.hasError)
-                                          return Text(
-                                            'An Error has Occured ${snapshot.error}',
-                                            style: kPriceTextStyle,
-                                          );
-                                        else if (!snapshot.hasData)
-                                          return Text(
-                                            '0',
-                                            style: kPriceTextStyle,
-                                          );
-                                        switch (snapshot.connectionState) {
-                                          case ConnectionState.waiting:
-                                            return CircularProgressIndicator();
+                                  builder: (_, value, __) =>
+                                      FutureBuilder<List<TransactionOrder>>(
+                                          future: value.selectedDate.isEmpty
+                                              ? _firestoreServices
+                                                  .getAllTransactionOrder(
+                                                      currentUser.shopName)
+                                              : _firestoreServices
+                                                  .getDocumentByDate(
+                                                      currentUser.shopName,
+                                                      value.selectedDate),
+                                          builder: (context, snapshot) {
+                                            if (snapshot.hasError)
+                                              return Text(
+                                                'An Error has Occured ${snapshot.error}',
+                                                style: kPriceTextStyle,
+                                              );
+                                            else if (!snapshot.hasData)
+                                              return Text(
+                                                '0',
+                                                style: kPriceTextStyle,
+                                              );
+                                            switch (snapshot.connectionState) {
+                                              case ConnectionState.waiting:
+                                                return CircularProgressIndicator();
 
-                                            break;
-                                          default:
-                                            return Text(
-                                              snapshot.data.length.toString() ??
-                                                  ['null'],
-                                              style:
-                                                  kProductNameSmallScreenTextStyle,
-                                            );
-                                        }
-                                      }),
+                                                break;
+                                              default:
+                                                return Text(
+                                                  snapshot.data.length
+                                                          .toString() ??
+                                                      ['null'],
+                                                  style:
+                                                      kProductNameSmallScreenTextStyle,
+                                                );
+                                            }
+                                          }),
                                 ),
                               ],
                             ),
@@ -173,9 +179,9 @@ class TransactionHistoryPage extends StatelessWidget {
                             FutureBuilder<List<TransactionOrder>>(
                           future: value.selectedDate.isEmpty
                               ? _firestoreServices
-                                  .getAllTransactionOrder(kShopName)
+                                  .getAllTransactionOrder(currentUser.shopName)
                               : _firestoreServices.getDocumentByDate(
-                                  kShopName, value.selectedDate),
+                                  currentUser.shopName, value.selectedDate),
                           builder: (context, snapshot) {
                             if (snapshot.hasError)
                               return Text(
@@ -339,9 +345,11 @@ class TransactionHistoryPage extends StatelessWidget {
                                 icon: Icons.delete,
                                 iconColor: Colors.red,
                                 confirmButtonTitle: 'Hapus',
-                                onConfirmPressed: () {
+                                onConfirmPressed: () async {
+                                  var currentUser =
+                                      await CurrentUserLoggedIn.currentUser;
                                   _firestoreServices.deleteTransaction(
-                                      kShopName, item.id);
+                                      currentUser.shopName, item.id);
                                   Navigator.pop(context);
                                 });
                           }),

@@ -10,9 +10,11 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:urawai_pos/core/Models/postedOrder.dart';
 import 'package:urawai_pos/core/Models/products.dart';
+import 'package:urawai_pos/core/Models/users.dart';
 import 'package:urawai_pos/core/Provider/general_provider.dart';
 import 'package:urawai_pos/core/Provider/orderList_provider.dart';
 import 'package:urawai_pos/core/Provider/postedOrder_provider.dart';
+import 'package:urawai_pos/core/Services/firebase_auth.dart';
 import 'package:urawai_pos/core/Services/firestore_service.dart';
 import 'package:urawai_pos/ui/Widgets/connection_status.dart';
 import 'package:urawai_pos/ui/Widgets/costum_DialogBox.dart';
@@ -20,7 +22,6 @@ import 'package:urawai_pos/ui/Widgets/costum_button.dart';
 import 'package:urawai_pos/ui/Widgets/detail_itemOrder.dart';
 import 'package:urawai_pos/ui/Widgets/extraDiscount.dart';
 import 'package:urawai_pos/ui/Widgets/footer_OrderList.dart';
-import 'package:urawai_pos/ui/utils/constans/const.dart';
 import 'package:urawai_pos/ui/utils/constans/formatter.dart';
 import 'package:urawai_pos/ui/utils/constans/utils.dart';
 import 'package:urawai_pos/ui/utils/functions/general_function.dart';
@@ -40,6 +41,7 @@ class _POSPageState extends State<POSPage> with SingleTickerProviderStateMixin {
   final TextEditingController _textQuery = TextEditingController();
   final _formKey = GlobalKey<FormState>();
   final FirestoreServices _firestoreServices = FirestoreServices();
+  final FirebaseAuthentication _auth = FirebaseAuthentication();
 
   AnimationController _animationController;
   Animation<double> _animationScale;
@@ -72,6 +74,11 @@ class _POSPageState extends State<POSPage> with SingleTickerProviderStateMixin {
   Widget build(BuildContext context) {
     final screenHeight = MediaQuery.of(context).size.height;
     var orderlistState = Provider.of<OrderListProvider>(context, listen: false);
+
+    //TODO: Will check why null at First Run
+    var currentUser = Provider.of<Users>(context);
+
+    // print(currentUser);
 
     return SafeArea(
       child: GestureDetector(
@@ -117,10 +124,11 @@ class _POSPageState extends State<POSPage> with SingleTickerProviderStateMixin {
                                               future: _textQuery.text.isEmpty ||
                                                       _textQuery.text.length < 3
                                                   ? _firestoreServices
-                                                      .getProducts(kShopName)
+                                                      .getProducts(
+                                                          currentUser.shopName)
                                                   : _firestoreServices
                                                       .getDocumentByProductName(
-                                                          kShopName,
+                                                          currentUser.shopName,
                                                           _textQuery.text),
                                               builder: (context, snapshot) {
                                                 if (snapshot.hasError)
@@ -201,6 +209,25 @@ class _POSPageState extends State<POSPage> with SingleTickerProviderStateMixin {
                         child: Column(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: <Widget>[
+                              GestureDetector(
+                                child: Container(
+                                  alignment: Alignment.centerRight,
+                                  child: Consumer<Users>(
+                                    builder: (context, currentUser, __) => Text(
+                                      'Kasir: ${currentUser.username ?? [
+                                            null
+                                          ]}', //TODO: Need to change with Stream Builder
+                                      style: kPriceTextStyle,
+                                    ),
+                                  ),
+                                ),
+                                onDoubleTap: () async {
+                                  // var user =
+                                  //     await CurrentUserLoggedIn.currentUser;
+                                  // print(user.username);
+                                  // print(user.shopName);
+                                },
+                              ),
                               Consumer<ConnectivityResult>(
                                 builder: (context, value, _) =>
                                     ConnectionStatusWidget(),
@@ -566,7 +593,7 @@ class _POSPageState extends State<POSPage> with SingleTickerProviderStateMixin {
             children: <Widget>[
               Expanded(
                 child: Text(
-                  'Order List: ' + orderlistState.orderID.toString(),
+                  'Order ID: ' + orderlistState.orderID.toString(),
                   style: TextStyle(
                     color: priceColor,
                     fontSize: 18,
@@ -667,6 +694,7 @@ class _POSPageState extends State<POSPage> with SingleTickerProviderStateMixin {
   }
 
   void _createNewOrder(OrderListProvider orderlistProvider) {
+    final currentUser = Provider.of<Users>(context, listen: false);
     CostumDialogBox.showInputDialogBox(
         formKey: _formKey,
         context: context,
@@ -678,8 +706,8 @@ class _POSPageState extends State<POSPage> with SingleTickerProviderStateMixin {
           if (_formKey.currentState.validate()) {
             orderlistProvider.resetOrderList();
             orderlistProvider.referenceOrder = _textReferenceOrder.text;
-            orderlistProvider.cashierName =
-                'Dummy Cashier XXX'; //override Cashier Name HERE
+            orderlistProvider.cashierName = currentUser.username;
+
             orderlistProvider.createNewOrder();
             _textReferenceOrder.clear();
             Navigator.pop(context);
@@ -961,6 +989,27 @@ class _POSPageState extends State<POSPage> with SingleTickerProviderStateMixin {
               ListTile(
                 leading: FaIcon(FontAwesomeIcons.lifeRing),
                 title: (Text('Bantuan', style: kMainMenuStyle)),
+              ),
+              ListTile(
+                leading: FaIcon(FontAwesomeIcons.signOutAlt),
+                title: (Text('Keluar', style: kMainMenuStyle)),
+                onTap: () {
+                  CostumDialogBox.showCostumDialogBox(
+                      context: context,
+                      title: 'Konfirmasi',
+                      icon: FontAwesomeIcons.signOutAlt,
+                      iconColor: Colors.red,
+                      contentString: 'Keluar dari Aplikasi?',
+                      confirmButtonTitle: 'Keluar',
+                      onConfirmPressed: () async {
+                        await _auth.signOut();
+                        Navigator.pushNamedAndRemoveUntil(
+                            context,
+                            RouteGenerator.kRouteGateKeeper,
+                            ModalRoute.withName(
+                                RouteGenerator.kRouteGateKeeper));
+                      });
+                },
               ),
             ],
           ),

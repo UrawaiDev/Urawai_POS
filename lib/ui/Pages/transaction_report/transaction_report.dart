@@ -7,11 +7,11 @@ import 'package:provider/provider.dart';
 import 'package:urawai_pos/core/Models/orderList.dart';
 import 'package:urawai_pos/core/Models/products.dart';
 import 'package:urawai_pos/core/Models/transaction.dart';
+import 'package:urawai_pos/core/Models/users.dart';
 import 'package:urawai_pos/core/Provider/general_provider.dart';
 import 'package:urawai_pos/core/Services/firestore_service.dart';
 import 'package:urawai_pos/ui/Widgets/costum_button.dart';
 import 'package:urawai_pos/ui/Widgets/drawerMenu.dart';
-import 'package:urawai_pos/ui/utils/constans/const.dart';
 import 'package:urawai_pos/ui/utils/constans/formatter.dart';
 import 'package:urawai_pos/ui/utils/constans/utils.dart';
 import 'package:date_range_picker/date_range_picker.dart' as dateRangePicker;
@@ -19,9 +19,13 @@ import 'package:urawai_pos/ui/utils/functions/routeGenerator.dart';
 
 class TransactionReport extends StatelessWidget {
   final FirestoreServices _firestoreServices = FirestoreServices();
+
   @override
   Widget build(BuildContext context) {
     final generalProvider = Provider.of<GeneralProvider>(context);
+
+    Users currentUser = Provider.of<Users>(context);
+
     return SafeArea(
         child: Scaffold(
             appBar: AppBar(title: Text('Laporan Penjualan')),
@@ -104,55 +108,54 @@ class TransactionReport extends StatelessWidget {
                     ),
                     SizedBox(height: 20),
                     Consumer<GeneralProvider>(
-                      builder: (context, value, _) =>
-                          FutureBuilder<List<TransactionOrder>>(
-                              future: value.selectedDate.isEmpty
-                                  ? _firestoreServices
-                                      .getAllDocumentsWithoutVOID(kShopName)
-                                  : _firestoreServices.getDocumentByDate(
-                                      kShopName,
-                                      value.selectedDate,
-                                      includeVoid: false,
-                                    ),
-                              builder: (context, snapshot) {
-                                if (snapshot.hasError)
-                                  return Text(
-                                    'An Error has Occured ${snapshot.error}',
-                                    style: kProductNameBigScreenTextStyle,
-                                  );
+                      builder: (context, value, _) => FutureBuilder<
+                              List<TransactionOrder>>(
+                          future: value.selectedDate.isEmpty
+                              ? _firestoreServices.getAllDocumentsWithoutVOID(
+                                  currentUser.shopName)
+                              : _firestoreServices.getDocumentByDate(
+                                  currentUser.shopName,
+                                  value.selectedDate,
+                                  includeVoid: false,
+                                ),
+                          builder: (context, snapshot) {
+                            if (snapshot.hasError)
+                              return Text(
+                                'An Error has Occured ${snapshot.error}',
+                                style: kProductNameBigScreenTextStyle,
+                              );
 
-                                if (snapshot.connectionState ==
-                                        ConnectionState.waiting ||
-                                    !snapshot.hasData)
-                                  return CircularProgressIndicator();
+                            if (snapshot.connectionState ==
+                                    ConnectionState.waiting ||
+                                !snapshot.hasData)
+                              return CircularProgressIndicator();
 
-                                return Row(
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceAround,
-                                  children: <Widget>[
-                                    _headerCard(
-                                      'Total Penjualan Kotor',
-                                      Colors.lightGreen,
-                                      _getBruto(snapshot),
-                                    ),
-                                    _headerCard(
-                                      'Total Keuntungan',
-                                      Colors.amber,
-                                      _getNetto(snapshot),
-                                    ),
-                                    _headerCard(
-                                      'Total Transaksi',
-                                      Colors.blue,
-                                      snapshot.data.length.toString(),
-                                    ),
-                                    _headerCard(
-                                      'Rata-Rata Nilai Transaksi',
-                                      Colors.red,
-                                      _getAverage(snapshot),
-                                    ),
-                                  ],
-                                );
-                              }),
+                            return Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceAround,
+                              children: <Widget>[
+                                _headerCard(
+                                  'Total Penjualan Kotor',
+                                  Colors.lightGreen,
+                                  _getBruto(snapshot),
+                                ),
+                                _headerCard(
+                                  'Total Keuntungan',
+                                  Colors.amber,
+                                  _getNetto(snapshot),
+                                ),
+                                _headerCard(
+                                  'Total Transaksi',
+                                  Colors.blue,
+                                  snapshot.data.length.toString(),
+                                ),
+                                _headerCard(
+                                  'Rata-Rata Nilai Transaksi',
+                                  Colors.red,
+                                  _getAverage(snapshot),
+                                ),
+                              ],
+                            );
+                          }),
                     ),
                     SizedBox(height: 20),
                     Expanded(
@@ -190,10 +193,10 @@ class TransactionReport extends StatelessWidget {
                                             future: value.selectedDate.isEmpty
                                                 ? _firestoreServices
                                                     .getAllDocumentsWithoutVOID(
-                                                        kShopName)
+                                                        currentUser.shopName)
                                                 : _firestoreServices
                                                     .getDocumentByDate(
-                                                        kShopName,
+                                                        currentUser.shopName,
                                                         value.selectedDate,
                                                         includeVoid: false),
                                             builder: (context, snapshot) {
@@ -212,7 +215,8 @@ class TransactionReport extends StatelessWidget {
                                               return FutureBuilder<
                                                       List<Product>>(
                                                   future: _firestoreServices
-                                                      .getProducts(kShopName),
+                                                      .getProducts(
+                                                          currentUser.shopName),
                                                   builder: (context, products) {
                                                     if (products.hasError ||
                                                         !products.hasData)

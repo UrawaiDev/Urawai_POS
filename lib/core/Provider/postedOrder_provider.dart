@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
+import 'package:urawai_pos/core/Models/orderList.dart';
 import 'package:urawai_pos/core/Models/postedOrder.dart';
 import 'package:urawai_pos/ui/Pages/pos/pos_Page.dart';
 
@@ -57,29 +58,29 @@ class PostedOrderProvider with ChangeNotifier {
     notifyListeners();
   }
 
-  // addItem(PostedOrder pOrder, OrderList orderList, {bool vat = false}) {
-  //   int index = pOrder.orderList.indexWhere((element) =>
-  //       element.productName == orderList.productName &&
-  //       element.id == orderList.id);
+  addItem(PostedOrder pOrder, OrderList orderList, {bool vat = false}) {
+    int index = pOrder.orderList.indexWhere((element) =>
+        element.productName == orderList.productName &&
+        element.id == orderList.id);
 
-  //   if (index == -1)
-  //     pOrder.orderList.add(orderList);
-  //   else {
-  //     OrderList data = pOrder.orderList[index];
-  //     data.id = orderList.id;
-  //     data.note = orderList.note;
-  //     data.productName = orderList.productName;
-  //     data.price = orderList.price;
-  //     data.quantity = data.quantity + 1;
-  //     data.discount = orderList.discount;
-  //   }
-  //   if (vat == true)
-  //     _vat = 0.1;
-  //   else
-  //     _vat = 0;
+    if (index == -1)
+      pOrder.orderList.add(orderList);
+    else {
+      OrderList data = pOrder.orderList[index];
+      data.id = orderList.id;
+      data.note = orderList.note;
+      data.productName = orderList.productName;
+      data.price = orderList.price;
+      data.quantity = data.quantity + 1;
+      data.discount = orderList.discount;
+    }
+    if (vat == true)
+      _vat = 0.1;
+    else
+      _vat = 0;
 
-  //   notifyListeners();
-  // }
+    notifyListeners();
+  }
 
   resetFinalPayment() {
     _totalPayment = '';

@@ -9,8 +9,8 @@ import 'package:urawai_pos/core/Models/products.dart';
 import 'package:urawai_pos/core/Provider/general_provider.dart';
 import 'package:urawai_pos/ui/Widgets/costum_DialogBox.dart';
 import 'package:urawai_pos/ui/Widgets/costum_button.dart';
-import 'package:urawai_pos/ui/utils/constans/const.dart';
 import 'package:urawai_pos/ui/utils/constans/utils.dart';
+import 'package:urawai_pos/ui/utils/functions/getCurrentUser.dart';
 import 'package:urawai_pos/ui/utils/functions/imagePicker.dart';
 import 'package:urawai_pos/ui/utils/constans/products.dart';
 import 'package:urawai_pos/ui/utils/functions/routeGenerator.dart';
@@ -366,10 +366,11 @@ class _EditProductPageState extends State<EditProductPage> {
                   SizedBox(height: 30),
                   CostumButton.squareButton('Simpan', prefixIcon: Icons.save,
                       onTap: () async {
+                    var currentUser = await CurrentUserLoggedIn.currentUser;
                     if (_formKey.currentState.validate()) {
                       var result = await uploadAndEditDocument(
                         id: widget.product.id,
-                        shopName: kShopName,
+                        shopName: currentUser.shopName,
                         productName: _textProductName.text,
                         productPrice: double.tryParse(_textProductPrice.text),
                         discount: double.tryParse(_textDiscount.text ?? '0'),

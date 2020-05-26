@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:urawai_pos/core/Models/orderList.dart';
 import 'package:urawai_pos/core/Models/products.dart';
+import 'package:urawai_pos/core/Models/users.dart';
 import 'package:urawai_pos/core/Provider/orderList_provider.dart';
 import 'package:urawai_pos/core/Provider/postedOrder_provider.dart';
 import 'package:urawai_pos/core/Services/firestore_service.dart';
 import 'package:urawai_pos/ui/Widgets/card_menu.dart';
-import 'package:urawai_pos/ui/utils/constans/const.dart';
 import 'package:urawai_pos/ui/utils/constans/utils.dart';
 
 class AddtionalItemOrderPage extends StatelessWidget {
@@ -16,6 +18,8 @@ class AddtionalItemOrderPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    Users currentUser = Provider.of<Users>(context);
+
     return SafeArea(
         child: Scaffold(
             body: Padding(
@@ -33,7 +37,7 @@ class AddtionalItemOrderPage extends StatelessWidget {
               child: Container(
                 // color: Colors.yellow,
                 child: FutureBuilder<List<Product>>(
-                  future: _firestoreServices.getProducts(kShopName),
+                  future: _firestoreServices.getProducts(currentUser.shopName),
                   builder: (context, snapshot) {
                     if (snapshot.connectionState == ConnectionState.waiting)
                       return Center(
@@ -62,12 +66,15 @@ class AddtionalItemOrderPage extends StatelessWidget {
                       children: snapshot.data
                           .map((product) => CardMenu(
                                 product,
-                                onDoubleTap: () {
+                                onDoubleTap: () async {
+                                  SharedPreferences _prefs =
+                                      await SharedPreferences.getInstance();
                                   if (stateProvider is OrderListProvider) {
                                     stateProvider.addToList(
                                       item: product,
                                       referenceOrder:
                                           stateProvider.referenceOrder,
+                                      vat: _prefs.getBool('vat'),
                                     );
                                     Navigator.pop(context);
                                   } else if (stateProvider
@@ -81,6 +88,7 @@ class AddtionalItemOrderPage extends StatelessWidget {
                                         discount: product.discount,
                                         quantity: 1,
                                       ),
+                                      vat: _prefs.getBool('vat'),
                                     );
                                     Navigator.pop(context);
                                   }

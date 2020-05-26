@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:urawai_pos/core/Services/firebase_auth.dart';
+import 'package:urawai_pos/ui/Widgets/costum_DialogBox.dart';
 import 'package:urawai_pos/ui/utils/constans/utils.dart';
 import 'package:urawai_pos/ui/utils/functions/routeGenerator.dart';
 
 class DrawerMenu extends StatelessWidget {
+  final FirebaseAuthentication _auth = FirebaseAuthentication();
   @override
   Widget build(BuildContext context) {
     return Drawer(
@@ -100,6 +103,26 @@ class DrawerMenu extends StatelessWidget {
           ListTile(
             leading: FaIcon(FontAwesomeIcons.lifeRing),
             title: (Text('Bantuan', style: kMainMenuStyle)),
+          ),
+          ListTile(
+            leading: FaIcon(FontAwesomeIcons.signOutAlt),
+            title: (Text('Keluar', style: kMainMenuStyle)),
+            onTap: () {
+              CostumDialogBox.showCostumDialogBox(
+                  context: context,
+                  title: 'Konfirmasi',
+                  icon: FontAwesomeIcons.signOutAlt,
+                  iconColor: Colors.red,
+                  contentString: 'Keluar dari Aplikasi?',
+                  confirmButtonTitle: 'Keluar',
+                  onConfirmPressed: () async {
+                    await _auth.signOut();
+                    Navigator.pushNamedAndRemoveUntil(
+                        context,
+                        RouteGenerator.kRouteGateKeeper,
+                        ModalRoute.withName(RouteGenerator.kRouteGateKeeper));
+                  });
+            },
           ),
         ],
       ),

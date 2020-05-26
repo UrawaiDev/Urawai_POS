@@ -8,12 +8,14 @@ import 'package:urawai_pos/core/Models/orderList.dart';
 import 'package:urawai_pos/core/Models/postedOrder.dart';
 
 import 'package:path_provider/path_provider.dart' as path;
+import 'package:urawai_pos/core/Models/users.dart';
 import 'package:urawai_pos/core/Provider/general_provider.dart';
 import 'package:urawai_pos/core/Provider/orderList_provider.dart';
 import 'package:urawai_pos/core/Provider/postedOrder_provider.dart';
 import 'package:urawai_pos/core/Provider/settings_provider.dart';
 import 'package:urawai_pos/core/Provider/transactionOrder_provider.dart';
 import 'package:urawai_pos/core/Services/connectivity_service.dart';
+import 'package:urawai_pos/ui/utils/functions/getCurrentUser.dart';
 import 'package:urawai_pos/ui/utils/functions/routeGenerator.dart';
 
 import 'core/Models/transaction.dart';
@@ -45,10 +47,9 @@ void main() async {
 
 void _loadAppConfig() async {
   SharedPreferences _prefs = await SharedPreferences.getInstance();
-  if (_prefs.getBool('vat') == null)
-    _prefs.setBool('vat', false);
-  else
-    print(' VAT from MAIN ${_prefs.getBool('vat')}');
+  if (_prefs.getBool('vat') == null) _prefs.setBool('vat', false);
+
+  print(' VAT from MAIN ${_prefs.getBool('vat')}');
 }
 
 class MyApp extends StatelessWidget {
@@ -67,6 +68,9 @@ class MyApp extends StatelessWidget {
         StreamProvider<ConnectivityResult>(
             create: (context) =>
                 ConnectivityService().networkStatusController.stream),
+
+        // StreamProvider<FirebaseUser>(
+        //     create: (context) => FirebaseAuthentication().userState),
       ],
       child: MaterialApp(
         debugShowCheckedModeBanner: false,
@@ -76,7 +80,8 @@ class MyApp extends StatelessWidget {
             primaryColor: Color(0xFF408be5),
             scaffoldBackgroundColor: Color(0xFFfbfcfe),
             textTheme: TextTheme(body1: TextStyle(color: Color(0xFF435c72)))),
-        initialRoute: 'POS_Page',
+        // initialRoute: 'POS_Page',
+        initialRoute: 'GateKeeper_Page',
         onGenerateRoute: RouteGenerator.onGenerate,
       ),
     );
