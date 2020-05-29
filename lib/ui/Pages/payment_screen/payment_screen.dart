@@ -1,5 +1,6 @@
 import 'package:connectivity/connectivity.dart';
 import 'package:flutter/material.dart';
+import 'package:get_it/get_it.dart';
 import 'package:hive/hive.dart';
 import 'package:provider/provider.dart';
 import 'package:urawai_pos/core/Models/postedOrder.dart';
@@ -10,6 +11,7 @@ import 'package:urawai_pos/core/Provider/orderList_provider.dart';
 import 'package:urawai_pos/core/Provider/postedOrder_provider.dart';
 import 'package:urawai_pos/core/Provider/transactionOrder_provider.dart';
 import 'package:urawai_pos/core/Services/connectivity_service.dart';
+import 'package:urawai_pos/core/Services/firebase_auth.dart';
 import 'package:urawai_pos/ui/Pages/pos/pos_Page.dart';
 import 'package:urawai_pos/ui/Widgets/connection_status.dart';
 import 'package:urawai_pos/ui/Widgets/costum_DialogBox.dart';
@@ -31,6 +33,8 @@ class PaymentScreen extends StatefulWidget {
 }
 
 class _PaymentScreenState extends State<PaymentScreen> {
+  final locatorAuth = GetIt.I<FirebaseAuthentication>();
+
   @override
   void dispose() {
     super.dispose();
@@ -71,7 +75,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
                           padding: const EdgeInsets.fromLTRB(20, 10, 20, 20),
                           child: Column(
                             children: <Widget>[
-                              ConnectionStatusWidget(),
+                              ConnectionStatusWidget(kPriceTextStyle),
                               Expanded(
                                   flex: 2,
                                   child: Container(
@@ -573,8 +577,9 @@ class _PaymentScreenState extends State<PaymentScreen> {
                               final connectionStatus =
                                   Provider.of<ConnectivityResult>(context,
                                       listen: false);
+
                               final currentUser =
-                                  Provider.of<Users>(context, listen: false);
+                                  await locatorAuth.currentUserXXX;
                               if (connectionStatus == ConnectivityResult.none) {
                                 //Add Transaction to Hive DB when Offline
                                 Provider.of<TransactionOrderProvider>(context,

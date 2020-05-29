@@ -1,5 +1,6 @@
 import 'dart:collection';
 
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:intl/intl.dart';
@@ -12,9 +13,11 @@ import 'package:urawai_pos/core/Provider/general_provider.dart';
 import 'package:urawai_pos/core/Services/firestore_service.dart';
 import 'package:urawai_pos/ui/Widgets/costum_button.dart';
 import 'package:urawai_pos/ui/Widgets/drawerMenu.dart';
+import 'package:urawai_pos/ui/Widgets/loading_card.dart';
 import 'package:urawai_pos/ui/utils/constans/formatter.dart';
 import 'package:urawai_pos/ui/utils/constans/utils.dart';
 import 'package:date_range_picker/date_range_picker.dart' as dateRangePicker;
+import 'package:urawai_pos/ui/utils/functions/getCurrentUser.dart';
 import 'package:urawai_pos/ui/utils/functions/routeGenerator.dart';
 
 class TransactionReport extends StatelessWidget {
@@ -23,330 +26,353 @@ class TransactionReport extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final generalProvider = Provider.of<GeneralProvider>(context);
-
-    Users currentUser = Provider.of<Users>(context);
+    final firebaseUser = Provider.of<FirebaseUser>(context);
+    bool isLogin = firebaseUser != null;
 
     return SafeArea(
-        child: Scaffold(
-            appBar: AppBar(title: Text('Laporan Penjualan')),
-            drawer: Drawer(
-              child: DrawerMenu(),
-            ),
-            body: Padding(
-              padding: const EdgeInsets.all(10.0),
-              child: Container(
-                child: Column(
-                  children: <Widget>[
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: <Widget>[
-                        Text('Beranda', style: kHeaderTextStyle),
-                        Row(
-                          children: <Widget>[
-                            Consumer<GeneralProvider>(builder: (_, value, __) {
-                              String text;
-                              if (value.selectedDate == null ||
-                                  value.selectedDate.isEmpty)
-                                text = 'Semua Transaksi';
-                              else if (value.selectedDate.length == 1)
-                                text = DateFormat('d-M-y')
-                                    .format(value.selectedDate[0]);
-                              else if (value.selectedDate.length == 2)
-                                text = DateFormat('d-M-y')
-                                        .format(value.selectedDate[0]) +
-                                    ' s/d ' +
-                                    DateFormat('d-M-y')
-                                        .format(value.selectedDate[1]);
+        child: FutureBuilder<Users>(
+            future: isLogin
+                ? CurrentUserLoggedIn.getCurrentUser(firebaseUser.uid)
+                : null,
+            builder: (context, snapshot) {
+              Users currentUser = snapshot.data;
+              if (snapshot.hasError)
+                return Scaffold(
+                  body: Center(
+                    child: Text(snapshot.error.toString(),
+                        style: kProductNameBigScreenTextStyle),
+                  ),
+                );
+              if (!snapshot.hasData ||
+                  snapshot.connectionState == ConnectionState.waiting)
+                return Scaffold(
+                  body: LoadingCard(),
+                );
 
-                              return Text(
-                                'Tanggal: $text',
-                                style: kProductNameSmallScreenTextStyle,
-                              );
-                            }),
-                            SizedBox(width: 20),
-                            GestureDetector(
-                              child: FaIcon(
-                                FontAwesomeIcons.calendarDay,
-                                color: Colors.blue,
-                                size: 35,
-                              ),
-                              onTap: () async {
-                                var pickedDate =
-                                    await dateRangePicker.showDatePicker(
-                                  context: context,
-                                  initialFirstDate: DateTime.now(),
-                                  initialLastDate:
-                                      DateTime.now().add(Duration(days: 7)),
-                                  firstDate: DateTime(2020),
-                                  lastDate: DateTime(2040),
-                                );
-                                if (pickedDate != null &&
-                                    pickedDate.length == 2) {
-                                  generalProvider.selectedDate = pickedDate;
-                                } else if (pickedDate != null &&
-                                    pickedDate.length == 1) {
-                                  generalProvider.selectedDate = pickedDate;
-                                }
-                              },
-                            ),
-                            SizedBox(width: 20),
-                            GestureDetector(
-                              child: FaIcon(
-                                FontAwesomeIcons.syncAlt,
-                                color: Colors.green,
-                                size: 35,
-                              ),
-                              onTap: () {
-                                Provider.of<GeneralProvider>(context,
-                                        listen: false)
-                                    .selectedDate = [];
-                              },
-                            ),
-                          ],
-                        )
-                      ],
-                    ),
-                    SizedBox(height: 20),
-                    Consumer<GeneralProvider>(
-                      builder: (context, value, _) => FutureBuilder<
-                              List<TransactionOrder>>(
-                          future: value.selectedDate.isEmpty
-                              ? _firestoreServices.getAllDocumentsWithoutVOID(
-                                  currentUser.shopName)
-                              : _firestoreServices.getDocumentByDate(
-                                  currentUser.shopName,
-                                  value.selectedDate,
-                                  includeVoid: false,
-                                ),
-                          builder: (context, snapshot) {
-                            if (snapshot.hasError)
-                              return Text(
-                                'An Error has Occured ${snapshot.error}',
-                                style: kProductNameBigScreenTextStyle,
-                              );
-
-                            if (snapshot.connectionState ==
-                                    ConnectionState.waiting ||
-                                !snapshot.hasData)
-                              return CircularProgressIndicator();
-
-                            return Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceAround,
-                              children: <Widget>[
-                                _headerCard(
-                                  'Total Penjualan Kotor',
-                                  Colors.lightGreen,
-                                  _getBruto(snapshot),
-                                ),
-                                _headerCard(
-                                  'Total Keuntungan',
-                                  Colors.amber,
-                                  _getNetto(snapshot),
-                                ),
-                                _headerCard(
-                                  'Total Transaksi',
-                                  Colors.blue,
-                                  snapshot.data.length.toString(),
-                                ),
-                                _headerCard(
-                                  'Rata-Rata Nilai Transaksi',
-                                  Colors.red,
-                                  _getAverage(snapshot),
-                                ),
-                              ],
-                            );
-                          }),
-                    ),
-                    SizedBox(height: 20),
-                    Expanded(
-                      child: Row(
+              return Scaffold(
+                  appBar: AppBar(title: Text('Laporan Penjualan')),
+                  drawer: Drawer(
+                    child: DrawerMenu(),
+                  ),
+                  body: Padding(
+                    padding: const EdgeInsets.all(10.0),
+                    child: Container(
+                      child: Column(
                         children: <Widget>[
-                          Expanded(
-                            child: Container(
-                              decoration: BoxDecoration(
-                                border: Border.all(color: Colors.grey),
-                              ),
-                              child: Padding(
-                                padding: const EdgeInsets.all(8.0),
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: <Widget>[
-                                    Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: <Widget>[
-                                        Text(
-                                          'Produk Terlaris',
-                                          style: kHeaderTextStyle,
-                                        ),
-                                        Text(
-                                          'Produk dengan penjualan terbanyak',
-                                          style: kPriceTextStyle,
-                                        ),
-                                        Divider(thickness: 4),
-                                      ],
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: <Widget>[
+                              Text('Beranda', style: kHeaderTextStyle),
+                              Row(
+                                children: <Widget>[
+                                  Consumer<GeneralProvider>(
+                                      builder: (_, value, __) {
+                                    String text;
+                                    if (value.selectedDate == null ||
+                                        value.selectedDate.isEmpty)
+                                      text = 'Semua Transaksi';
+                                    else if (value.selectedDate.length == 1)
+                                      text = DateFormat('d-M-y')
+                                          .format(value.selectedDate[0]);
+                                    else if (value.selectedDate.length == 2)
+                                      text = DateFormat('d-M-y')
+                                              .format(value.selectedDate[0]) +
+                                          ' s/d ' +
+                                          DateFormat('d-M-y')
+                                              .format(value.selectedDate[1]);
+
+                                    return Text(
+                                      'Tanggal: $text',
+                                      style: kProductNameSmallScreenTextStyle,
+                                    );
+                                  }),
+                                  SizedBox(width: 20),
+                                  GestureDetector(
+                                    child: FaIcon(
+                                      FontAwesomeIcons.calendarDay,
+                                      color: Colors.blue,
+                                      size: 35,
                                     ),
-                                    Expanded(
-                                      child: Consumer<GeneralProvider>(
-                                        builder: (_, value, __) => FutureBuilder<
-                                                List<TransactionOrder>>(
-                                            future: value.selectedDate.isEmpty
-                                                ? _firestoreServices
-                                                    .getAllDocumentsWithoutVOID(
-                                                        currentUser.shopName)
-                                                : _firestoreServices
-                                                    .getDocumentByDate(
-                                                        currentUser.shopName,
-                                                        value.selectedDate,
-                                                        includeVoid: false),
-                                            builder: (context, snapshot) {
-                                              if (snapshot.hasError)
-                                                return Text(
-                                                  'An Error has Occured ${snapshot.error}',
-                                                  style:
-                                                      kProductNameBigScreenTextStyle,
-                                                );
-
-                                              // if (snapshot.connectionState ==
-                                              //         ConnectionState.waiting ||
-                                              //     !snapshot.hasData)
-                                              //   return CircularProgressIndicator();
-
-                                              return FutureBuilder<
-                                                      List<Product>>(
-                                                  future: _firestoreServices
-                                                      .getProducts(
-                                                          currentUser.shopName),
-                                                  builder: (context, products) {
-                                                    if (products.hasError ||
-                                                        !products.hasData)
-                                                      return Container(
-                                                        alignment:
-                                                            Alignment.center,
-                                                        child: Column(
-                                                          mainAxisAlignment:
-                                                              MainAxisAlignment
-                                                                  .center,
-                                                          children: <Widget>[
-                                                            CircularProgressIndicator(),
-                                                            SizedBox(
-                                                                height: 20),
-                                                            Text(
-                                                              'Loading...',
-                                                              style:
-                                                                  kPriceTextStyle,
-                                                            ),
-                                                          ],
-                                                        ),
-                                                      );
-
-                                                    if (products.data.isEmpty)
-                                                      return Container(
-                                                          alignment:
-                                                              Alignment.center,
-                                                          child: Center(
-                                                            child: Column(
-                                                              mainAxisAlignment:
-                                                                  MainAxisAlignment
-                                                                      .center,
-                                                              children: <
-                                                                  Widget>[
-                                                                Text(
-                                                                  'Belum Ada Produk Saat ini.',
-                                                                  style:
-                                                                      kProductNameBigScreenTextStyle,
-                                                                ),
-                                                                SizedBox(
-                                                                    height: 30),
-                                                                CostumButton.squareButtonSmall(
-                                                                    'Buat',
-                                                                    onTap: () => Navigator.pushNamed(
-                                                                        context,
-                                                                        RouteGenerator
-                                                                            .kRouteAddProductPage),
-                                                                    prefixIcon:
-                                                                        Icons
-                                                                            .add),
-                                                              ],
-                                                            ),
-                                                          ));
-
-                                                    switch (products
-                                                        .connectionState) {
-                                                      case ConnectionState
-                                                          .waiting:
-                                                        return Center(
-                                                            child:
-                                                                CircularProgressIndicator());
-                                                        break;
-                                                      default:
-                                                        return ListView.builder(
-                                                            itemCount: products
-                                                                .data
-                                                                .length ??= 0,
-                                                            itemBuilder:
-                                                                (context,
-                                                                    index) {
-                                                              var data =
-                                                                  _getTopSellingProducts(
-                                                                      snapshot,
-                                                                      products);
-
-                                                              return ListTile(
-                                                                leading: Chip(
-                                                                  label: Text(
-                                                                    (index + 1)
-                                                                        .toString(),
-                                                                    style:
-                                                                        kProductNameSmallScreenTextStyle,
-                                                                  ),
-                                                                ),
-                                                                title: Text(
-                                                                  data.keys
-                                                                      .elementAt(
-                                                                          index),
-                                                                  style:
-                                                                      kPriceTextStyle,
-                                                                ),
-                                                                trailing: Text(
-                                                                  data.values
-                                                                      .elementAt(
-                                                                          index)
-                                                                      .toString(),
-                                                                  style:
-                                                                      kProductNameSmallScreenTextStyle,
-                                                                ),
-                                                              );
-                                                            });
-                                                    }
-                                                  });
-                                            }),
-                                      ),
-                                    )
-                                  ],
-                                ),
-                              ),
-                            ),
+                                    onTap: () async {
+                                      var pickedDate =
+                                          await dateRangePicker.showDatePicker(
+                                        context: context,
+                                        initialFirstDate: DateTime.now(),
+                                        initialLastDate: DateTime.now()
+                                            .add(Duration(days: 7)),
+                                        firstDate: DateTime(2020),
+                                        lastDate: DateTime(2040),
+                                      );
+                                      if (pickedDate != null &&
+                                          pickedDate.length == 2) {
+                                        generalProvider.selectedDate =
+                                            pickedDate;
+                                      } else if (pickedDate != null &&
+                                          pickedDate.length == 1) {
+                                        generalProvider.selectedDate =
+                                            pickedDate;
+                                      }
+                                    },
+                                  ),
+                                  SizedBox(width: 20),
+                                  GestureDetector(
+                                    child: FaIcon(
+                                      FontAwesomeIcons.syncAlt,
+                                      color: Colors.green,
+                                      size: 35,
+                                    ),
+                                    onTap: () {
+                                      Provider.of<GeneralProvider>(context,
+                                              listen: false)
+                                          .selectedDate = [];
+                                    },
+                                  ),
+                                ],
+                              )
+                            ],
                           ),
-                          //Prepare for Chart
+                          SizedBox(height: 20),
+                          Consumer<GeneralProvider>(
+                            builder: (context, value, _) =>
+                                FutureBuilder<List<TransactionOrder>>(
+                                    future: value.selectedDate.isEmpty
+                                        ? _firestoreServices
+                                            .getAllDocumentsWithoutVOID(
+                                                currentUser.shopName)
+                                        : _firestoreServices.getDocumentByDate(
+                                            currentUser.shopName,
+                                            value.selectedDate,
+                                            includeVoid: false,
+                                          ),
+                                    builder: (context, snapshot) {
+                                      if (snapshot.hasError)
+                                        return Text(
+                                          'An Error has Occured ${snapshot.error}',
+                                          style: kProductNameBigScreenTextStyle,
+                                        );
+
+                                      if (snapshot.connectionState ==
+                                              ConnectionState.waiting ||
+                                          !snapshot.hasData)
+                                        return CircularProgressIndicator();
+
+                                      return Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.spaceAround,
+                                        children: <Widget>[
+                                          _headerCard(
+                                            'Total Penjualan Kotor',
+                                            Colors.lightGreen,
+                                            _getBruto(snapshot),
+                                          ),
+                                          _headerCard(
+                                            'Total Keuntungan',
+                                            Colors.amber,
+                                            _getNetto(snapshot),
+                                          ),
+                                          _headerCard(
+                                            'Total Transaksi',
+                                            Colors.blue,
+                                            snapshot.data.length.toString(),
+                                          ),
+                                          _headerCard(
+                                            'Rata-Rata Nilai Transaksi',
+                                            Colors.red,
+                                            _getAverage(snapshot),
+                                          ),
+                                        ],
+                                      );
+                                    }),
+                          ),
+                          SizedBox(height: 20),
                           Expanded(
-                              child: Container(
-                            // color: Colors.blue,
-                            child: Container(
-                              alignment: Alignment.center,
-                              child: Text(
-                                'CHART',
-                                style: kProductNameBigScreenTextStyle,
-                              ),
+                            child: Row(
+                              children: <Widget>[
+                                Expanded(
+                                  child: Container(
+                                    decoration: BoxDecoration(
+                                      border: Border.all(color: Colors.grey),
+                                    ),
+                                    child: Padding(
+                                      padding: const EdgeInsets.all(8.0),
+                                      child: Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: <Widget>[
+                                          Column(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
+                                            children: <Widget>[
+                                              Text(
+                                                'Produk Terlaris',
+                                                style: kHeaderTextStyle,
+                                              ),
+                                              Text(
+                                                'Produk dengan penjualan terbanyak',
+                                                style: kPriceTextStyle,
+                                              ),
+                                              Divider(thickness: 4),
+                                            ],
+                                          ),
+                                          Expanded(
+                                            child: Consumer<GeneralProvider>(
+                                              builder: (_, value, __) =>
+                                                  FutureBuilder<
+                                                          List<
+                                                              TransactionOrder>>(
+                                                      future: value.selectedDate
+                                                              .isEmpty
+                                                          ? _firestoreServices
+                                                              .getAllDocumentsWithoutVOID(
+                                                                  currentUser
+                                                                      .shopName)
+                                                          : _firestoreServices
+                                                              .getDocumentByDate(
+                                                                  currentUser.shopName,
+                                                                  value.selectedDate,
+                                                                  includeVoid: false),
+                                                      builder: (context, snapshot) {
+                                                        if (snapshot.hasError)
+                                                          return Text(
+                                                            'An Error has Occured ${snapshot.error}',
+                                                            style:
+                                                                kProductNameBigScreenTextStyle,
+                                                          );
+
+                                                        // if (snapshot.connectionState ==
+                                                        //         ConnectionState.waiting ||
+                                                        //     !snapshot.hasData)
+                                                        //   return CircularProgressIndicator();
+
+                                                        return FutureBuilder<
+                                                                List<Product>>(
+                                                            future: _firestoreServices
+                                                                .getProducts(
+                                                                    currentUser
+                                                                        .shopName),
+                                                            builder: (context,
+                                                                products) {
+                                                              if (products
+                                                                      .hasError ||
+                                                                  !products
+                                                                      .hasData)
+                                                                return Container(
+                                                                  alignment:
+                                                                      Alignment
+                                                                          .center,
+                                                                  child: Column(
+                                                                    mainAxisAlignment:
+                                                                        MainAxisAlignment
+                                                                            .center,
+                                                                    children: <
+                                                                        Widget>[
+                                                                      CircularProgressIndicator(),
+                                                                      SizedBox(
+                                                                          height:
+                                                                              20),
+                                                                      Text(
+                                                                        'Loading...',
+                                                                        style:
+                                                                            kPriceTextStyle,
+                                                                      ),
+                                                                    ],
+                                                                  ),
+                                                                );
+
+                                                              if (products
+                                                                  .data.isEmpty)
+                                                                return Container(
+                                                                    alignment:
+                                                                        Alignment
+                                                                            .center,
+                                                                    child:
+                                                                        Center(
+                                                                      child:
+                                                                          Column(
+                                                                        mainAxisAlignment:
+                                                                            MainAxisAlignment.center,
+                                                                        children: <
+                                                                            Widget>[
+                                                                          Text(
+                                                                            'Belum Ada Produk Saat ini.',
+                                                                            style:
+                                                                                kProductNameBigScreenTextStyle,
+                                                                          ),
+                                                                          SizedBox(
+                                                                              height: 30),
+                                                                          CostumButton.squareButtonSmall(
+                                                                              'Buat',
+                                                                              onTap: () => Navigator.pushNamed(context, RouteGenerator.kRouteAddProductPage),
+                                                                              prefixIcon: Icons.add),
+                                                                        ],
+                                                                      ),
+                                                                    ));
+
+                                                              switch (products
+                                                                  .connectionState) {
+                                                                case ConnectionState
+                                                                    .waiting:
+                                                                  return Center(
+                                                                      child:
+                                                                          CircularProgressIndicator());
+                                                                  break;
+                                                                default:
+                                                                  return ListView
+                                                                      .builder(
+                                                                          itemCount: products.data.length ??=
+                                                                              0,
+                                                                          itemBuilder:
+                                                                              (context, index) {
+                                                                            var data =
+                                                                                _getTopSellingProducts(snapshot, products);
+
+                                                                            return ListTile(
+                                                                              leading: Chip(
+                                                                                label: Text(
+                                                                                  (index + 1).toString(),
+                                                                                  style: kProductNameSmallScreenTextStyle,
+                                                                                ),
+                                                                              ),
+                                                                              title: Text(
+                                                                                data.keys.elementAt(index),
+                                                                                style: kPriceTextStyle,
+                                                                              ),
+                                                                              trailing: Text(
+                                                                                data.values.elementAt(index).toString(),
+                                                                                style: kProductNameSmallScreenTextStyle,
+                                                                              ),
+                                                                            );
+                                                                          });
+                                                              }
+                                                            });
+                                                      }),
+                                            ),
+                                          )
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                                //Prepare for Chart
+                                Expanded(
+                                    child: Container(
+                                  // color: Colors.blue,
+                                  child: Container(
+                                    alignment: Alignment.center,
+                                    child: Text(
+                                      'CHART',
+                                      style: kProductNameBigScreenTextStyle,
+                                    ),
+                                  ),
+                                )),
+                              ],
                             ),
-                          )),
+                          )
                         ],
                       ),
-                    )
-                  ],
-                ),
-              ),
-            )));
+                    ),
+                  ));
+            }));
   }
 
   LinkedHashMap<dynamic, dynamic> _getTopSellingProducts(

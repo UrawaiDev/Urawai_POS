@@ -1,6 +1,8 @@
 import 'package:email_validator/email_validator.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:provider/provider.dart';
 import 'package:urawai_pos/core/Models/users.dart';
 import 'package:urawai_pos/core/Provider/general_provider.dart';
@@ -45,71 +47,75 @@ class _AuthenticationPageState extends State<AuthenticationPage> {
   @override
   Widget build(BuildContext context) {
     final generalProvider = Provider.of<GeneralProvider>(context);
+
     return SafeArea(
-        child: GestureDetector(
-      onTap: () => FocusScope.of(context).unfocus(),
-      child: Scaffold(
-        body: Row(
-          children: <Widget>[
-            Expanded(child: Container(color: Colors.blue)),
-            Expanded(
-                child: Stack(
-              fit: StackFit.expand,
-              children: <Widget>[
-                Padding(
-                  padding: const EdgeInsets.all(10.0),
-                  child: SingleChildScrollView(
-                    child: Container(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: <Widget>[
-                          Text(
-                            'Selamat Datang.',
-                            style: TextStyle(
-                              fontSize: 40,
-                              color: Colors.blueAccent,
+        child: WillPopScope(
+      onWillPop: () => _isBackButtonPressed(context),
+      child: GestureDetector(
+        onTap: () => FocusScope.of(context).unfocus(),
+        child: Scaffold(
+          body: Row(
+            children: <Widget>[
+              Expanded(child: Container(color: Colors.blue)),
+              Expanded(
+                  child: Stack(
+                fit: StackFit.expand,
+                children: <Widget>[
+                  Padding(
+                    padding: const EdgeInsets.all(10.0),
+                    child: SingleChildScrollView(
+                      child: Container(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: <Widget>[
+                            Text(
+                              'Selamat Datang.',
+                              style: TextStyle(
+                                fontSize: 40,
+                                color: Colors.blueAccent,
+                              ),
                             ),
-                          ),
-                          Text(
-                            'Urawai POS (Point of Sales)',
-                            style: TextStyle(
-                                fontSize: 18,
-                                color: Colors.black,
-                                fontStyle: FontStyle.italic),
-                          ),
-                          Container(
-                            width: MediaQuery.of(context).size.width * 0.45,
-                            height: MediaQuery.of(context).size.height + 100,
-                            child: Padding(
-                              padding: const EdgeInsets.all(8.0),
-                              child: Form(
-                                key: _formKey,
-                                child: Padding(
-                                  padding: const EdgeInsets.all(8.0),
-                                  child: PageView(
-                                    controller: _pageController,
-                                    scrollDirection: Axis.horizontal,
-                                    children: <Widget>[
-                                      _formSignIn(generalProvider, context),
-                                      _formSignUp(generalProvider, context),
-                                    ],
+                            Text(
+                              'Urawai POS (Point of Sales)',
+                              style: TextStyle(
+                                  fontSize: 18,
+                                  color: Colors.black,
+                                  fontStyle: FontStyle.italic),
+                            ),
+                            Container(
+                              width: MediaQuery.of(context).size.width * 0.45,
+                              height: MediaQuery.of(context).size.height + 100,
+                              child: Padding(
+                                padding: const EdgeInsets.all(8.0),
+                                child: Form(
+                                  key: _formKey,
+                                  child: Padding(
+                                    padding: const EdgeInsets.all(8.0),
+                                    child: PageView(
+                                      controller: _pageController,
+                                      scrollDirection: Axis.horizontal,
+                                      children: <Widget>[
+                                        _formSignIn(generalProvider, context),
+                                        _formSignUp(generalProvider, context),
+                                      ],
+                                    ),
                                   ),
                                 ),
                               ),
                             ),
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
                     ),
                   ),
-                ),
-                Consumer<GeneralProvider>(
-                    builder: (_, value, __) => (value.isLoading)
-                        ? _showLoading(context)
-                        : Container()),
-              ],
-            )),
-          ],
+                  Consumer<GeneralProvider>(
+                      builder: (_, value, __) => (value.isLoading)
+                          ? _showLoading(context)
+                          : Container()),
+                ],
+              )),
+            ],
+          ),
         ),
       ),
     ));
@@ -194,14 +200,18 @@ class _AuthenticationPageState extends State<AuthenticationPage> {
 
             //stop loading
             generalProvider.isLoading = false;
-
-            if (result is FirebaseAuthError) {
+            if (result == null) {
+              print('hasilnya $result');
+            } else if (result is OnErrorState) {
               errorMessageSignIn = result.message;
-            } else if (result is FirebaseUser) {
-              Navigator.pushNamedAndRemoveUntil(
-                  context,
-                  RouteGenerator.kRouteGateKeeper,
-                  ModalRoute.withName(RouteGenerator.kRouteGateKeeper));
+            } else if (result is Users) {
+              // TODO:will check the best option
+              // Navigator.pushNamedAndRemoveUntil(
+              //     context,
+              //     RouteGenerator.kRouteGateKeeper,
+              //     ModalRoute.withName(RouteGenerator.kRouteGateKeeper));
+
+              Navigator.pushNamed(context, RouteGenerator.kRoutePOSPage);
             }
           }
         }),
@@ -359,11 +369,8 @@ class _AuthenticationPageState extends State<AuthenticationPage> {
             generalProvider.isLoading = false;
 
             if (result is Users) {
-              Navigator.pushNamedAndRemoveUntil(
-                  context,
-                  RouteGenerator.kRouteGateKeeper,
-                  ModalRoute.withName(RouteGenerator.kRouteGateKeeper));
-            } else if (result is FirebaseAuthError) {
+              Navigator.pushNamed(context, RouteGenerator.kRoutePOSPage);
+            } else if (result is OnErrorState) {
               errorMessageSignUp = result.message;
             }
           }
@@ -400,5 +407,51 @@ class _AuthenticationPageState extends State<AuthenticationPage> {
         ),
       ),
     );
+  }
+
+  Future<bool> _isBackButtonPressed(BuildContext context) {
+    return showDialog(
+        barrierDismissible: false,
+        context: context,
+        builder: (context) => AlertDialog(
+              title: Text(
+                'Konfirmasi',
+                style: kProductNameSmallScreenTextStyle,
+              ),
+              content: Row(
+                children: <Widget>[
+                  FaIcon(
+                    FontAwesomeIcons.signOutAlt,
+                    color: Colors.red,
+                    size: 25,
+                  ),
+                  SizedBox(width: 20),
+                  Text(
+                    'Keluar dari Aplikasi?',
+                    style: kPriceTextStyle,
+                  )
+                ],
+              ),
+              actions: <Widget>[
+                FlatButton(
+                  child: Text(
+                    'Tidak',
+                    style: kPriceTextStyle,
+                  ),
+                  onPressed: () {
+                    Navigator.pop(context, false);
+                  },
+                ),
+                FlatButton(
+                  child: Text(
+                    'Ya',
+                    style: kPriceTextStyle,
+                  ),
+                  onPressed: () {
+                    SystemNavigator.pop();
+                  },
+                )
+              ],
+            ));
   }
 }

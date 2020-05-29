@@ -54,8 +54,7 @@ class _POSPageState extends State<POSPage> with SingleTickerProviderStateMixin {
 
   AnimationController _animationController;
   Animation<double> _animationScale;
-  Future<Users> currentUser;
-  Future _getProduct;
+  var currentUser;
 
   @override
   void initState() {
@@ -71,9 +70,6 @@ class _POSPageState extends State<POSPage> with SingleTickerProviderStateMixin {
     _animationController.forward();
 
     currentUser = locatorAuth.currentUserXXX;
-    currentUser.then((user) {
-      _getProduct = locatorFirestore.getProducts(user.shopName);
-    });
   }
 
   @override
@@ -98,10 +94,15 @@ class _POSPageState extends State<POSPage> with SingleTickerProviderStateMixin {
         Provider.of<OrderListProvider>(context, listen: false);
     final generalProvider =
         Provider.of<GeneralProvider>(context, listen: false);
+    final firebaseUser = Provider.of<FirebaseUser>(context);
+
+    bool isLogin = firebaseUser != null;
+
+    print('current user $currentUser');
 
     return SafeArea(
       child: FutureBuilder<Users>(
-          future: currentUser,
+          future: isLogin ? _firestoreServices.getUser(firebaseUser.uid) : null,
           builder: (context, snapshot) {
             if (snapshot.hasError)
               return Scaffold(
@@ -150,6 +151,11 @@ class _POSPageState extends State<POSPage> with SingleTickerProviderStateMixin {
                                   await _auth.signOut();
                                   Navigator.pushNamed(context,
                                       RouteGenerator.kRouteAuthenticatePage);
+                                  //         Navigator.pushNamedAndRemoveUntil(
+                                  //             context,
+                                  //             RouteGenerator.kRouteGateKeeper,
+                                  //             ModalRoute.withName(
+                                  //                 RouteGenerator.kRouteGateKeeper));
                                 });
                           },
                         ),
@@ -277,7 +283,10 @@ class _POSPageState extends State<POSPage> with SingleTickerProviderStateMixin {
                                                                 _textQuery
                                                                         .text.length <
                                                                     3
-                                                            ? _getProduct
+                                                            ? _firestoreServices
+                                                                .getProducts(
+                                                                    currentUser
+                                                                        .shopName)
                                                             : _firestoreServices
                                                                 .getDocumentByProductName(
                                                                     currentUser
@@ -700,11 +709,9 @@ class _POSPageState extends State<POSPage> with SingleTickerProviderStateMixin {
               child: IconButton(
                 icon: Icon(Icons.add),
                 iconSize: 35,
-                onPressed: () async {
-                  var user = await locatorAuth.currentUserXXX;
-
+                onPressed: () {
                   if (orderlistProvider.orderlist.isEmpty) {
-                    _createNewOrder(orderlistProvider, user.username);
+                    _createNewOrder(orderlistProvider);
                   } else if (orderlistProvider.orderlist.isNotEmpty) {
                     CostumDialogBox.showCostumDialogBox(
                       context: context,
@@ -716,7 +723,7 @@ class _POSPageState extends State<POSPage> with SingleTickerProviderStateMixin {
                       confirmButtonTitle: 'Ya',
                       onConfirmPressed: () {
                         Navigator.pop(context); //close dialogBox
-                        _createNewOrder(orderlistProvider, user.username);
+                        _createNewOrder(orderlistProvider);
                       },
                     );
                   }
@@ -859,8 +866,8 @@ class _POSPageState extends State<POSPage> with SingleTickerProviderStateMixin {
     );
   }
 
-  void _createNewOrder(
-      OrderListProvider orderlistProvider, String cashierName) {
+  void _createNewOrder(OrderListProvider orderlistProvider) {
+    final currentUser = Provider.of<Users>(context, listen: false);
     CostumDialogBox.showInputDialogBox(
         formKey: _formKey,
         context: context,
@@ -872,7 +879,7 @@ class _POSPageState extends State<POSPage> with SingleTickerProviderStateMixin {
           if (_formKey.currentState.validate()) {
             orderlistProvider.resetOrderList();
             orderlistProvider.referenceOrder = _textReferenceOrder.text;
-            orderlistProvider.cashierName = cashierName;
+            orderlistProvider.cashierName = currentUser.username;
 
             orderlistProvider.createNewOrder();
             _textReferenceOrder.clear();

@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:urawai_pos/core/Models/users.dart';
+import 'package:urawai_pos/core/Services/firebase_auth.dart';
 import 'package:urawai_pos/core/Services/firestore_service.dart';
 import 'package:urawai_pos/ui/Widgets/costum_button.dart';
 import 'package:urawai_pos/ui/Widgets/footer_OrderList.dart';
@@ -13,6 +14,10 @@ class DetailTransactionPage extends StatelessWidget {
   final String boxKey;
 
   DetailTransactionPage({@required this.boxKey});
+
+  final FirebaseAuthentication _firebaseAuthentication =
+      FirebaseAuthentication();
+  final FirestoreServices _firestoreServices = FirestoreServices();
 
   @override
   Widget build(BuildContext context) {
@@ -59,15 +64,20 @@ class DetailTransactionPage extends StatelessWidget {
     ));
   }
 
-  Widget _buildDetailTransactionFromFirestore(BuildContext context) {
-    Users currentUser = Provider.of<Users>(context);
+  Future<DocumentSnapshot> _getDocumentbyID() async {
+    Users currentUser = await _firebaseAuthentication.currentUserXXX;
+    var result =
+        _firestoreServices.getDocumentByID(currentUser.shopName, boxKey);
+    return result;
+  }
 
-    return StreamBuilder<DocumentSnapshot>(
-        stream:
-            FirestoreServices().getDocumentByID(currentUser.shopName, boxKey),
+  Widget _buildDetailTransactionFromFirestore(BuildContext context) {
+    return FutureBuilder<DocumentSnapshot>(
+        future: _getDocumentbyID(),
         builder: (context, document) {
           var data = document.data;
 
+          print(data);
           if (!document.hasData)
             return Center(child: CircularProgressIndicator());
           else {
@@ -90,24 +100,24 @@ class DetailTransactionPage extends StatelessWidget {
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: <Widget>[
-                        Text('WARUNG MAKYOS',
-                            style: TextStyle(
-                              fontSize: 30,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.blue,
-                            )),
-                        Text(
-                          'Jln. KP. Rawageni No. 5',
-                          style: TextStyle(
-                            fontSize: 18,
-                          ),
-                        ),
-                        Text(
-                          'RT 4. RW 5, Kelurahan Ratujaya, Kota DEPOK',
-                          style: TextStyle(
-                            fontSize: 18,
-                          ),
-                        ),
+                        FutureBuilder<Users>(
+                            future: _firebaseAuthentication.currentUserXXX,
+                            builder: (context, snapshot) {
+                              if (!snapshot.hasData ||
+                                  snapshot.connectionState ==
+                                      ConnectionState.waiting)
+                                return Text(
+                                  'Loading',
+                                  style: kPriceTextStyle,
+                                );
+
+                              return Text(snapshot.data.shopName.toUpperCase(),
+                                  style: TextStyle(
+                                    fontSize: 30,
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.blue,
+                                  ));
+                            }),
                         Divider(
                           thickness: 2,
                         ),

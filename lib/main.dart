@@ -1,4 +1,5 @@
 import 'package:connectivity/connectivity.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:hive/hive.dart';
@@ -15,8 +16,11 @@ import 'package:urawai_pos/core/Provider/postedOrder_provider.dart';
 import 'package:urawai_pos/core/Provider/settings_provider.dart';
 import 'package:urawai_pos/core/Provider/transactionOrder_provider.dart';
 import 'package:urawai_pos/core/Services/connectivity_service.dart';
+import 'package:urawai_pos/core/Services/firebase_auth.dart';
+import 'package:urawai_pos/core/Services/services_locator.dart';
 import 'package:urawai_pos/ui/utils/functions/getCurrentUser.dart';
 import 'package:urawai_pos/ui/utils/functions/routeGenerator.dart';
+import 'package:urawai_pos/core/Models/users.dart';
 
 import 'core/Models/transaction.dart';
 
@@ -41,6 +45,7 @@ void main() async {
   await Hive.openBox<TransactionOrder>(transactionBoxName);
 
   _loadAppConfig();
+  ServiceLocator().setup();
 
   runApp(MyApp());
 }
@@ -63,14 +68,13 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider(create: (context) => PostedOrderProvider()),
         ChangeNotifierProvider(create: (context) => TransactionOrderProvider()),
         ChangeNotifierProvider(create: (context) => SettingProvider()),
-
-        //not sure if this the best Practice
         StreamProvider<ConnectivityResult>(
             create: (context) =>
                 ConnectivityService().networkStatusController.stream),
+        StreamProvider(
+            create: (context) => FirebaseAuth.instance.onAuthStateChanged),
 
-        // StreamProvider<FirebaseUser>(
-        //     create: (context) => FirebaseAuthentication().userState),
+        // FutureProvider<Users>.value(value: CurrentUserLoggedIn.currentUser,catchError: ,),
       ],
       child: MaterialApp(
         debugShowCheckedModeBanner: false,
@@ -81,7 +85,7 @@ class MyApp extends StatelessWidget {
             scaffoldBackgroundColor: Color(0xFFfbfcfe),
             textTheme: TextTheme(body1: TextStyle(color: Color(0xFF435c72)))),
         // initialRoute: 'POS_Page',
-        initialRoute: 'GateKeeper_Page',
+        initialRoute: 'Authenticate_Page',
         onGenerateRoute: RouteGenerator.onGenerate,
       ),
     );

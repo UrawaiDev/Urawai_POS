@@ -1,25 +1,32 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:urawai_pos/core/Models/orderList.dart';
 import 'package:urawai_pos/core/Models/products.dart';
 import 'package:urawai_pos/core/Models/users.dart';
 import 'package:urawai_pos/core/Provider/orderList_provider.dart';
 import 'package:urawai_pos/core/Provider/postedOrder_provider.dart';
+import 'package:urawai_pos/core/Services/firebase_auth.dart';
 import 'package:urawai_pos/core/Services/firestore_service.dart';
 import 'package:urawai_pos/ui/Widgets/card_menu.dart';
+import 'package:urawai_pos/ui/Widgets/loading_card.dart';
 import 'package:urawai_pos/ui/utils/constans/utils.dart';
 
 class AddtionalItemOrderPage extends StatelessWidget {
   final FirestoreServices _firestoreServices = FirestoreServices();
+  final FirebaseAuthentication _firebaseAuthentication =
+      FirebaseAuthentication();
   final dynamic stateProvider;
 
   AddtionalItemOrderPage(this.stateProvider);
 
+  Future<List<Product>> _getCurrentUser() async {
+    var user = await _firebaseAuthentication.currentUserXXX;
+
+    return _firestoreServices.getProducts(user.shopName);
+  }
+
   @override
   Widget build(BuildContext context) {
-    Users currentUser = Provider.of<Users>(context);
-
     return SafeArea(
         child: Scaffold(
             body: Padding(
@@ -37,29 +44,22 @@ class AddtionalItemOrderPage extends StatelessWidget {
               child: Container(
                 // color: Colors.yellow,
                 child: FutureBuilder<List<Product>>(
-                  future: _firestoreServices.getProducts(currentUser.shopName),
+                  future: _getCurrentUser(),
                   builder: (context, snapshot) {
-                    if (snapshot.connectionState == ConnectionState.waiting)
-                      return Center(
-                        child: CircularProgressIndicator(),
+                    if (snapshot.hasError)
+                      return Text(
+                        'An Error has Occured ${snapshot.error}',
+                        style: kPriceTextStyle,
                       );
-                    else if (snapshot.connectionState == ConnectionState.done) {
-                      if (snapshot.hasError)
-                        return Text(
-                          'An Error has Occured ${snapshot.error}',
-                          style: kPriceTextStyle,
-                        );
-                      else if (!snapshot.hasData)
-                        return Text(
-                          'Loading....',
-                          style: kPriceTextStyle,
-                        );
-                      else if (snapshot.data.isEmpty)
-                        return Text(
-                          'Belum Ada Produk',
-                          style: kPriceTextStyle,
-                        );
-                    }
+                    if (!snapshot.hasData ||
+                        snapshot.connectionState == ConnectionState.waiting)
+                      return LoadingCard();
+                    if (snapshot.data.isEmpty)
+                      return Text(
+                        'Belum Ada Produk.',
+                        style: kPriceTextStyle,
+                      );
+
                     return GridView.count(
                       padding: EdgeInsets.all(8),
                       crossAxisCount: 5,

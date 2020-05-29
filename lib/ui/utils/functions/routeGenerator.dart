@@ -7,7 +7,6 @@ import 'package:urawai_pos/ui/Pages/Transacation_history/detail_transaction.dart
 import 'package:urawai_pos/ui/Pages/Transacation_history/transaction_history.dart';
 import 'package:urawai_pos/ui/Pages/authentication/authentication_page.dart';
 import 'package:urawai_pos/ui/Pages/authentication/gateKeeper.dart';
-import 'package:urawai_pos/ui/Pages/homePage/home_page.dart';
 import 'package:urawai_pos/ui/Pages/payment_screen/addtional_itemOrder.dart';
 import 'package:urawai_pos/ui/Pages/payment_screen/payment_screen.dart';
 import 'package:urawai_pos/ui/Pages/payment_success/payment_success.dart';
@@ -30,18 +29,17 @@ class RouteGenerator {
   static const String kRouteDetailTransaction = 'Detail_Transaction_Page';
   static const String kRouteTransactionReport = 'Transaction_Report_Page';
   static const String kRouteSettingsPage = 'Settings_Page';
-  static const String kRouteSignUpPage = 'SignUp_Page';
+  static const String kRouteAuthenticatePage = 'Authenticate_Page';
   static const String kRouteGateKeeper = 'GateKeeper_Page';
-  static const String kRouteHomePage = 'Home_Page';
 
   static Route<dynamic> onGenerate(settings) {
     final args = settings.arguments;
     switch (settings.name) {
-      case kRouteHomePage:
-        return MaterialPageRoute(builder: (context) => HomePage());
-        break;
       case kRouteGateKeeper:
         return MaterialPageRoute(builder: (context) => GateKeeper());
+        break;
+      case kRouteAuthenticatePage:
+        return MaterialPageRoute(builder: (context) => AuthenticationPage());
         break;
       case kRoutePOSPage:
         return MaterialPageRoute(builder: (context) => POSPage());
@@ -65,9 +63,7 @@ class RouteGenerator {
       case kRouteSettingsPage:
         return MaterialPageRoute(builder: (context) => SettingPage());
         break;
-      case kRouteSignUpPage:
-        return MaterialPageRoute(builder: (context) => AuthenticationPage());
-        break;
+
       case kRouteAddtionalItemOrderPage:
         return MaterialPageRoute(
             builder: (context) => AddtionalItemOrderPage(args));

@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:get_it/get_it.dart';
 import 'package:provider/provider.dart';
 import 'package:urawai_pos/core/Models/transaction.dart';
+import 'package:urawai_pos/core/Models/users.dart';
 import 'package:urawai_pos/core/Provider/orderList_provider.dart';
 import 'package:urawai_pos/core/Provider/postedOrder_provider.dart';
+import 'package:urawai_pos/core/Services/firebase_auth.dart';
 import 'package:urawai_pos/ui/Pages/pos/pos_Page.dart';
 import 'package:urawai_pos/ui/Widgets/costum_button.dart';
 import 'package:urawai_pos/ui/Widgets/footer_OrderList.dart';
@@ -15,6 +18,7 @@ class PaymentSuccess extends StatelessWidget {
   final double kembali;
   final dynamic state;
   final PaymentType paymentType;
+  final locatorAuth = GetIt.I<FirebaseAuthentication>();
 
   PaymentSuccess({
     @required this.itemList,
@@ -58,6 +62,7 @@ class PaymentSuccess extends StatelessWidget {
                 ),
                 SizedBox(width: 5),
                 Expanded(
+                  flex: 2,
                   child: Container(
                     // color: Colors.blue,
                     padding: EdgeInsets.fromLTRB(10, 20, 5, 15),
@@ -67,24 +72,25 @@ class PaymentSuccess extends StatelessWidget {
                         Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: <Widget>[
-                            Text('WARUNG MAKYOS',
-                                style: TextStyle(
-                                  fontSize: 30,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.blue,
-                                )),
-                            Text(
-                              'Jln. KP. Rawageni No. 5',
-                              style: TextStyle(
-                                fontSize: 18,
-                              ),
-                            ),
-                            Text(
-                              'RT 4. RW 5, Kelurahan Ratujaya, Kota DEPOK',
-                              style: TextStyle(
-                                fontSize: 18,
-                              ),
-                            ),
+                            FutureBuilder<Users>(
+                                future: locatorAuth.currentUserXXX,
+                                builder: (context, snapshot) {
+                                  if (!snapshot.hasData ||
+                                      snapshot.connectionState ==
+                                          ConnectionState.waiting)
+                                    return Text(
+                                      'Loading',
+                                      style: kPriceTextStyle,
+                                    );
+
+                                  return Text(
+                                      snapshot.data.shopName.toUpperCase(),
+                                      style: TextStyle(
+                                        fontSize: 30,
+                                        fontWeight: FontWeight.bold,
+                                        color: Colors.blue,
+                                      ));
+                                }),
                             Divider(
                               thickness: 2,
                             ),
@@ -138,17 +144,22 @@ class PaymentSuccess extends StatelessWidget {
                                                 style: kStruckTextStyle,
                                               ),
                                               SizedBox(width: 15),
-                                              Text(
-                                                itemList[index].productName,
-                                                style: kStruckTextStyle,
+                                              Container(
+                                                width: 250,
+                                                child: Text(
+                                                  itemList[index].productName,
+                                                  style: kStruckTextStyle,
+                                                ),
                                               ),
                                             ],
                                           ),
-                                          Text(
-                                            Formatter.currencyFormat(
-                                                itemList[index].price *
-                                                    itemList[index].quantity),
-                                            style: kStruckTextStyle,
+                                          Container(
+                                            child: Text(
+                                              Formatter.currencyFormat(
+                                                  itemList[index].price *
+                                                      itemList[index].quantity),
+                                              style: kStruckTextStyle,
+                                            ),
                                           ),
                                         ],
                                       ),
@@ -247,11 +258,11 @@ class PaymentSuccess extends StatelessWidget {
                           SizedBox(height: 100),
                           Padding(
                             padding: const EdgeInsets.all(10.0),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                            child: Column(
                               children: <Widget>[
                                 CostumButton.squareButton('Cetak Kwitansi',
                                     prefixIcon: Icons.print),
+                                SizedBox(height: 20),
                                 CostumButton.squareButton(
                                   'Selesai',
                                   prefixIcon: Icons.done,

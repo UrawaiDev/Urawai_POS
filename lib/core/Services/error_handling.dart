@@ -1,4 +1,4 @@
-class FirebaseAuthError {
+class OnErrorState {
   String message;
-  FirebaseAuthError(this.message);
+  OnErrorState(this.message);
 }

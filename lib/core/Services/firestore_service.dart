@@ -114,12 +114,12 @@ class FirestoreServices {
   }
 
   // get Document by Document ID
-  Stream<DocumentSnapshot> getDocumentByID(
+  Future<DocumentSnapshot> getDocumentByID(
     String shopName,
     String id,
   ) {
-    Stream<DocumentSnapshot> result =
-        _firestore.collection(shopName).document(id).snapshots();
+    Future<DocumentSnapshot> result =
+        _firestore.collection(shopName).document(id).get();
 
     return result;
   }
@@ -171,5 +171,22 @@ class FirestoreServices {
   //delete transaction by ID
   Future<void> deleteTransaction(String shopName, String id) async {
     await _firestore.collection(shopName).document(id).delete();
+  }
+
+  Future createUser(Users user) async {
+    try {
+      await _firestore
+          .collection('Users')
+          .document(user.id)
+          .setData(user.toJson());
+    } catch (e) {
+      return e.message;
+    }
+  }
+
+  Future<Users> getUser(String id) async {
+    var snapshot = await _firestore.collection('Users').document(id).get();
+    var currentUser = Users.fromJson(snapshot.data);
+    return currentUser;
   }
 }

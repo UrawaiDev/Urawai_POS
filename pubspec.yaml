@@ -37,6 +37,7 @@ dependencies:
   shimmer: ^1.1.1
   shared_preferences: ^0.5.7+3
   email_validator: ^1.0.4
+  get_it: ^4.0.2
 
 
 dev_dependencies:

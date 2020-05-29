@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:urawai_pos/core/Models/users.dart';
+import 'package:urawai_pos/core/Services/error_handling.dart';
 
 class CurrentUserLoggedIn {
   static Future<Users> get currentUser async {
@@ -11,40 +12,20 @@ class CurrentUserLoggedIn {
     if (_firebaseUser == null)
       return null;
     else {
-      var snapshot = await _firestore
+      var document = await _firestore
           .collection('Users')
-          .where('id', isEqualTo: _firebaseUser.uid)
-          .getDocuments();
-      var users =
-          snapshot.documents.map((documents) => Users.fromJson(documents.data));
-      var currentUser =
-          users.firstWhere((element) => element.id == _firebaseUser.uid);
+          .document(_firebaseUser.uid)
+          .get();
 
-      return currentUser;
+      return Users.fromJson(document.data);
     }
   }
 
-  // Stream<Users> getCurrentUser() {
-  //   Stream<Users> currentUser;
-  //   final Firestore _firestore = Firestore.instance;
-  //   final FirebaseAuth _firebaseAuth = FirebaseAuth.instance;
-  //   _firebaseAuth.onAuthStateChanged.listen((user) async {
-  //     if (user == null)
-  //       currentUser = null;
-  //     else {
-  //       var snapshot = _firestore
-  //           .collection('Users')
-  //           .where('id', isEqualTo: user.uid)
-  //           .snapshots();
+  static Future<Users> getCurrentUser(String uid) async {
+    final Firestore _firestore = Firestore.instance;
 
-  //       var result = snapshot.forEach((querySnapshot) {
-  //         return querySnapshot.documents
-  //             .map((document) => Users.fromJson(document.data));
-  //       });
+    var document = await _firestore.collection('Users').document(uid).get();
 
-  //       currentUser = Stream.fromFuture(result);
-  //     }
-  //   });
-  //   return currentUser;
-  // }
+    return Users.fromJson(document.data);
+  }
 }

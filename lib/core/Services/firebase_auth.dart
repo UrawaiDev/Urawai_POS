@@ -5,13 +5,21 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:urawai_pos/core/Enums/user_roles.dart';
 import 'package:urawai_pos/core/Models/users.dart';
 import 'package:urawai_pos/core/Services/error_handling.dart';
+import 'package:urawai_pos/core/Services/firestore_service.dart';
 
 class FirebaseAuthentication {
   FirebaseAuth _auth = FirebaseAuth.instance;
-  Firestore _firestore = Firestore.instance;
+  FirestoreServices _firestoreServices = FirestoreServices();
 
   //Stream Auth onChanged
   Stream<FirebaseUser> get userState => _auth.onAuthStateChanged;
+
+  Users _currentUser;
+  Future<Users> get currentUserXXX async {
+    var firebaseUser = await _auth.currentUser();
+    Users result = await _populateCurrentUser(firebaseUser);
+    return result;
+  }
 
   //SignOUt
   Future<void> signOut() async {
@@ -26,40 +34,42 @@ class FirebaseAuthentication {
           email: email, password: password);
       FirebaseUser _firebaseUser = authResult.user;
 
-      Users _user = Users(_firebaseUser.uid, shopName, username,
-          _firebaseUser.email, UserRole.ADMIN);
+      Users _user = Users(
+          _firebaseUser.uid, shopName, username, _firebaseUser.email, 'admin');
 
       //create users to Firestore DB
-      _firestore
-          .collection('Users')
-          .document(shopName + '_' + username + '_' + _firebaseUser.uid)
-          .setData({
-        'id': _firebaseUser.uid,
-        'shopName': shopName,
-        'email': email,
-        'username': username,
-        'roles': UserRole.ADMIN.toString(),
-      });
+      await _firestoreServices.createUser(_user);
+
+      // await _populateCurrentUser(_firebaseUser);
 
       return _user;
     } catch (e) {
-      return FirebaseAuthError(e.message.toString());
+      return OnErrorState(e.message.toString());
     }
   }
 
   //Sign In With Email & Password
-  Future<dynamic> signInWithEmailandPassword(
-      String email, String password) async {
+  Future signInWithEmailandPassword(String email, String password) async {
     try {
       AuthResult authResult = await _auth.signInWithEmailAndPassword(
           email: email, password: password);
-      FirebaseUser firebaseUser = authResult.user;
-      //  Users _user = Users(id, shopName, username, email, roles)
 
-      return firebaseUser;
+      // _currentUser = await _populateCurrentUser(authResult.user);
+      _currentUser = await _firestoreServices.currentUser(authResult.user.uid);
+      // return authResult.user;
+      return _currentUser;
     } catch (e) {
-      FirebaseAuthError msg = FirebaseAuthError(e.message.toString());
+      OnErrorState msg = OnErrorState(e.message.toString());
       return msg;
     }
+  }
+
+  Future<Users> _populateCurrentUser(FirebaseUser firebaseUser) async {
+    if (firebaseUser != null) {
+      Users result = await _firestoreServices.getUser(firebaseUser.uid);
+
+      return result;
+    }
+    return null;
   }
 }
