@@ -52,7 +52,7 @@ class TransactionReport extends StatelessWidget {
               return Scaffold(
                   appBar: AppBar(title: Text('Laporan Penjualan')),
                   drawer: Drawer(
-                    child: DrawerMenu(),
+                    child: DrawerMenu(currentUser),
                   ),
                   body: Padding(
                     padding: const EdgeInsets.all(10.0),
@@ -308,42 +308,41 @@ class TransactionReport extends StatelessWidget {
                                                                       ),
                                                                     ));
 
-                                                              switch (products
-                                                                  .connectionState) {
-                                                                case ConnectionState
-                                                                    .waiting:
-                                                                  return Center(
-                                                                      child:
-                                                                          CircularProgressIndicator());
-                                                                  break;
-                                                                default:
-                                                                  return ListView
-                                                                      .builder(
-                                                                          itemCount: products.data.length ??=
+                                                              return ListView
+                                                                  .builder(
+                                                                      itemCount:
+                                                                          products.data.length ??=
                                                                               0,
-                                                                          itemBuilder:
-                                                                              (context, index) {
-                                                                            var data =
-                                                                                _getTopSellingProducts(snapshot, products);
+                                                                      itemBuilder:
+                                                                          (context,
+                                                                              index) {
+                                                                        var data = _getTopSellingProducts(
+                                                                            snapshot,
+                                                                            products);
 
-                                                                            return ListTile(
-                                                                              leading: Chip(
-                                                                                label: Text(
-                                                                                  (index + 1).toString(),
-                                                                                  style: kProductNameSmallScreenTextStyle,
-                                                                                ),
-                                                                              ),
-                                                                              title: Text(
-                                                                                data.keys.elementAt(index),
-                                                                                style: kPriceTextStyle,
-                                                                              ),
-                                                                              trailing: Text(
-                                                                                data.values.elementAt(index).toString(),
-                                                                                style: kProductNameSmallScreenTextStyle,
-                                                                              ),
-                                                                            );
-                                                                          });
-                                                              }
+                                                                        return ListTile(
+                                                                          leading:
+                                                                              Chip(
+                                                                            label:
+                                                                                Text(
+                                                                              (index + 1).toString(),
+                                                                              style: kProductNameSmallScreenTextStyle,
+                                                                            ),
+                                                                          ),
+                                                                          title:
+                                                                              Text(
+                                                                            data.keys.elementAt(index),
+                                                                            style:
+                                                                                kPriceTextStyle,
+                                                                          ),
+                                                                          trailing:
+                                                                              Text(
+                                                                            data.values.elementAt(index).toString(),
+                                                                            style:
+                                                                                kProductNameSmallScreenTextStyle,
+                                                                          ),
+                                                                        );
+                                                                      });
                                                             });
                                                       }),
                                             ),
@@ -383,18 +382,19 @@ class TransactionReport extends StatelessWidget {
 
     Map<String, int> mapper = Map<String, int>();
     for (var product in products.data) {
-      snapshot.data.forEach((element) {
-        if (element.paymentStatus.toString() != 'PaymentStatus.VOID') {
-          for (OrderList data in element.itemList) {
-            if (data.productName.toString().trim().toUpperCase() ==
-                product.name.trim().toUpperCase()) {
-              count++;
-              total = total + data.quantity;
+      if (snapshot.hasData) {
+        snapshot.data.forEach((element) {
+          if (element.paymentStatus.toString() != 'PaymentStatus.VOID') {
+            for (OrderList data in element.itemList) {
+              if (data.productName.toString().trim().toUpperCase() ==
+                  product.name.trim().toUpperCase()) {
+                count++;
+                total = total + data.quantity;
+              }
             }
           }
-        }
-      });
-
+        });
+      }
       mapper.addAll({product.name: total});
 
       count = 0;

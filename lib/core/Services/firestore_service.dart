@@ -168,10 +168,26 @@ class FirestoreServices {
     return currentUser;
   }
 
+  //===================================================
+  // ==================[DELETE SECTION]=================
+  //===================================================
+
   //delete transaction by ID
   Future<void> deleteTransaction(String shopName, String id) async {
     await _firestore.collection(shopName).document(id).delete();
   }
+
+  //delete Product by ID
+  Future<void> deleteProduct(String shopName, String productId) async {
+    await _firestore
+        .collection(shopName + '_products')
+        .document(productId)
+        .delete();
+  }
+
+  //===================================================
+  // ==================[USERS SECTION]=================
+  //===================================================
 
   Future createUser(Users user) async {
     try {

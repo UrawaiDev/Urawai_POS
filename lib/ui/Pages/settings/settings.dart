@@ -16,7 +16,7 @@ class SettingPage extends StatelessWidget {
             appBar: AppBar(
               title: Text('Halaman Pengaturan'),
             ),
-            drawer: DrawerMenu(),
+            // drawer: DrawerMenu(),
             body: Padding(
               padding: const EdgeInsets.all(10.0),
               child: Column(

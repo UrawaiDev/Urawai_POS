@@ -22,7 +22,7 @@ class ConnectionStatusWidget extends StatelessWidget {
               maxRadius: 8,
               backgroundColor: value == ConnectivityResult.none || value == null
                   ? Colors.red
-                  : Colors.green,
+                  : Colors.lightGreen,
             )
           ],
         ),

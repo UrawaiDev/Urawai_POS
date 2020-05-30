@@ -52,7 +52,7 @@ class TransactionHistoryPage extends StatelessWidget {
                   title: Text('Riwayat Transasksi'),
                 ),
                 drawer: Drawer(
-                  child: DrawerMenu(),
+                  child: DrawerMenu(currentUser),
                 ),
                 body: Container(
                   child: Row(

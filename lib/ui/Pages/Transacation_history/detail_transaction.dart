@@ -1,6 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 import 'package:urawai_pos/core/Models/users.dart';
 import 'package:urawai_pos/core/Services/firebase_auth.dart';
 import 'package:urawai_pos/core/Services/firestore_service.dart';
@@ -77,7 +76,6 @@ class DetailTransactionPage extends StatelessWidget {
         builder: (context, document) {
           var data = document.data;
 
-          print(data);
           if (!document.hasData)
             return Center(child: CircularProgressIndicator());
           else {

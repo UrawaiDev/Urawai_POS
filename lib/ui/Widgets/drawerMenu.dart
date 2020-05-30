@@ -1,52 +1,62 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:get_it/get_it.dart';
 import 'package:urawai_pos/core/Models/users.dart';
 import 'package:urawai_pos/core/Services/firebase_auth.dart';
+import 'package:urawai_pos/ui/Widgets/costum_DialogBox.dart';
 import 'package:urawai_pos/ui/utils/constans/utils.dart';
 import 'package:urawai_pos/ui/utils/functions/routeGenerator.dart';
 
 class DrawerMenu extends StatelessWidget {
-  final FirebaseAuthentication _auth = FirebaseAuthentication();
+  final Users currentUser;
+  DrawerMenu(this.currentUser);
+  final locatorAuth = GetIt.I<FirebaseAuthentication>();
+
+  String _getUserIntial(String username) {
+    String userInital = '';
+    var result = username.trim().split(' ');
+    for (String intial in result) userInital = userInital + intial[0];
+
+    return userInital.toUpperCase();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Drawer(
       child: ListView(
         children: <Widget>[
-          FutureBuilder<Users>(
-              future: _auth.currentUserXXX,
-              builder: (context, snapshot) {
-                if (!snapshot.hasData ||
-                    snapshot.connectionState == ConnectionState.waiting)
-                  return DrawerHeader(child: Text('Loading...'));
-
-                // return Text(snapshot.data.username);
-                return UserAccountsDrawerHeader(
-                  accountName: Text(
-                    snapshot.data.username,
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 18,
-                    ),
-                  ),
-                  accountEmail: Text(
-                    snapshot.data.email,
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 18,
-                    ),
-                  ),
-                  currentAccountPicture: CircleAvatar(
-                    radius: 80,
-                    child: Text(
-                      snapshot.data.username[0],
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 50,
-                      ),
-                    ),
-                  ),
-                );
-              }),
+          UserAccountsDrawerHeader(
+            accountName: Text(
+              currentUser.username,
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 18,
+              ),
+            ),
+            accountEmail: Text(
+              currentUser.email,
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 18,
+              ),
+            ),
+            currentAccountPicture: Container(
+              alignment: Alignment.center,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: Colors.grey[600],
+              ),
+              child: Text(
+                _getUserIntial(currentUser.username),
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 25,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+          ),
           Container(
             color: Color(0xFFebf2fd),
             child: ListTile(
@@ -139,27 +149,23 @@ class DrawerMenu extends StatelessWidget {
             leading: FaIcon(FontAwesomeIcons.lifeRing),
             title: (Text('Bantuan', style: kMainMenuStyle)),
           ),
-          // ListTile(
-          //   leading: FaIcon(FontAwesomeIcons.signOutAlt),
-          //   title: (Text('Keluar', style: kMainMenuStyle)),
-          //   onTap: () {
-          //     CostumDialogBox.showCostumDialogBox(
-          //         context: context,
-          //         title: 'Konfirmasi',
-          //         icon: FontAwesomeIcons.signOutAlt,
-          //         iconColor: Colors.red,
-          //         contentString: 'Keluar dari Aplikasi?',
-          //         confirmButtonTitle: 'Keluar',
-          //         onConfirmPressed: () async {
-          //           await _auth.signOut();
-          //           Navigator.pushNamedAndRemoveUntil(
-          //               context,
-          //               RouteGenerator.kRouteGateKeeper,
-          //               ModalRoute.withName(RouteGenerator.kRouteGateKeeper));
-          //         });
-          //   },
-
-          // ),
+          ListTile(
+            leading: FaIcon(FontAwesomeIcons.signOutAlt),
+            title: (Text('Keluar', style: kMainMenuStyle)),
+            onTap: () {
+              CostumDialogBox.showCostumDialogBox(
+                  context: context,
+                  title: 'Konfirmasi',
+                  icon: FontAwesomeIcons.signOutAlt,
+                  iconColor: Colors.red,
+                  contentString: 'Keluar dari Aplikasi?',
+                  confirmButtonTitle: 'Keluar',
+                  onConfirmPressed: () {
+                    locatorAuth.signOut();
+                    SystemNavigator.pop();
+                  });
+            },
+          ),
         ],
       ),
     );

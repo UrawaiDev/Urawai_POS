@@ -1,7 +1,6 @@
 import 'dart:async';
 
 import 'package:connectivity/connectivity.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
@@ -19,7 +18,6 @@ import 'package:urawai_pos/core/Provider/orderList_provider.dart';
 import 'package:urawai_pos/core/Provider/postedOrder_provider.dart';
 import 'package:urawai_pos/core/Services/firebase_auth.dart';
 import 'package:urawai_pos/core/Services/firestore_service.dart';
-import 'package:urawai_pos/core/Services/services_locator.dart';
 import 'package:urawai_pos/ui/Widgets/connection_status.dart';
 import 'package:urawai_pos/ui/Widgets/costum_DialogBox.dart';
 import 'package:urawai_pos/ui/Widgets/costum_button.dart';
@@ -91,6 +89,20 @@ class _POSPageState extends State<POSPage> with SingleTickerProviderStateMixin {
     super.didChangeDependencies();
   }
 
+  Future<bool> _isBackButtonPressed() {
+    return CostumDialogBox.showCostumDialogBox(
+        context: context,
+        title: 'Konfirmasi',
+        icon: FontAwesomeIcons.signOutAlt,
+        iconColor: Colors.red,
+        contentString: 'Keluar dari Aplikasi?',
+        confirmButtonTitle: 'Keluar',
+        onConfirmPressed: () {
+          locatorAuth.signOut();
+          SystemNavigator.pop();
+        });
+  }
+
   @override
   Widget build(BuildContext context) {
     final screenHeight = MediaQuery.of(context).size.height;
@@ -124,7 +136,7 @@ class _POSPageState extends State<POSPage> with SingleTickerProviderStateMixin {
                 FocusScope.of(context).unfocus();
               },
               child: WillPopScope(
-                onWillPop: () => _isBackButtonPressed(context),
+                onWillPop: () => _isBackButtonPressed(),
                 child: Scaffold(
                   resizeToAvoidBottomPadding: false,
                   appBar: AppBar(
@@ -144,7 +156,7 @@ class _POSPageState extends State<POSPage> with SingleTickerProviderStateMixin {
                                 title: 'Konfirmasi',
                                 icon: FontAwesomeIcons.signOutAlt,
                                 iconColor: Colors.red,
-                                contentString: 'Keluar dari Aplikasi?',
+                                contentString: 'Logout dari Akun Anda?',
                                 confirmButtonTitle: 'Keluar',
                                 onConfirmPressed: () async {
                                   await _auth.signOut();
@@ -237,7 +249,7 @@ class _POSPageState extends State<POSPage> with SingleTickerProviderStateMixin {
                       )
                     ],
                   ),
-                  drawer: DrawerMenu(),
+                  drawer: DrawerMenu(currentUser),
                   body: Container(
                     child: Row(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -1338,50 +1350,4 @@ Widget myAppBar(TextEditingController textController, BuildContext context) {
       ),
     ),
   );
-}
-
-Future<bool> _isBackButtonPressed(BuildContext context) {
-  return showDialog(
-      barrierDismissible: false,
-      context: context,
-      builder: (context) => AlertDialog(
-            title: Text(
-              'Konfirmasi',
-              style: kProductNameSmallScreenTextStyle,
-            ),
-            content: Row(
-              children: <Widget>[
-                FaIcon(
-                  FontAwesomeIcons.signOutAlt,
-                  color: Colors.red,
-                  size: 25,
-                ),
-                SizedBox(width: 20),
-                Text(
-                  'Keluar dari Aplikasi?',
-                  style: kPriceTextStyle,
-                )
-              ],
-            ),
-            actions: <Widget>[
-              FlatButton(
-                child: Text(
-                  'Tidak',
-                  style: kPriceTextStyle,
-                ),
-                onPressed: () {
-                  Navigator.pop(context, false);
-                },
-              ),
-              FlatButton(
-                child: Text(
-                  'Ya',
-                  style: kPriceTextStyle,
-                ),
-                onPressed: () {
-                  SystemNavigator.pop();
-                },
-              )
-            ],
-          ));
 }

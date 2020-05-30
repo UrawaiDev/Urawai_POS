@@ -6,13 +6,12 @@ import 'package:urawai_pos/core/Models/users.dart';
 import 'package:urawai_pos/core/Provider/general_provider.dart';
 import 'package:urawai_pos/core/Services/firebase_auth.dart';
 import 'package:urawai_pos/core/Services/firestore_service.dart';
+import 'package:urawai_pos/ui/Widgets/costum_DialogBox.dart';
 import 'package:urawai_pos/ui/Widgets/drawerMenu.dart';
 import 'package:urawai_pos/ui/Widgets/loading_card.dart';
 import 'package:urawai_pos/ui/utils/constans/formatter.dart';
 import 'package:urawai_pos/ui/utils/constans/utils.dart';
-import 'package:urawai_pos/ui/utils/functions/getCurrentUser.dart';
 import 'package:urawai_pos/ui/utils/functions/routeGenerator.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 
 class ProductListPage extends StatefulWidget {
   @override
@@ -23,8 +22,9 @@ class _ProductListPageState extends State<ProductListPage> {
   final _textQuery = TextEditingController();
   final locatorAuth = GetIt.I<FirebaseAuthentication>();
   final locatorFirestore = GetIt.I<FirestoreServices>();
-  Future<Users> currentUser;
+
   Future<List<Product>> _getProducts;
+  Future<Users> _currentUser;
 
   @override
   void dispose() {
@@ -36,8 +36,8 @@ class _ProductListPageState extends State<ProductListPage> {
   void initState() {
     super.initState();
 
-    currentUser = locatorAuth.currentUserXXX;
-    currentUser.then((user) {
+    _currentUser = locatorAuth.currentUserXXX;
+    _currentUser.then((user) {
       _getProducts = locatorFirestore.getProducts(user.shopName);
     });
   }
@@ -45,8 +45,6 @@ class _ProductListPageState extends State<ProductListPage> {
   @override
   Widget build(BuildContext context) {
     final state = Provider.of<GeneralProvider>(context);
-    final firebaseUser = Provider.of<FirebaseUser>(context);
-    bool isLogin = firebaseUser != null;
 
     return SafeArea(
         child: GestureDetector(
@@ -112,11 +110,16 @@ class _ProductListPageState extends State<ProductListPage> {
               ),
             ),
           ),
-          drawer: DrawerMenu(),
+          drawer: FutureBuilder<Users>(
+              future: _currentUser,
+              builder: (_, snapshot) {
+                if (!snapshot.hasData ||
+                    snapshot.connectionState == ConnectionState.waiting)
+                  return Container();
+                return DrawerMenu(snapshot.data);
+              }),
           body: FutureBuilder<Users>(
-              future: isLogin
-                  ? CurrentUserLoggedIn.getCurrentUser(firebaseUser.uid)
-                  : null,
+              future: _currentUser,
               builder: (context, snapshot) {
                 Users currentUser = snapshot.data;
 
@@ -143,7 +146,8 @@ class _ProductListPageState extends State<ProductListPage> {
                         child: FutureBuilder<List<Product>>(
                             future: (_textQuery.text.isEmpty ||
                                     _textQuery.text.length < 3)
-                                ? _getProducts
+                                ? locatorFirestore
+                                    .getProducts(currentUser.shopName)
                                 : locatorFirestore.getDocumentByProductName(
                                     currentUser.shopName, _textQuery.text),
                             builder: (context, snapshot) {
@@ -315,7 +319,39 @@ class _ProductListPageState extends State<ProductListPage> {
                                                   ),
                                                   iconSize: 35,
                                                   color: Colors.red,
-                                                  onPressed: () {}),
+                                                  onPressed: () {
+                                                    CostumDialogBox
+                                                        .showCostumDialogBox(
+                                                            context: context,
+                                                            title: 'Konfirmasi',
+                                                            icon: Icons.delete,
+                                                            iconColor:
+                                                                Colors.red,
+                                                            contentString:
+                                                                'Anda Akang Menghapus Produk?',
+                                                            confirmButtonTitle:
+                                                                'Hapus',
+                                                            onConfirmPressed:
+                                                                () {
+                                                              final gProvider =
+                                                                  Provider.of<
+                                                                          GeneralProvider>(
+                                                                      context,
+                                                                      listen:
+                                                                          false);
+                                                              locatorFirestore
+                                                                  .deleteProduct(
+                                                                      currentUser
+                                                                          .shopName,
+                                                                      product
+                                                                          .id);
+                                                              Navigator.pop(
+                                                                  context);
+                                                              gProvider
+                                                                      .isLoading =
+                                                                  false;
+                                                            });
+                                                  }),
                                             ],
                                           )
                                         ],
