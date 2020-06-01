@@ -708,30 +708,39 @@ class _POSPageState extends State<POSPage> with SingleTickerProviderStateMixin {
             }),
             ScaleTransition(
               scale: _animationScale,
-              child: IconButton(
-                icon: Icon(Icons.add),
-                iconSize: 35,
-                onPressed: () async {
-                  var user = await locatorAuth.currentUserXXX;
-
-                  if (orderlistProvider.orderlist.isEmpty) {
-                    _createNewOrder(orderlistProvider, user.username);
-                  } else if (orderlistProvider.orderlist.isNotEmpty) {
-                    CostumDialogBox.showCostumDialogBox(
-                      context: context,
-                      title: 'Information',
-                      contentString:
-                          'Orderlist Sebelumnya belum disimpan, \nApakah akan tetap dibuatkan order List Baru?',
-                      icon: Icons.info,
-                      iconColor: Colors.blue,
-                      confirmButtonTitle: 'Ya',
-                      onConfirmPressed: () {
-                        Navigator.pop(context); //close dialogBox
-                        _createNewOrder(orderlistProvider, user.username);
-                      },
-                    );
-                  }
-                },
+              child: Padding(
+                padding: const EdgeInsets.only(left: 8.0),
+                child: Consumer<GeneralProvider>(
+                  builder: (_, generalProvider, __) => generalProvider.isLoading
+                      ? Container(
+                          width: 30,
+                          height: 30,
+                          child: CircularProgressIndicator(),
+                        )
+                      : IconButton(
+                          icon: Icon(Icons.add),
+                          iconSize: 35,
+                          onPressed: () {
+                            if (orderlistProvider.orderlist.isEmpty) {
+                              _createNewOrder(orderlistProvider);
+                            } else if (orderlistProvider.orderlist.isNotEmpty) {
+                              CostumDialogBox.showCostumDialogBox(
+                                context: context,
+                                title: 'Information',
+                                contentString:
+                                    'Orderlist Sebelumnya belum disimpan, \nApakah akan tetap dibuatkan order List Baru?',
+                                icon: Icons.info,
+                                iconColor: Colors.blue,
+                                confirmButtonTitle: 'Ya',
+                                onConfirmPressed: () {
+                                  Navigator.pop(context); //close dialogBox
+                                  _createNewOrder(orderlistProvider);
+                                },
+                              );
+                            }
+                          },
+                        ),
+                ),
               ),
             ),
           ],
@@ -870,26 +879,34 @@ class _POSPageState extends State<POSPage> with SingleTickerProviderStateMixin {
     );
   }
 
-  void _createNewOrder(
-      OrderListProvider orderlistProvider, String cashierName) {
-    CostumDialogBox.showInputDialogBox(
-        formKey: _formKey,
-        context: context,
-        textEditingController: _textReferenceOrder,
-        title: 'Referensi',
-        hint: 'Nama Pelanggan atau Nomor Meja',
-        confirmButtonTitle: 'OK',
-        onConfirmPressed: () {
-          if (_formKey.currentState.validate()) {
-            orderlistProvider.resetOrderList();
-            orderlistProvider.referenceOrder = _textReferenceOrder.text;
-            orderlistProvider.cashierName = cashierName;
+  void _createNewOrder(OrderListProvider orderlistProvider) async {
+    //* set loading to prevent double click new Order
+    Provider.of<GeneralProvider>(context, listen: false).isLoading = true;
 
-            orderlistProvider.createNewOrder();
-            _textReferenceOrder.clear();
-            Navigator.pop(context);
-          }
-        });
+    var currentUser = await _auth.currentUserXXX;
+
+    if (currentUser != null) {
+      Provider.of<GeneralProvider>(context, listen: false).isLoading = false;
+
+      CostumDialogBox.showInputDialogBox(
+          formKey: _formKey,
+          context: context,
+          textEditingController: _textReferenceOrder,
+          title: 'Referensi',
+          hint: 'Nama Pelanggan atau Nomor Meja',
+          confirmButtonTitle: 'OK',
+          onConfirmPressed: () {
+            if (_formKey.currentState.validate()) {
+              orderlistProvider.resetOrderList();
+              orderlistProvider.referenceOrder = _textReferenceOrder.text;
+              orderlistProvider.cashierName = currentUser.username;
+
+              orderlistProvider.createNewOrder();
+              _textReferenceOrder.clear();
+              Navigator.pop(context);
+            }
+          });
+    }
   }
 
   Widget _shimmerLoading(bool isDrawerShow) {

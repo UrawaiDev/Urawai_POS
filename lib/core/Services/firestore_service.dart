@@ -14,19 +14,6 @@ class FirestoreServices {
     return result;
   }
 
-  // get All Documents exclude Void Trnsaction
-  Future<List<TransactionOrder>> getAllDocumentsWithoutVOID(
-      String shopName) async {
-    List<TransactionOrder> transactions = [];
-    var snapshot = await _firestore.collection(shopName).getDocuments();
-    for (var data in snapshot.documents) {
-      if (data['paymentStatus'] != 'PaymentStatus.VOID')
-        transactions.add(TransactionOrder.fromJson(data.data));
-    }
-
-    return transactions;
-  }
-
   Future<List<Product>> getProducts(String shopName) async {
     List<Product> products = [];
 
@@ -50,6 +37,50 @@ class FirestoreServices {
 
   Future<QuerySnapshot> getDocumentLength(String shopName) {
     return _firestore.collection(shopName).getDocuments();
+  }
+
+  //*===================================================
+  //* ==================[TRANSACTION SECTION]===========
+  //*===================================================
+
+  //* Post Transaction
+  Future<void> postTransaction(
+      String shopName, TransactionOrder transaction) async {
+    try {
+      await _firestore.collection(shopName).document(transaction.id).setData({
+        'id': transaction.id,
+        'cashierName': transaction.cashierName,
+        'orderDate': transaction.date,
+        'referenceOrder': transaction.referenceOrder,
+        'discount': transaction.discount,
+        'subtotal': transaction.subtotal,
+        'grandTotal': transaction.grandTotal,
+        'paymentStatus': transaction.paymentStatus.toString(),
+        'paymentType': transaction.paymentType.toString(),
+        'tender': transaction.tender,
+        'vat': transaction.vat,
+        'change': transaction.paymentType == PaymentType.CASH &&
+                transaction.paymentStatus != PaymentStatus.VOID
+            ? transaction.tender - transaction.grandTotal
+            : 0,
+        'orderlist': transaction.itemList.map((data) => data.toJson()).toList(),
+      });
+    } catch (e) {
+      print(e.toString());
+    }
+  }
+
+  //* get All Documents exclude Void Trnsaction
+  Future<List<TransactionOrder>> getAllDocumentsWithoutVOID(
+      String shopName) async {
+    List<TransactionOrder> transactions = [];
+    var snapshot = await _firestore.collection(shopName).getDocuments();
+    for (var data in snapshot.documents) {
+      if (data['paymentStatus'] != 'PaymentStatus.VOID')
+        transactions.add(TransactionOrder.fromJson(data.data));
+    }
+
+    return transactions;
   }
 
   Future<List<TransactionOrder>> getAllTransactionOrder(String shopName) async {
@@ -168,9 +199,9 @@ class FirestoreServices {
     return currentUser;
   }
 
-  //===================================================
-  // ==================[DELETE SECTION]=================
-  //===================================================
+  //* ===================================================
+  //* ==================[DELETE SECTION]=================
+  //* ===================================================
 
   //delete transaction by ID
   Future<void> deleteTransaction(String shopName, String id) async {

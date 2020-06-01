@@ -2,6 +2,7 @@ import 'package:connectivity/connectivity.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_phoenix/flutter_phoenix.dart';
 import 'package:hive/hive.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -43,7 +44,7 @@ void main() async {
   _loadAppConfig();
   ServiceLocator().setup();
 
-  runApp(MyApp());
+  runApp(Phoenix(child: MyApp()));
 }
 
 void _loadAppConfig() async {

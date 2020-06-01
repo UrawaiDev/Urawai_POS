@@ -15,14 +15,15 @@ class ConnectionStatusWidget extends StatelessWidget {
         builder: (context, value, _) => Row(
           mainAxisAlignment: MainAxisAlignment.end,
           children: <Widget>[
-            Text('Connection Status:', style: textStyle),
+            Text('Koneksi Internet:', style: textStyle),
             SizedBox(width: 10),
             CircleAvatar(
               maxRadius: 8,
               backgroundColor: value == ConnectivityResult.none || value == null
                   ? Colors.red
                   : Colors.lightGreen,
-            )
+            ),
+            SizedBox(width: 8),
           ],
         ),
       ),

@@ -9,9 +9,10 @@ class SalesChart extends StatelessWidget {
 
   SalesChart(this.seriesList, {this.animate});
 
-  factory SalesChart.lineChartSales(List<TransactionOrder> transactions) {
+  factory SalesChart.lineChartSales(
+      List<TransactionOrder> transactions, List<DateTime> selectedDate) {
     return new SalesChart(
-      _createData(transactions),
+      _createData(transactions, selectedDate),
 
       // Disable animations for image tests.
       animate: true,
@@ -26,21 +27,25 @@ class SalesChart extends StatelessWidget {
   }
 
   static List<charts.Series<LinearSales, DateTime>> _createData(
-      List<TransactionOrder> transactions) {
+      List<TransactionOrder> transactions, List<DateTime> selectedDate) {
+    print('panjang date ${selectedDate.length}');
     double currentMonthTransaction = 0;
     double prevMonthTransaction = 0;
     double twoMonthAgoTransaction = 0;
     List<LinearSales> linearSales = [];
 
+    //! TODO: Will filter based on selected Date
     for (var transaction in transactions) {
-      if (transaction.date.month == DateTime.now().month) {
-        currentMonthTransaction =
-            currentMonthTransaction + transaction.grandTotal;
-      } else if (transaction.date.month == DateTime.now().month - 1) {
-        prevMonthTransaction = prevMonthTransaction + transaction.grandTotal;
-      } else if (transaction.date.month == DateTime.now().month - 2) {
-        twoMonthAgoTransaction =
-            twoMonthAgoTransaction + transaction.grandTotal;
+      if (selectedDate.length == 0) {
+        if (transaction.date.month == DateTime.now().month) {
+          currentMonthTransaction =
+              currentMonthTransaction + transaction.grandTotal;
+        } else if (transaction.date.month == DateTime.now().month - 1) {
+          prevMonthTransaction = prevMonthTransaction + transaction.grandTotal;
+        } else if (transaction.date.month == DateTime.now().month - 2) {
+          twoMonthAgoTransaction =
+              twoMonthAgoTransaction + transaction.grandTotal;
+        }
       }
     }
 

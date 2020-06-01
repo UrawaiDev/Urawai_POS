@@ -388,7 +388,9 @@ class TransactionReport extends StatelessWidget {
 
                                                 return SalesChart
                                                     .lineChartSales(
-                                                        snapshot.data);
+                                                        snapshot.data,
+                                                        generalProvider
+                                                            .selectedDate);
                                               }),
                                     ),
                                   ),

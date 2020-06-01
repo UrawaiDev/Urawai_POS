@@ -396,6 +396,11 @@ class TransactionHistoryPage extends StatelessWidget {
                                   _firestoreServices.deleteTransaction(
                                       currentUser.shopName, item.id);
                                   Navigator.pop(context);
+
+                                  //* Refresh Page
+                                  Provider.of<GeneralProvider>(context,
+                                          listen: false)
+                                      .selectedDate = [];
                                 });
                           }),
                     ],
