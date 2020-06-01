@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:urawai_pos/core/Models/orderList.dart';
 import 'package:urawai_pos/core/Models/products.dart';
-import 'package:urawai_pos/core/Models/users.dart';
 import 'package:urawai_pos/core/Provider/orderList_provider.dart';
 import 'package:urawai_pos/core/Provider/postedOrder_provider.dart';
 import 'package:urawai_pos/core/Services/firebase_auth.dart';

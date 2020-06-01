@@ -29,7 +29,6 @@ import 'package:urawai_pos/ui/Widgets/loading_card.dart';
 import 'package:urawai_pos/ui/utils/constans/formatter.dart';
 import 'package:urawai_pos/ui/utils/constans/utils.dart';
 import 'package:urawai_pos/ui/utils/functions/general_function.dart';
-import 'package:urawai_pos/ui/utils/functions/getCurrentUser.dart';
 import 'package:urawai_pos/ui/utils/functions/routeGenerator.dart';
 
 class POSPage extends StatefulWidget {
@@ -160,8 +159,8 @@ class _POSPageState extends State<POSPage> with SingleTickerProviderStateMixin {
                                 confirmButtonTitle: 'Keluar',
                                 onConfirmPressed: () async {
                                   await _auth.signOut();
-                                  Navigator.pushNamed(context,
-                                      RouteGenerator.kRouteAuthenticatePage);
+                                  Navigator.pushNamed(
+                                      context, RouteGenerator.kRouteLoginPage);
                                 });
                           },
                         ),

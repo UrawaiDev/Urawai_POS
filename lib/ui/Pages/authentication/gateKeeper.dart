@@ -2,10 +2,9 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:urawai_pos/core/Services/firebase_auth.dart';
-import 'package:urawai_pos/ui/Pages/authentication/authentication_page.dart';
-import 'package:urawai_pos/core/Models/users.dart';
+
+import 'package:urawai_pos/ui/Pages/authentication/login_page.dart';
 import 'package:urawai_pos/ui/Pages/pos/pos_Page.dart';
-import 'package:urawai_pos/ui/utils/functions/getCurrentUser.dart';
 
 class GateKeeper extends StatelessWidget {
   @override
@@ -36,7 +35,7 @@ class GateKeeper extends StatelessWidget {
             return POSPage();
           } else {
             print('user aktif $userState');
-            return AuthenticationPage();
+            return LoginPage();
           }
         },
       ),

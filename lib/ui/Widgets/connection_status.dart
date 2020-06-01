@@ -1,7 +1,6 @@
 import 'package:connectivity/connectivity.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:urawai_pos/ui/utils/constans/utils.dart';
 
 class ConnectionStatusWidget extends StatelessWidget {
   final TextStyle textStyle;

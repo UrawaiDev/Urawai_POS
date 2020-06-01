@@ -1,7 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:urawai_pos/core/Models/users.dart';
-import 'package:urawai_pos/core/Services/error_handling.dart';
 
 class CurrentUserLoggedIn {
   static Future<Users> get currentUser async {

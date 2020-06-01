@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:urawai_pos/core/Provider/settings_provider.dart';
-import 'package:urawai_pos/ui/Widgets/drawerMenu.dart';
 import 'package:urawai_pos/ui/utils/constans/utils.dart';
 
 class SettingPage extends StatelessWidget {
@@ -51,6 +50,23 @@ class SettingPage extends StatelessWidget {
                                 );
                               }),
                         ),
+                        //* TODO: Load Offline Transaction Order
+                        ListTile(
+                          title: Text(
+                            'Terdapat 0 Transaksi Offline',
+                            style: kPriceTextStyle,
+                          ),
+                          trailing: RaisedButton.icon(
+                              onPressed: () {},
+                              icon: Icon(
+                                Icons.sync,
+                                color: Colors.green,
+                              ),
+                              label: Text(
+                                'Sinkronisasi',
+                                style: kPriceTextStyle,
+                              )),
+                        )
                       ],
                     ),
                   )

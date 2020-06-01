@@ -23,7 +23,6 @@ class _ProductListPageState extends State<ProductListPage> {
   final locatorAuth = GetIt.I<FirebaseAuthentication>();
   final locatorFirestore = GetIt.I<FirestoreServices>();
 
-  Future<List<Product>> _getProducts;
   Future<Users> _currentUser;
 
   @override
@@ -37,9 +36,6 @@ class _ProductListPageState extends State<ProductListPage> {
     super.initState();
 
     _currentUser = locatorAuth.currentUserXXX;
-    _currentUser.then((user) {
-      _getProducts = locatorFirestore.getProducts(user.shopName);
-    });
   }
 
   @override

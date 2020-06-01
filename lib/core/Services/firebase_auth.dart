@@ -1,8 +1,6 @@
 import 'dart:async';
 
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:urawai_pos/core/Enums/user_roles.dart';
 import 'package:urawai_pos/core/Models/users.dart';
 import 'package:urawai_pos/core/Services/error_handling.dart';
 import 'package:urawai_pos/core/Services/firestore_service.dart';

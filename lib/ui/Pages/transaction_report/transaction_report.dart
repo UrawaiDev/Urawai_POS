@@ -5,12 +5,14 @@ import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:urawai_pos/core/Models/orderList.dart';
 import 'package:urawai_pos/core/Models/products.dart';
 import 'package:urawai_pos/core/Models/transaction.dart';
 import 'package:urawai_pos/core/Models/users.dart';
 import 'package:urawai_pos/core/Provider/general_provider.dart';
 import 'package:urawai_pos/core/Services/firestore_service.dart';
+import 'package:urawai_pos/ui/Widgets/charts/line_sales_chart.dart';
 import 'package:urawai_pos/ui/Widgets/costum_button.dart';
 import 'package:urawai_pos/ui/Widgets/drawerMenu.dart';
 import 'package:urawai_pos/ui/Widgets/loading_card.dart';
@@ -161,14 +163,23 @@ class TransactionReport extends StatelessWidget {
                                             MainAxisAlignment.spaceAround,
                                         children: <Widget>[
                                           _headerCard(
-                                            'Total Penjualan Kotor',
+                                            'Total Penjualan',
                                             Colors.lightGreen,
                                             _getBruto(snapshot),
                                           ),
-                                          _headerCard(
-                                            'Total Keuntungan',
-                                            Colors.amber,
-                                            _getNetto(snapshot),
+                                          FutureBuilder<String>(
+                                            future: _getNetto(snapshot),
+                                            builder: (_, dataSnapshot) {
+                                              if (!dataSnapshot.hasData)
+                                                return _headerCard(
+                                                    'Total Keuntungan',
+                                                    Colors.amber,
+                                                    'Loading...');
+                                              return _headerCard(
+                                                  'Total Keuntungan',
+                                                  Colors.amber,
+                                                  dataSnapshot.data);
+                                            },
                                           ),
                                           _headerCard(
                                             'Total Transaksi',
@@ -238,11 +249,6 @@ class TransactionReport extends StatelessWidget {
                                                             style:
                                                                 kProductNameBigScreenTextStyle,
                                                           );
-
-                                                        // if (snapshot.connectionState ==
-                                                        //         ConnectionState.waiting ||
-                                                        //     !snapshot.hasData)
-                                                        //   return CircularProgressIndicator();
 
                                                         return FutureBuilder<
                                                                 List<Product>>(
@@ -352,15 +358,38 @@ class TransactionReport extends StatelessWidget {
                                     ),
                                   ),
                                 ),
-                                //Prepare for Chart
                                 Expanded(
-                                    child: Container(
-                                  // color: Colors.blue,
+                                    child: Padding(
+                                  padding: const EdgeInsets.all(8.0),
                                   child: Container(
                                     alignment: Alignment.center,
-                                    child: Text(
-                                      'CHART',
-                                      style: kProductNameBigScreenTextStyle,
+                                    child: Consumer<GeneralProvider>(
+                                      builder: (context, value, _) =>
+                                          FutureBuilder<List<TransactionOrder>>(
+                                              future: value.selectedDate.isEmpty
+                                                  ? _firestoreServices
+                                                      .getAllDocumentsWithoutVOID(
+                                                          currentUser.shopName)
+                                                  : _firestoreServices
+                                                      .getDocumentByDate(
+                                                          currentUser.shopName,
+                                                          value.selectedDate,
+                                                          includeVoid: false),
+                                              builder: (context, snapshot) {
+                                                if (snapshot.hasError)
+                                                  return Text(
+                                                    'An Erro Occured. ${snapshot.error}',
+                                                    style: kPriceTextStyle,
+                                                  );
+                                                if (!snapshot.hasData ||
+                                                    snapshot.connectionState ==
+                                                        ConnectionState.waiting)
+                                                  return CircularProgressIndicator();
+
+                                                return SalesChart
+                                                    .lineChartSales(
+                                                        snapshot.data);
+                                              }),
                                     ),
                                   ),
                                 )),
@@ -416,11 +445,17 @@ class TransactionReport extends StatelessWidget {
     return Formatter.currencyFormat(result);
   }
 
-  String _getNetto(AsyncSnapshot<List<TransactionOrder>> snapshot) {
+  Future<String> _getNetto(
+      AsyncSnapshot<List<TransactionOrder>> snapshot) async {
+    SharedPreferences _prefs = await SharedPreferences.getInstance();
+    double result = 0;
     double total =
         snapshot.data.fold(0, (prev, element) => prev + element.grandTotal);
-
-    double result = (total * 100 / 110);
+    bool hasVAT = _prefs.getBool('vat');
+    if (hasVAT)
+      result = (total * 100 / 110);
+    else
+      result = total;
 
     return Formatter.currencyFormat(result);
   }

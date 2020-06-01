@@ -1,5 +1,3 @@
-import 'package:urawai_pos/core/Enums/user_roles.dart';
-
 class Users {
   String id;
   String username;

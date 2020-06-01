@@ -1,5 +1,4 @@
 import 'package:email_validator/email_validator.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
@@ -12,23 +11,20 @@ import 'package:urawai_pos/ui/Widgets/costum_button.dart';
 import 'package:urawai_pos/ui/utils/constans/utils.dart';
 import 'package:urawai_pos/ui/utils/functions/routeGenerator.dart';
 
-class AuthenticationPage extends StatefulWidget {
+class SignUpPage extends StatefulWidget {
   @override
-  _AuthenticationPageState createState() => _AuthenticationPageState();
+  _SignUpPageState createState() => _SignUpPageState();
 }
 
-class _AuthenticationPageState extends State<AuthenticationPage> {
+class _SignUpPageState extends State<SignUpPage> {
   final _formKey = GlobalKey<FormState>();
   final _textshopName = TextEditingController();
   final _textUserName = TextEditingController();
   final _textEmail = TextEditingController();
   final _textPassword = TextEditingController();
   final _textReconfirmPassword = TextEditingController();
-  final _textEmailSignIn = TextEditingController();
-  final _textPasswordSignIn = TextEditingController();
+
   final FirebaseAuthentication _auth = FirebaseAuthentication();
-  PageController _pageController = PageController();
-  String errorMessageSignIn = '';
   String errorMessageSignUp = '';
 
   @override
@@ -39,9 +35,6 @@ class _AuthenticationPageState extends State<AuthenticationPage> {
     _textEmail.dispose();
     _textPassword.dispose();
     _textReconfirmPassword.dispose();
-    _pageController.dispose();
-    _textEmailSignIn.dispose();
-    _textPasswordSignIn.dispose();
   }
 
   @override
@@ -54,19 +47,21 @@ class _AuthenticationPageState extends State<AuthenticationPage> {
       child: GestureDetector(
         onTap: () => FocusScope.of(context).unfocus(),
         child: Scaffold(
-          body: Row(
+          backgroundColor: Color(0xFFfeffff),
+          // body: _viewPage(context, generalProvider),
+          body: Stack(
+            fit: StackFit.expand,
             children: <Widget>[
-              Expanded(child: Container(color: Colors.blue)),
-              Expanded(
-                  child: Stack(
-                fit: StackFit.expand,
-                children: <Widget>[
-                  Padding(
-                    padding: const EdgeInsets.all(10.0),
-                    child: SingleChildScrollView(
-                      child: Container(
+              SingleChildScrollView(
+                child: Padding(
+                  padding: const EdgeInsets.all(10.0),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceAround,
+                    children: <Widget>[
+                      //* LEFT SIDE
+                      Expanded(
                         child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisAlignment: MainAxisAlignment.center,
                           children: <Widget>[
                             Text(
                               'Selamat Datang.',
@@ -82,38 +77,27 @@ class _AuthenticationPageState extends State<AuthenticationPage> {
                                   color: Colors.black,
                                   fontStyle: FontStyle.italic),
                             ),
+                            SizedBox(height: 50),
                             Container(
-                              width: MediaQuery.of(context).size.width * 0.45,
-                              height: MediaQuery.of(context).size.height + 100,
-                              child: Padding(
-                                padding: const EdgeInsets.all(8.0),
-                                child: Form(
-                                  key: _formKey,
-                                  child: Padding(
-                                    padding: const EdgeInsets.all(8.0),
-                                    child: PageView(
-                                      controller: _pageController,
-                                      scrollDirection: Axis.horizontal,
-                                      children: <Widget>[
-                                        _formSignIn(generalProvider, context),
-                                        _formSignUp(generalProvider, context),
-                                      ],
-                                    ),
-                                  ),
-                                ),
+                              width: 400,
+                              height: 400,
+                              child: Image.asset(
+                                'assets/images/login_image.jpg',
+                                fit: BoxFit.fill,
                               ),
                             ),
                           ],
                         ),
                       ),
-                    ),
+                      //* RIGHT SIDE
+                      _buildRightSide(generalProvider, context)
+                    ],
                   ),
-                  Consumer<GeneralProvider>(
-                      builder: (_, value, __) => (value.isLoading)
-                          ? _showLoading(context)
-                          : Container()),
-                ],
-              )),
+                ),
+              ),
+              Consumer<GeneralProvider>(
+                  builder: (_, value, __) =>
+                      (value.isLoading) ? _showLoading(context) : Container()),
             ],
           ),
         ),
@@ -121,101 +105,20 @@ class _AuthenticationPageState extends State<AuthenticationPage> {
     ));
   }
 
-  Widget _formSignIn(GeneralProvider generalProvider, BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: <Widget>[
-        Text(
-          'Masuk',
-          style: kProductNameBigScreenTextStyle,
-        ),
-        Divider(
-          thickness: 4,
-          color: Colors.green,
-          endIndent: 200,
-        ),
-        SizedBox(height: 20),
-        TextFormField(
-          controller: _textEmailSignIn,
-          autocorrect: false,
-          decoration: InputDecoration(
-            hintStyle: kPriceTextStyle,
-            hintText: 'Alamat Email',
-            labelStyle: kPriceTextStyle,
-            labelText: 'Email',
-            border: OutlineInputBorder(),
-            counterText: '',
-            errorStyle: kErrorTextStyle,
+  Widget _buildRightSide(
+      GeneralProvider generalProvider, BuildContext context) {
+    return Expanded(
+      child: Container(
+        child: Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: Form(
+            key: _formKey,
+            child: Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: _formSignUp(generalProvider, context)),
           ),
-          style: kPriceTextStyle,
-          maxLength: 50,
-          keyboardType: TextInputType.emailAddress,
-          validator: (value) {
-            if (value.isEmpty)
-              return 'Email Tidak Boleh Kosong.';
-            else if (!EmailValidator.validate(value))
-              return 'Email Anda Tidak Valid';
-            return null;
-          },
         ),
-        SizedBox(height: 20),
-        TextFormField(
-          controller: _textPasswordSignIn,
-          autocorrect: false,
-          decoration: InputDecoration(
-            hintStyle: kPriceTextStyle,
-            hintText: 'Password (Angka)',
-            labelStyle: kPriceTextStyle,
-            labelText: 'Password',
-            border: OutlineInputBorder(),
-            counterText: '',
-            errorStyle: kErrorTextStyle,
-          ),
-          style: TextStyle(fontSize: 25),
-          maxLength: 6,
-          keyboardType: TextInputType.number,
-          obscureText: true,
-          validator: (value) {
-            if (value.isEmpty) return 'Password Tidak Boleh Kosong.';
-            return null;
-          },
-        ),
-        SizedBox(height: 20),
-        Text(
-          errorMessageSignIn.isEmpty ? '' : errorMessageSignIn,
-          style: kErrorTextStyle,
-        ),
-        SizedBox(height: 30),
-        CostumButton.squareButtonSmall('Masuk', onTap: () async {
-          //Make sure to close softkeyboard
-          FocusScope.of(context).unfocus();
-
-          if (_formKey.currentState.validate()) {
-            //show loading
-            generalProvider.isLoading = true;
-            Future.delayed(Duration(seconds: 1));
-
-            var result = await _auth.signInWithEmailandPassword(
-                _textEmailSignIn.text, _textPasswordSignIn.text);
-
-            //stop loading
-            generalProvider.isLoading = false;
-            if (result == null) {
-              print('hasilnya $result');
-            } else if (result is OnErrorState) {
-              errorMessageSignIn = result.message;
-            } else if (result is Users) {
-              // TODO:will check the best option
-              // Navigator.pushNamedAndRemoveUntil(
-              //     context,
-              //     RouteGenerator.kRouteGateKeeper,
-              //     ModalRoute.withName(RouteGenerator.kRouteGateKeeper));
-
-              Navigator.pushNamed(context, RouteGenerator.kRoutePOSPage);
-            }
-          }
-        }),
-      ],
+      ),
     );
   }
 
@@ -338,7 +241,7 @@ class _AuthenticationPageState extends State<AuthenticationPage> {
             counterText: '',
             errorStyle: kErrorTextStyle,
           ),
-          style: kPriceTextStyle,
+          style: TextStyle(fontSize: 25),
           maxLength: 6,
           keyboardType: TextInputType.number,
           obscureText: true,
@@ -351,30 +254,47 @@ class _AuthenticationPageState extends State<AuthenticationPage> {
           },
         ),
         SizedBox(height: 20),
-        CostumButton.squareButtonSmall('Sign Up', onTap: () async {
-          //Make sure to close softkeyboard
-          FocusScope.of(context).unfocus();
+        Row(
+          children: <Widget>[
+            CostumButton.squareButtonSmall('Daftar',
+                prefixIcon: FontAwesomeIcons.userPlus, onTap: () async {
+              //Make sure to close softkeyboard
+              FocusScope.of(context).unfocus();
 
-          if (_formKey.currentState.validate()) {
-            generalProvider.isLoading = true;
-            Future.delayed(Duration(seconds: 1));
-            var result = await _auth.signUpWithEmail(
-              _textEmail.text,
-              _textPassword.text,
-              _textUserName.text,
-              _textshopName.text,
-            );
+              if (_formKey.currentState.validate()) {
+                generalProvider.isLoading = true;
+                Future.delayed(Duration(seconds: 1));
+                var result = await _auth.signUpWithEmail(
+                  _textEmail.text,
+                  _textPassword.text,
+                  _textUserName.text,
+                  _textshopName.text,
+                );
 
-            //stop loading animation
-            generalProvider.isLoading = false;
+                //stop loading animation
+                generalProvider.isLoading = false;
 
-            if (result is Users) {
-              Navigator.pushNamed(context, RouteGenerator.kRoutePOSPage);
-            } else if (result is OnErrorState) {
-              errorMessageSignUp = result.message;
-            }
-          }
-        }),
+                if (result is Users) {
+                  Navigator.pushNamed(context, RouteGenerator.kRoutePOSPage);
+                } else if (result is OnErrorState) {
+                  errorMessageSignUp = result.message;
+                }
+              }
+            }),
+            SizedBox(width: 20),
+            GestureDetector(
+              child: Text(
+                'Login disini',
+                style: TextStyle(
+                    fontSize: 22,
+                    fontStyle: FontStyle.italic,
+                    decoration: TextDecoration.underline),
+              ),
+              onTap: () =>
+                  Navigator.pushNamed(context, RouteGenerator.kRouteLoginPage),
+            ),
+          ],
+        ),
       ],
     );
   }
@@ -382,8 +302,6 @@ class _AuthenticationPageState extends State<AuthenticationPage> {
   Widget _showLoading(BuildContext context) {
     return Positioned.fill(
       child: Container(
-        width: MediaQuery.of(context).size.width,
-        height: MediaQuery.of(context).size.height,
         color: Colors.grey.withOpacity(0.6),
         child: Align(
           alignment: Alignment.center,

@@ -57,18 +57,6 @@ class DrawerMenu extends StatelessWidget {
               ),
             ),
           ),
-          Container(
-            color: Color(0xFFebf2fd),
-            child: ListTile(
-              leading: Icon(Icons.home),
-              title: (Text(
-                'Beranda',
-                style: kMainMenuStyle,
-              )),
-              selected: true,
-              onTap: () {},
-            ),
-          ),
           ListTile(
             leading: FaIcon(FontAwesomeIcons.cashRegister),
             title: (Text(

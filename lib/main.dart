@@ -9,18 +9,14 @@ import 'package:urawai_pos/core/Models/orderList.dart';
 import 'package:urawai_pos/core/Models/postedOrder.dart';
 
 import 'package:path_provider/path_provider.dart' as path;
-import 'package:urawai_pos/core/Models/users.dart';
 import 'package:urawai_pos/core/Provider/general_provider.dart';
 import 'package:urawai_pos/core/Provider/orderList_provider.dart';
 import 'package:urawai_pos/core/Provider/postedOrder_provider.dart';
 import 'package:urawai_pos/core/Provider/settings_provider.dart';
 import 'package:urawai_pos/core/Provider/transactionOrder_provider.dart';
 import 'package:urawai_pos/core/Services/connectivity_service.dart';
-import 'package:urawai_pos/core/Services/firebase_auth.dart';
 import 'package:urawai_pos/core/Services/services_locator.dart';
-import 'package:urawai_pos/ui/utils/functions/getCurrentUser.dart';
 import 'package:urawai_pos/ui/utils/functions/routeGenerator.dart';
-import 'package:urawai_pos/core/Models/users.dart';
 
 import 'core/Models/transaction.dart';
 
@@ -85,7 +81,7 @@ class MyApp extends StatelessWidget {
             scaffoldBackgroundColor: Color(0xFFfbfcfe),
             textTheme: TextTheme(body1: TextStyle(color: Color(0xFF435c72)))),
         // initialRoute: 'POS_Page',
-        initialRoute: 'Authenticate_Page',
+        initialRoute: 'Login_Page',
         onGenerateRoute: RouteGenerator.onGenerate,
       ),
     );
