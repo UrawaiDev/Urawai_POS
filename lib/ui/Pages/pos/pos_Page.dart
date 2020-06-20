@@ -8,6 +8,7 @@ import 'package:get_it/get_it.dart';
 import 'package:hive/hive.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:provider/provider.dart';
+import 'package:responsive_builder/responsive_builder.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:urawai_pos/core/Models/postedOrder.dart';
@@ -496,6 +497,7 @@ class _POSPageState extends State<POSPage> with SingleTickerProviderStateMixin {
                                                 ),
                                               ),
                                             ),
+
                                       Container(
                                         child: FooterOrderList(
                                           dicount: orderlistState.discountTotal,
@@ -504,130 +506,8 @@ class _POSPageState extends State<POSPage> with SingleTickerProviderStateMixin {
                                           vat: orderlistState.taxFinal,
                                         ),
                                       ),
-                                      Row(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.spaceBetween,
-                                        children: <Widget>[
-                                          Row(
-                                            mainAxisAlignment:
-                                                MainAxisAlignment.spaceAround,
-                                            children: <Widget>[
-                                              _bottomButton(
-                                                  icon: Icon(Icons.save,
-                                                      color: Colors.blue),
-                                                  title: 'Simpan',
-                                                  onTap: () {
-                                                    if (orderlistState.orderID
-                                                            .isNotEmpty &&
-                                                        orderlistState.orderlist
-                                                            .isNotEmpty) {
-                                                      if (orderlistState
-                                                          .addPostedOrder(
-                                                              orderlistState)) {
-                                                        CostumDialogBox
-                                                            .showDialogInformation(
-                                                                title:
-                                                                    'Information',
-                                                                contentText:
-                                                                    'Daftar sudah disimpan kedalam Draft',
-                                                                context:
-                                                                    context,
-                                                                icon:
-                                                                    Icons.info,
-                                                                iconColor:
-                                                                    Colors.blue,
-                                                                onTap: () {
-                                                                  orderlistState
-                                                                      .resetOrderList();
-                                                                  Navigator.pop(
-                                                                      context);
-                                                                });
-                                                      }
-                                                      //set cashier name for PostedOrder Provider
-                                                      Provider.of<PostedOrderProvider>(
-                                                                  context,
-                                                                  listen: false)
-                                                              .cashierName =
-                                                          orderlistState
-                                                              .cashierName;
-                                                    }
-                                                  }),
-                                              _bottomButton(
-                                                  icon: Icon(Icons.disc_full),
-                                                  title: 'Diskon',
-                                                  onTap: () {
-                                                    if (orderlistState
-                                                        .orderlist.isNotEmpty) {
-                                                      showDialog(
-                                                          context: context,
-                                                          barrierDismissible:
-                                                              false,
-                                                          builder: (context) =>
-                                                              ExtraDiscoutDialog(
-                                                                  orderlistState));
-                                                    }
-                                                  }),
-                                              _bottomButton(
-                                                  icon: Icon(Icons.delete,
-                                                      color: Colors.red),
-                                                  title: 'Hapus',
-                                                  onTap: () {
-                                                    if (orderlistState
-                                                        .orderlist.isNotEmpty) {
-                                                      CostumDialogBox
-                                                          .showCostumDialogBox(
-                                                              context: context,
-                                                              title:
-                                                                  'Konfirmasi',
-                                                              contentString:
-                                                                  'List Order akan di Hapus',
-                                                              icon:
-                                                                  Icons.delete,
-                                                              iconColor:
-                                                                  Colors.red,
-                                                              confirmButtonTitle:
-                                                                  'Hapus',
-                                                              onConfirmPressed:
-                                                                  () {
-                                                                orderlistState
-                                                                    .resetOrderList();
-                                                                Navigator.pop(
-                                                                    context);
-                                                              });
-                                                    }
-                                                  }),
-                                            ],
-                                          ),
-                                          Expanded(
-                                            child: RaisedButton(
-                                                padding: EdgeInsets.all(0),
-                                                child: Container(
-                                                    alignment: Alignment.center,
-                                                    height: 60,
-                                                    color: Color(0xFF408be5),
-                                                    child: Text(
-                                                      'BAYAR',
-                                                      style: TextStyle(
-                                                        color: Colors.white,
-                                                        fontSize: 25,
-                                                        fontWeight:
-                                                            FontWeight.bold,
-                                                      ),
-                                                    )),
-                                                onPressed: () {
-                                                  if (orderlistState
-                                                      .orderlist.isNotEmpty)
-                                                    Navigator.pushNamed(
-                                                        context,
-                                                        RouteGenerator
-                                                            .kRoutePaymentScreen,
-                                                        arguments:
-                                                            orderlistState
-                                                                .orderlist);
-                                                }),
-                                          )
-                                        ],
-                                      ),
+                                      transactionButton(
+                                          orderlistState, context),
                                     ]))),
 
                         //Right side -- menu penjuala
@@ -638,6 +518,95 @@ class _POSPageState extends State<POSPage> with SingleTickerProviderStateMixin {
               ),
             );
           }),
+    );
+  }
+
+  Row transactionButton(
+      OrderListProvider orderlistState, BuildContext context) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: <Widget>[
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceAround,
+          children: <Widget>[
+            _bottomButton(
+                icon: Icon(Icons.save, color: Colors.blue),
+                title: 'Simpan',
+                onTap: () {
+                  if (orderlistState.orderID.isNotEmpty &&
+                      orderlistState.orderlist.isNotEmpty) {
+                    if (orderlistState.addPostedOrder(orderlistState)) {
+                      CostumDialogBox.showDialogInformation(
+                          title: 'Information',
+                          contentText: 'Daftar sudah disimpan kedalam Draft',
+                          context: context,
+                          icon: Icons.info,
+                          iconColor: Colors.blue,
+                          onTap: () {
+                            orderlistState.resetOrderList();
+                            Navigator.pop(context);
+                          });
+                    }
+                    //set cashier name for PostedOrder Provider
+                    Provider.of<PostedOrderProvider>(context, listen: false)
+                        .cashierName = orderlistState.cashierName;
+                  }
+                }),
+            _bottomButton(
+                icon: Icon(Icons.disc_full),
+                title: 'Diskon',
+                onTap: () {
+                  if (orderlistState.orderlist.isNotEmpty) {
+                    showDialog(
+                        context: context,
+                        barrierDismissible: false,
+                        builder: (context) =>
+                            ExtraDiscoutDialog(orderlistState));
+                  }
+                }),
+            _bottomButton(
+                icon: Icon(Icons.delete, color: Colors.red),
+                title: 'Hapus',
+                onTap: () {
+                  if (orderlistState.orderlist.isNotEmpty) {
+                    CostumDialogBox.showCostumDialogBox(
+                        context: context,
+                        title: 'Konfirmasi',
+                        contentString: 'List Order akan di Hapus',
+                        icon: Icons.delete,
+                        iconColor: Colors.red,
+                        confirmButtonTitle: 'Hapus',
+                        onConfirmPressed: () {
+                          orderlistState.resetOrderList();
+                          Navigator.pop(context);
+                        });
+                  }
+                }),
+          ],
+        ),
+        Expanded(
+          child: RaisedButton(
+              padding: EdgeInsets.all(0),
+              child: Container(
+                  alignment: Alignment.center,
+                  height: 60,
+                  color: Color(0xFF408be5),
+                  child: Text(
+                    'BAYAR',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 25,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  )),
+              onPressed: () {
+                if (orderlistState.orderlist.isNotEmpty)
+                  Navigator.pushNamed(
+                      context, RouteGenerator.kRoutePaymentScreen,
+                      arguments: orderlistState.orderlist);
+              }),
+        )
+      ],
     );
   }
 

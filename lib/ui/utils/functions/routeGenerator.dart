@@ -15,6 +15,7 @@ import 'package:urawai_pos/ui/Pages/pos/pos_Page.dart';
 import 'package:urawai_pos/ui/Pages/products/add_products.dart';
 import 'package:urawai_pos/ui/Pages/products/edit_products.dart';
 import 'package:urawai_pos/ui/Pages/products/list_products.dart';
+import 'package:urawai_pos/ui/Pages/settings/search_printer.dart';
 import 'package:urawai_pos/ui/Pages/settings/settings.dart';
 import 'package:urawai_pos/ui/Pages/transaction_report/transaction_report.dart';
 
@@ -33,6 +34,7 @@ class RouteGenerator {
   static const String kRouteSignUpPage = 'SignUp_Page';
   static const String kRouteGateKeeper = 'GateKeeper_Page';
   static const String kRouteLoginPage = 'Login_Page';
+  static const String kRoutePrinterPage = 'Printer_Page';
 
   static Route<dynamic> onGenerate(settings) {
     final args = settings.arguments;
@@ -43,6 +45,10 @@ class RouteGenerator {
       case kRouteLoginPage:
         return MaterialPageRoute(builder: (context) => LoginPage());
         break;
+      case kRoutePrinterPage:
+        return MaterialPageRoute(builder: (context) => SearchPrinterPage());
+        break;
+
       case kRouteSignUpPage:
         return MaterialPageRoute(builder: (context) => SignUpPage());
         break;

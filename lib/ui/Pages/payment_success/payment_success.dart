@@ -1,4 +1,6 @@
+import 'package:esc_pos_bluetooth/esc_pos_bluetooth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bluetooth_basic/flutter_bluetooth_basic.dart';
 import 'package:get_it/get_it.dart';
 import 'package:provider/provider.dart';
 import 'package:urawai_pos/core/Models/transaction.dart';
@@ -6,19 +8,20 @@ import 'package:urawai_pos/core/Models/users.dart';
 import 'package:urawai_pos/core/Provider/orderList_provider.dart';
 import 'package:urawai_pos/core/Provider/postedOrder_provider.dart';
 import 'package:urawai_pos/core/Services/firebase_auth.dart';
+import 'package:urawai_pos/core/Services/printer_service.dart';
 import 'package:urawai_pos/ui/Pages/pos/pos_Page.dart';
+import 'package:urawai_pos/ui/Widgets/costum_DialogBox.dart';
 import 'package:urawai_pos/ui/Widgets/costum_button.dart';
 import 'package:urawai_pos/ui/Widgets/footer_OrderList.dart';
 import 'package:urawai_pos/ui/utils/constans/formatter.dart';
 import 'package:urawai_pos/ui/utils/constans/utils.dart';
 
-class PaymentSuccess extends StatelessWidget {
+class PaymentSuccess extends StatefulWidget {
   final List<dynamic> itemList;
   final double pembayaran;
   final double kembali;
   final dynamic state;
   final PaymentType paymentType;
-  final locatorAuth = GetIt.I<FirebaseAuthentication>();
 
   PaymentSuccess({
     @required this.itemList,
@@ -29,19 +32,42 @@ class PaymentSuccess extends StatelessWidget {
   });
 
   @override
+  _PaymentSuccessState createState() => _PaymentSuccessState();
+}
+
+class _PaymentSuccessState extends State<PaymentSuccess> {
+  final locatorAuth = GetIt.I<FirebaseAuthentication>();
+
+  static const int BLUETOOTH_DISCONNECTED = 10;
+  int bluetoothStatus;
+  BluetoothManager bluetoothManager;
+
+  @override
+  void initState() {
+    super.initState();
+
+    // ? Return Null When using Emulator
+    // bluetoothManager.state.listen((status) {
+    //   bluetoothStatus = status;
+    //   print(status);
+    // });
+  }
+
+  @override
   Widget build(BuildContext context) {
     String _cashierName;
     String _referenceOrder;
     DateTime _orderDate;
+    String _shopName;
 
     //Get header information
-    if (state is OrderListProvider) {
-      var x = state as OrderListProvider;
+    if (widget.state is OrderListProvider) {
+      var x = widget.state as OrderListProvider;
       _cashierName = x.cashierName;
       _referenceOrder = x.referenceOrder;
       _orderDate = x.orderDate;
-    } else if (state is PostedOrderProvider) {
-      var x = state as PostedOrderProvider;
+    } else if (widget.state is PostedOrderProvider) {
+      var x = widget.state as PostedOrderProvider;
       _cashierName = x.postedOrder.cashierName;
       _referenceOrder = x.postedOrder.refernceOrder;
       _orderDate = x.postedOrder.dateTime;
@@ -82,7 +108,8 @@ class PaymentSuccess extends StatelessWidget {
                                       'Loading',
                                       style: kPriceTextStyle,
                                     );
-
+                                  _shopName =
+                                      snapshot.data.shopName.toUpperCase();
                                   return Text(
                                       snapshot.data.shopName.toUpperCase(),
                                       style: TextStyle(
@@ -128,7 +155,7 @@ class PaymentSuccess extends StatelessWidget {
                             padding: const EdgeInsets.symmetric(vertical: 5.0),
                             child: Container(
                               child: ListView.builder(
-                                  itemCount: itemList.length,
+                                  itemCount: widget.itemList.length,
                                   itemBuilder: (context, index) {
                                     return Padding(
                                       padding: const EdgeInsets.symmetric(
@@ -140,14 +167,15 @@ class PaymentSuccess extends StatelessWidget {
                                           Row(
                                             children: <Widget>[
                                               Text(
-                                                'x${itemList[index].quantity}',
+                                                'x${widget.itemList[index].quantity}',
                                                 style: kStruckTextStyle,
                                               ),
                                               SizedBox(width: 15),
                                               Container(
                                                 width: 250,
                                                 child: Text(
-                                                  itemList[index].productName,
+                                                  widget.itemList[index]
+                                                      .productName,
                                                   style: kStruckTextStyle,
                                                 ),
                                               ),
@@ -156,8 +184,9 @@ class PaymentSuccess extends StatelessWidget {
                                           Container(
                                             child: Text(
                                               Formatter.currencyFormat(
-                                                  itemList[index].price *
-                                                      itemList[index].quantity),
+                                                  widget.itemList[index].price *
+                                                      widget.itemList[index]
+                                                          .quantity),
                                               style: kStruckTextStyle,
                                             ),
                                           ),
@@ -171,10 +200,10 @@ class PaymentSuccess extends StatelessWidget {
                         Column(
                           children: <Widget>[
                             FooterOrderList(
-                              dicount: state.discountTotal,
-                              grandTotal: state.grandTotal,
-                              subtotal: state.subTotal,
-                              vat: state.taxFinal,
+                              dicount: widget.state.discountTotal,
+                              grandTotal: widget.state.grandTotal,
+                              subtotal: widget.state.subTotal,
+                              vat: widget.state.taxFinal,
                             ),
                             Padding(
                               padding:
@@ -188,10 +217,11 @@ class PaymentSuccess extends StatelessWidget {
                                     style: kGrandTotalTextStyle,
                                   ),
                                   Text(
-                                    paymentType == PaymentType.CASH
-                                        ? Formatter.currencyFormat(pembayaran)
+                                    widget.paymentType == PaymentType.CASH
+                                        ? Formatter.currencyFormat(
+                                            widget.pembayaran)
                                         : Formatter.currencyFormat(
-                                            state.grandTotal),
+                                            widget.state.grandTotal),
                                     style: kGrandTotalTextStyle,
                                   ),
                                 ],
@@ -209,8 +239,9 @@ class PaymentSuccess extends StatelessWidget {
                                     style: kGrandTotalTextStyle,
                                   ),
                                   Text(
-                                    paymentType == PaymentType.CASH
-                                        ? Formatter.currencyFormat(kembali)
+                                    widget.paymentType == PaymentType.CASH
+                                        ? Formatter.currencyFormat(
+                                            widget.kembali)
                                         : Formatter.currencyFormat(0),
                                     style: kGrandTotalTextStyle,
                                   ),
@@ -244,34 +275,120 @@ class PaymentSuccess extends StatelessWidget {
                     flex: 2,
                     child: Container(
                       child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
                         children: <Widget>[
-                          Icon(
-                            Icons.check_circle_outline,
-                            size: 200,
-                            color: Colors.green,
-                          ),
-                          Text(
-                            'Pembayaran Berhasil',
-                            style: TextStyle(fontSize: 35),
-                          ),
-                          SizedBox(height: 100),
-                          Padding(
-                            padding: const EdgeInsets.all(10.0),
-                            child: Column(
+                          SizedBox(height: 20),
+                          Container(
+                            alignment: Alignment.centerRight,
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.end,
                               children: <Widget>[
-                                CostumButton.squareButton('Cetak Kwitansi',
-                                    prefixIcon: Icons.print),
-                                SizedBox(height: 20),
-                                CostumButton.squareButton(
-                                  'Selesai',
-                                  prefixIcon: Icons.done,
-                                  borderColor: Colors.green,
-                                  onTap: () => _onTransactionComplete(context),
+                                Text(
+                                  'Koneksi Bluetooth:',
+                                  style: kPriceTextStyle,
                                 ),
+                                SizedBox(width: 10),
+                                //* Temporary Code
+                                (bluetoothStatus == BLUETOOTH_DISCONNECTED ||
+                                        bluetoothStatus == null)
+                                    ? Text(
+                                        'Disconnected',
+                                        style: kPriceTextStyle,
+                                      )
+                                    : Text(
+                                        'Connected',
+                                        style: kPriceTextStyle,
+                                      ),
+
+                                //! ERROR When User Emulator to TEST
+                                // StreamBuilder<int>(
+                                //     stream: bluetoothManager.state,
+                                //     builder: (context, snapshot) {
+                                //       if (snapshot.hasError)
+                                //         return Text(snapshot.error.toString(),
+                                //             style: kPriceTextStyle);
+                                //       if (!snapshot.hasData ||
+                                //           snapshot.connectionState ==
+                                //               ConnectionState.waiting)
+                                //         return Text(
+                                //           'Loading...',
+                                //           style: kPriceTextStyle,
+                                //         );
+
+                                //       return snapshot.data ==
+                                //               BLUETOOTH_DISCONNECTED
+                                //           ? Text('Disconnected',
+                                //               style: kPriceTextStyle)
+                                //           : Text(
+                                //               'Connected',
+                                //               style: kPriceTextStyle,
+                                //             );
+                                //     }),
+                                SizedBox(width: 10),
                               ],
                             ),
-                          )
+                          ),
+                          SizedBox(height: 20),
+                          Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: <Widget>[
+                              Icon(
+                                Icons.check_circle_outline,
+                                size: 200,
+                                color: Colors.green,
+                              ),
+                              Text(
+                                'Pembayaran Berhasil',
+                                style: TextStyle(fontSize: 35),
+                              ),
+                              SizedBox(height: 100),
+                              Padding(
+                                padding: const EdgeInsets.all(10.0),
+                                child: Column(
+                                  children: <Widget>[
+                                    CostumButton.squareButton('Cetak Kwitansi',
+                                        prefixIcon: Icons.print,
+                                        onTap: () async {
+                                      var printer = await PrinterService
+                                          .loadPrinterDevice();
+                                      //* Print if printer has set and bluetooth is active
+                                      if (printer.name != null &&
+                                          bluetoothStatus !=
+                                              BLUETOOTH_DISCONNECTED) {
+                                        PrinterService.printStruck(
+                                          printer: PrinterBluetooth(printer),
+                                          state: widget.state,
+                                          shopName: _shopName,
+                                          itemList: widget.itemList,
+                                          pembayaran: widget.pembayaran,
+                                          kembali: widget.kembali,
+                                        );
+                                      } else {
+                                        CostumDialogBox.showDialogInformation(
+                                          context: context,
+                                          title: 'Informasi',
+                                          contentText:
+                                              'Printer Tidak terhubung. \n• Periksa Koneksi Bluetooth. \n• Printer belum diset pada pengaturan',
+                                          icon: Icons.bluetooth_disabled,
+                                          iconColor: Colors.blue,
+                                          onTap: () => Navigator.pop(context),
+                                        );
+                                        print(
+                                            'Something when wrong with the printer, please check connection and make sure you have set the printer.');
+                                      }
+                                    }),
+                                    SizedBox(height: 20),
+                                    CostumButton.squareButton(
+                                      'Selesai',
+                                      prefixIcon: Icons.done,
+                                      borderColor: Colors.green,
+                                      onTap: () =>
+                                          _onTransactionComplete(context),
+                                    ),
+                                  ],
+                                ),
+                              )
+                            ],
+                          ),
                         ],
                       ),
                     )),

@@ -41,6 +41,16 @@ dependencies:
   charts_flutter: ^0.9.0
   flutter_phoenix: ^0.1.0
 
+  #Printer Bluetooth
+  esc_pos_bluetooth: ^0.2.8
+  esc_pos_utils: ^0.3.6
+  flutter_bluetooth_basic: ^0.1.5
+
+  #Open Setting Page
+  app_settings: ^4.0.0
+
+  #responsive ui
+  responsive_builder: ^0.2.0+2
 
 dev_dependencies:
   flutter_test:
@@ -74,6 +84,8 @@ flutter:
    - assets/images/noimage.png
    - assets/images/placeholder.gif
    - assets/images/login_image.jpg
+   - assets/images/logo.png
+   - assets/images/rabbit_black.jpg
   #  - images/a_dot_ham.jpeg
 
   # An image asset can refer to one or more resolution-specific "variants", see

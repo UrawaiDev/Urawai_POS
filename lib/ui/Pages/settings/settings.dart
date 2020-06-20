@@ -1,15 +1,16 @@
 import 'package:connectivity/connectivity.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bluetooth_basic/flutter_bluetooth_basic.dart';
 import 'package:flutter_phoenix/flutter_phoenix.dart';
 import 'package:hive/hive.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:urawai_pos/core/Models/transaction.dart';
 import 'package:urawai_pos/core/Provider/general_provider.dart';
-import 'package:urawai_pos/core/Provider/settings_provider.dart';
 import 'package:urawai_pos/core/Services/firebase_auth.dart';
 import 'package:urawai_pos/core/Services/firestore_service.dart';
+import 'package:urawai_pos/core/Services/printer_service.dart';
 import 'package:urawai_pos/ui/Widgets/connection_status.dart';
 import 'package:urawai_pos/ui/Widgets/costum_DialogBox.dart';
 import 'package:urawai_pos/ui/Widgets/loading_card.dart';
@@ -17,11 +18,24 @@ import 'package:urawai_pos/ui/utils/constans/utils.dart';
 import 'package:urawai_pos/main.dart' as mainPage;
 import 'package:urawai_pos/ui/utils/functions/routeGenerator.dart';
 
-class SettingPage extends StatelessWidget {
+class SettingPage extends StatefulWidget {
+  @override
+  _SettingPageState createState() => _SettingPageState();
+}
+
+class _SettingPageState extends State<SettingPage> {
   final Future<SharedPreferences> _prefs = SharedPreferences.getInstance();
+
   final hiveBox = Hive.box<TransactionOrder>(mainPage.transactionBoxName);
   final FirestoreServices _firestoreServices = FirestoreServices();
   final FirebaseAuthentication _authentication = FirebaseAuthentication();
+  Future<bool> vatValue;
+
+  @override
+  void initState() {
+    super.initState();
+    vatValue = _getVAT();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -60,93 +74,89 @@ class SettingPage extends StatelessWidget {
                               title: Text('Pajak Pertambahan Nilai (PPN) 10%',
                                   style: kPriceTextStyle),
                               trailing: FutureBuilder<bool>(
-                                  future: _getVAT(),
+                                  future: vatValue,
                                   builder: (context, snapshot) {
-                                    if (snapshot.hasData)
-                                      return CupertinoSwitch(
-                                          value: snapshot.data,
-                                          onChanged: (value) {
-                                            showDialog(
-                                                context: context,
-                                                barrierDismissible: false,
-                                                child: AlertDialog(
-                                                  title: Text(
-                                                    'Konfirmasi',
-                                                    style: kDialogTextStyle,
-                                                  ),
-                                                  content: Row(
-                                                    children: <Widget>[
-                                                      Icon(
-                                                        Icons.info,
-                                                        size: 30,
-                                                        color: Colors.blue,
-                                                      ),
-                                                      SizedBox(width: 20),
-                                                      Expanded(
-                                                        child: Text(
-                                                          value
-                                                              ? 'Anda Akan Mengaktifkan Pajak (PPN 10%)'
-                                                              : 'Anda Akan Menonaktfikan Pajak (PPN 10%)',
-                                                          style:
-                                                              kDialogTextStyle,
-                                                        ),
-                                                      ),
-                                                    ],
-                                                  ),
-                                                  actions: <Widget>[
-                                                    FlatButton(
-                                                      child: Text(
-                                                        'Batal',
-                                                        style: kDialogTextStyle,
-                                                      ),
-                                                      onPressed: () async {
-                                                        await _setVAT(!value);
+                                    if (!snapshot.hasData ||
+                                        snapshot.connectionState ==
+                                            ConnectionState.waiting)
+                                      return CircularProgressIndicator();
 
-                                                        // return Navigator
-                                                        //     .pop(context);
-                                                        Navigator
-                                                            .pushReplacementNamed(
-                                                                context,
-                                                                RouteGenerator
-                                                                    .kRouteSettingsPage);
-                                                      },
+                                    return CupertinoSwitch(
+                                        value: snapshot.data,
+                                        onChanged: (value) {
+                                          showDialog(
+                                              context: context,
+                                              barrierDismissible: false,
+                                              child: AlertDialog(
+                                                title: Text(
+                                                  'Konfirmasi',
+                                                  style: kDialogTextStyle,
+                                                ),
+                                                content: Row(
+                                                  children: <Widget>[
+                                                    Icon(
+                                                      Icons.info,
+                                                      size: 30,
+                                                      color: Colors.blue,
                                                     ),
-                                                    FlatButton(
+                                                    SizedBox(width: 20),
+                                                    Expanded(
                                                       child: Text(
-                                                        'OK',
+                                                        value
+                                                            ? 'Anda Akan Mengaktifkan Pajak (PPN 10%)'
+                                                            : 'Anda Akan Menonaktfikan Pajak (PPN 10%)',
                                                         style: kDialogTextStyle,
                                                       ),
-                                                      onPressed: () async {
-                                                        await _setVAT(value);
-                                                        Navigator.pop(context);
-                                                        CostumDialogBox
-                                                            .showDialogInformation(
-                                                                context:
-                                                                    context,
-                                                                icon:
-                                                                    Icons.check,
-                                                                iconColor:
-                                                                    Colors
-                                                                        .green,
-                                                                title:
-                                                                    'Informasi',
-                                                                contentText:
-                                                                    'PPN 10% Telah di Aktifkan, \nAplikasi perlu di Restart.',
-                                                                onTap: () {
-                                                                  Navigator.pop(
-                                                                      context);
-                                                                  Phoenix.rebirth(
-                                                                      context);
-                                                                });
-                                                      },
-                                                    )
+                                                    ),
                                                   ],
-                                                ));
-                                          });
+                                                ),
+                                                actions: <Widget>[
+                                                  FlatButton(
+                                                    child: Text(
+                                                      'Batal',
+                                                      style: kDialogTextStyle,
+                                                    ),
+                                                    onPressed: () async {
+                                                      await _setVAT(!value);
 
-                                    return Container(
-                                      child: Text('...'),
-                                    );
+                                                      setState(() {
+                                                        vatValue = _getVAT();
+                                                      });
+
+                                                      return Navigator.pop(
+                                                          context);
+                                                    },
+                                                  ),
+                                                  FlatButton(
+                                                    child: Text(
+                                                      'OK',
+                                                      style: kDialogTextStyle,
+                                                    ),
+                                                    onPressed: () async {
+                                                      await _setVAT(value);
+                                                      Navigator.pop(context);
+                                                      CostumDialogBox
+                                                          .showDialogInformation(
+                                                              context: context,
+                                                              icon: Icons.check,
+                                                              iconColor:
+                                                                  Colors.green,
+                                                              title:
+                                                                  'Informasi',
+                                                              contentText: value
+                                                                  ? 'PPN 10% Telah di Aktifkan, \nAplikasi perlu di Restart.'
+                                                                  : 'PPN 10% Telah di Non-Aktifkan, \nAplikasi perlu di Restart.',
+                                                              onTap: () {
+                                                                Navigator.pop(
+                                                                    context);
+                                                                Phoenix.rebirth(
+                                                                    context);
+                                                              });
+                                                    },
+                                                  )
+                                                ],
+                                              ));
+                                        });
                                   }),
                             ),
                             //* TODO: Load Offline Transaction Order
@@ -216,7 +226,8 @@ class SettingPage extends StatelessWidget {
                                       : Colors.green,
                                 ),
                               ),
-                            )
+                            ),
+                            _bluetoothPrinter(),
                           ],
                         ),
                       )
@@ -239,5 +250,51 @@ class SettingPage extends StatelessWidget {
   Future<bool> _getVAT() async {
     final SharedPreferences prefs = await _prefs;
     return prefs.getBool('vat');
+  }
+
+  Widget _bluetoothPrinter() {
+    return ListTile(
+      title: Text('Koneksi Printer', style: kPriceTextStyle),
+      subtitle: FutureBuilder<BluetoothDevice>(
+          future: PrinterService.loadPrinterDevice(),
+          builder: (context, snapshot) {
+            if (!snapshot.hasData ||
+                snapshot.connectionState == ConnectionState.waiting)
+              return Text('Loading...');
+
+            return RichText(
+              text: TextSpan(
+                  text: 'Nama Printer: ',
+                  style: kPriceTextStyle,
+                  children: [
+                    TextSpan(
+                        style: kProductNameSmallScreenTextStyle,
+                        text: snapshot.data.name ?? 'Printer Belum Diset.')
+                  ]),
+            );
+          }),
+      trailing: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: <Widget>[
+          RaisedButton(
+              onPressed: () async {
+                var printerDevice = await PrinterService.loadPrinterDevice();
+                if (printerDevice.name != null) PrinterService.testPrint();
+              },
+              child: Text(
+                'Test Print',
+                style: kPriceTextStyle,
+              )),
+          SizedBox(width: 20),
+          RaisedButton(
+              onPressed: () => Navigator.pushNamed(
+                  context, RouteGenerator.kRoutePrinterPage),
+              child: Text(
+                'Scan',
+                style: kPriceTextStyle,
+              )),
+        ],
+      ),
+    );
   }
 }

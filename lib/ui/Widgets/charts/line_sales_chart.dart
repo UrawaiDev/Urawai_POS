@@ -28,24 +28,21 @@ class SalesChart extends StatelessWidget {
 
   static List<charts.Series<LinearSales, DateTime>> _createData(
       List<TransactionOrder> transactions, List<DateTime> selectedDate) {
-    print('panjang date ${selectedDate.length}');
     double currentMonthTransaction = 0;
     double prevMonthTransaction = 0;
     double twoMonthAgoTransaction = 0;
     List<LinearSales> linearSales = [];
 
-    //! TODO: Will filter based on selected Date
+    //? TODO: Will filter based on selected Date
     for (var transaction in transactions) {
-      if (selectedDate.length == 0) {
-        if (transaction.date.month == DateTime.now().month) {
-          currentMonthTransaction =
-              currentMonthTransaction + transaction.grandTotal;
-        } else if (transaction.date.month == DateTime.now().month - 1) {
-          prevMonthTransaction = prevMonthTransaction + transaction.grandTotal;
-        } else if (transaction.date.month == DateTime.now().month - 2) {
-          twoMonthAgoTransaction =
-              twoMonthAgoTransaction + transaction.grandTotal;
-        }
+      if (transaction.date.month == DateTime.now().month) {
+        currentMonthTransaction =
+            currentMonthTransaction + transaction.grandTotal;
+      } else if (transaction.date.month == DateTime.now().month - 1) {
+        prevMonthTransaction = prevMonthTransaction + transaction.grandTotal;
+      } else if (transaction.date.month == DateTime.now().month - 2) {
+        twoMonthAgoTransaction =
+            twoMonthAgoTransaction + transaction.grandTotal;
       }
     }
 
@@ -66,6 +63,7 @@ class SalesChart extends StatelessWidget {
         domainFn: (LinearSales sales, _) => sales.year,
         measureFn: (LinearSales sales, _) => sales.sales,
         data: data,
+        displayName: 'Trend Penjualan',
       )
     ];
   }

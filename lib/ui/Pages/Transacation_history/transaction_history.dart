@@ -66,9 +66,6 @@ class TransactionHistoryPage extends StatelessWidget {
                                 Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: <Widget>[
-                                    Text('Riwayat Transaksi',
-                                        style: kProductNameBigScreenTextStyle),
-                                    SizedBox(height: 20),
                                     Row(
                                       mainAxisAlignment:
                                           MainAxisAlignment.spaceBetween,
