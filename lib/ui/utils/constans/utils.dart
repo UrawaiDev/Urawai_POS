@@ -7,7 +7,7 @@ Color kSelectedColor = Color(0xFFe4f2fe);
 
 TextStyle kHeaderTextStyle = TextStyle(
   fontWeight: FontWeight.w600,
-  fontSize: 25,
+  fontSize: 22,
 );
 
 TextStyle kBodyTextStyle = TextStyle(
@@ -17,27 +17,27 @@ TextStyle kBodyTextStyle = TextStyle(
 
 TextStyle kProductNameBigScreenTextStyle = TextStyle(
   fontWeight: FontWeight.bold,
-  fontSize: 25,
+  fontSize: 20,
 );
 
 TextStyle kMainMenuStyle = TextStyle(
   fontWeight: FontWeight.w400,
-  fontSize: 20,
+  fontSize: 18,
 );
 
 TextStyle kProductNameSmallScreenTextStyle = TextStyle(
   fontWeight: FontWeight.bold,
-  fontSize: 20,
+  fontSize: 18,
 );
 
 TextStyle kErrorTextStyle = TextStyle(
   color: Colors.red,
-  fontSize: 20,
+  fontSize: 18,
 );
 
 TextStyle kGrandTotalTextStyle = TextStyle(
   fontWeight: FontWeight.bold,
-  fontSize: 20,
+  fontSize: 18,
 );
 
 TextStyle kButtonPaymentTextStyle = TextStyle(
@@ -46,7 +46,7 @@ TextStyle kButtonPaymentTextStyle = TextStyle(
 );
 
 TextStyle kPriceTextStyle = TextStyle(
-  fontSize: 20,
+  fontSize: 17,
   color: priceColor,
 );
 
@@ -56,7 +56,7 @@ TextStyle kNoteTextStyle = TextStyle(
 );
 
 TextStyle kDialogTextStyle = TextStyle(
-  fontSize: 23,
+  fontSize: 20,
 );
 
 TextStyle kStruckTextStyle = TextStyle(

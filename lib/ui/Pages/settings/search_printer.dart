@@ -23,13 +23,13 @@ class _SearchPrinterPageState extends State<SearchPrinterPage> {
   @override
   void initState() {
     super.initState();
-    // _bluetoothManager.state.listen((result) {
-    //   // connection_status = result;
-    //   if (result == BLUETOOTH_DISCONNECTED)
-    //     print('Bluetooth is OFF');
-    //   else
-    //     print('Bluetooth is ON');
-    // });
+    _bluetoothManager.state.listen((result) {
+      connectionStatus = result;
+      if (result == BLUETOOTH_DISCONNECTED)
+        print('Bluetooth is OFF');
+      else
+        print('Bluetooth is ON');
+    });
   }
 
   @override
@@ -117,6 +117,7 @@ class _SearchPrinterPageState extends State<SearchPrinterPage> {
               _printerBluetoothManager.startScan(Duration(seconds: 4));
               _printerBluetoothManager.scanResults.listen(
                 (scannedDevices) {
+                  // print(scannedDevices);
                   if (scannedDevices != null) {
                     setState(() => _devices = scannedDevices);
                   }

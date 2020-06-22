@@ -1,27 +1,59 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:esc_pos_bluetooth/esc_pos_bluetooth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bluetooth_basic/flutter_bluetooth_basic.dart';
+import 'package:get_it/get_it.dart';
 import 'package:urawai_pos/core/Models/users.dart';
 import 'package:urawai_pos/core/Services/firebase_auth.dart';
 import 'package:urawai_pos/core/Services/firestore_service.dart';
+import 'package:urawai_pos/core/Services/printer_service.dart';
+import 'package:urawai_pos/ui/Widgets/costum_DialogBox.dart';
 import 'package:urawai_pos/ui/Widgets/costum_button.dart';
 import 'package:urawai_pos/ui/Widgets/footer_OrderList.dart';
 import 'package:urawai_pos/ui/utils/constans/formatter.dart';
 import 'package:urawai_pos/ui/utils/constans/utils.dart';
 import 'package:urawai_pos/ui/utils/functions/paymentHelpers.dart';
 
-class DetailTransactionPage extends StatelessWidget {
+class DetailTransactionPage extends StatefulWidget {
   final String boxKey;
 
   DetailTransactionPage({@required this.boxKey});
 
+  @override
+  _DetailTransactionPageState createState() => _DetailTransactionPageState();
+}
+
+class _DetailTransactionPageState extends State<DetailTransactionPage> {
+  final _scaffoldKey = GlobalKey<ScaffoldState>();
   final FirebaseAuthentication _firebaseAuthentication =
       FirebaseAuthentication();
+
   final FirestoreServices _firestoreServices = FirestoreServices();
+
+  final locatorAuth = GetIt.I<FirebaseAuthentication>();
+  static const int BLUETOOTH_DISCONNECTED = 10;
+  int bluetoothStatus;
+  BluetoothManager bluetoothManager = BluetoothManager.instance;
+  String _shopName;
+
+  @override
+  void initState() {
+    super.initState();
+
+    bluetoothManager.state.listen((status) {
+      bluetoothStatus = status;
+    });
+
+    locatorAuth.currentUserXXX.then((data) {
+      _shopName = data.shopName;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
     return SafeArea(
         child: Scaffold(
+      key: _scaffoldKey,
       body: Row(
         children: <Widget>[
           Expanded(
@@ -42,6 +74,15 @@ class DetailTransactionPage extends StatelessWidget {
                         'Cetak Kwitansi',
                         prefixIcon: Icons.print,
                         borderColor: Colors.green,
+                        onTap: () async {
+                          PosPrintResult result = await printStruck();
+                          if (result == null)
+                            _scaffoldKey.currentState.showSnackBar(
+                                SnackBar(content: Text('An Error Occured.')));
+                          else
+                            _scaffoldKey.currentState.showSnackBar(
+                                SnackBar(content: Text(result.msg)));
+                        },
                       ),
                       SizedBox(height: 20),
                       CostumButton.squareButton(
@@ -63,10 +104,39 @@ class DetailTransactionPage extends StatelessWidget {
     ));
   }
 
+  Future<PosPrintResult> printStruck() async {
+    var documentSnapshot = await _getDocumentbyID();
+    var printer = await PrinterService.loadPrinterDevice();
+
+    if (printer.name != null &&
+        bluetoothStatus != BLUETOOTH_DISCONNECTED &&
+        _shopName != null) {
+      var result = PrinterService.printStruckDetailTransaction(
+        printer: PrinterBluetooth(printer),
+        documents: documentSnapshot,
+        shopName: _shopName,
+      );
+      return result;
+    } else {
+      CostumDialogBox.showDialogInformation(
+        context: context,
+        title: 'Informasi',
+        contentText:
+            'Printer Tidak terhubung. \n• Periksa Koneksi Bluetooth. \n• Printer belum diset pada pengaturan',
+        icon: Icons.bluetooth_disabled,
+        iconColor: Colors.blue,
+        onTap: () => Navigator.pop(context),
+      );
+      print(
+          'Something when wrong with the printer, please check connection and make sure you have set the printer.');
+      return null;
+    }
+  }
+
   Future<DocumentSnapshot> _getDocumentbyID() async {
     Users currentUser = await _firebaseAuthentication.currentUserXXX;
     var result =
-        _firestoreServices.getDocumentByID(currentUser.shopName, boxKey);
+        _firestoreServices.getDocumentByID(currentUser.shopName, widget.boxKey);
     return result;
   }
 
@@ -334,236 +404,4 @@ class DetailTransactionPage extends StatelessWidget {
           }
         });
   }
-
-  ///==================== [ Transaction When Offline ] ================
-  // Widget _buildTransactionItem() {
-  //   var box =
-  //       Hive.box<TransactionOrder>(POSPage.transactionBoxName).get(boxKey);
-
-  //   return Padding(
-  //     padding: const EdgeInsets.all(8.0),
-  //     child: Container(
-  //       padding: EdgeInsets.all(8),
-  //       decoration: BoxDecoration(
-  //           border: Border.all(
-  //         width: 1.5,
-  //         color: Colors.grey,
-  //       )),
-  //       child: Column(
-  //         mainAxisAlignment: MainAxisAlignment.spaceBetween,
-  //         children: <Widget>[
-  //           Column(
-  //             crossAxisAlignment: CrossAxisAlignment.start,
-  //             children: <Widget>[
-  //               Text('WARUNG MAKYOS',
-  //                   style: TextStyle(
-  //                     fontSize: 30,
-  //                     fontWeight: FontWeight.bold,
-  //                     color: Colors.blue,
-  //                   )),
-  //               Text(
-  //                 'Jln. KP. Rawageni No. 5',
-  //                 style: TextStyle(
-  //                   fontSize: 18,
-  //                 ),
-  //               ),
-  //               Text(
-  //                 'RT 4. RW 5, Kelurahan Ratujaya, Kota DEPOK',
-  //                 style: TextStyle(
-  //                   fontSize: 18,
-  //                 ),
-  //               ),
-  //               Divider(
-  //                 thickness: 2,
-  //               ),
-  //               Row(
-  //                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
-  //                 children: <Widget>[
-  //                   Text(
-  //                     'Ref. Order :',
-  //                     style: kPriceTextStyle,
-  //                   ),
-  //                   SizedBox(width: 8),
-  //                   Text(
-  //                     box.referenceOrder ?? '-',
-  //                     style: kPriceTextStyle,
-  //                   ),
-  //                 ],
-  //               ),
-  //               Row(
-  //                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
-  //                 children: <Widget>[
-  //                   Text(
-  //                     'Tanggal :',
-  //                     style: kPriceTextStyle,
-  //                   ),
-  //                   SizedBox(width: 8),
-  //                   Text(
-  //                     Formatter.dateFormat(box.date),
-  //                     style: kPriceTextStyle,
-  //                   ),
-  //                 ],
-  //               ),
-  //               Row(
-  //                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
-  //                 children: <Widget>[
-  //                   Text(
-  //                     'Kasir :',
-  //                     style: kPriceTextStyle,
-  //                   ),
-  //                   SizedBox(width: 8),
-  //                   Text(
-  //                     box.cashierName ?? '[null]',
-  //                     style: kPriceTextStyle,
-  //                   ),
-  //                 ],
-  //               ),
-  //               Row(
-  //                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
-  //                 children: <Widget>[
-  //                   Text(
-  //                     'Metode Pembayaran:',
-  //                     style: kPriceTextStyle,
-  //                   ),
-  //                   SizedBox(width: 8),
-  //                   Text(
-  //                     PaymentHelper.getPaymentType(box.paymentType) ?? '[null]',
-  //                     style: kPriceTextStyle,
-  //                   ),
-  //                 ],
-  //               ),
-  //               Row(
-  //                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
-  //                 children: <Widget>[
-  //                   Text(
-  //                     'Status:',
-  //                     style: kPriceTextStyle,
-  //                   ),
-  //                   SizedBox(width: 8),
-  //                   Text(
-  //                     PaymentHelper.getPaymentStatus(box.paymentStatus) ??
-  //                         '[null]',
-  //                     style: kPriceTextStyle,
-  //                   ),
-  //                 ],
-  //               ),
-  //               Row(
-  //                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
-  //                 children: <Widget>[
-  //                   Text(
-  //                     'Jumlah Pesanan:',
-  //                     style: kPriceTextStyle,
-  //                   ),
-  //                   SizedBox(width: 8),
-  //                   Text(
-  //                     box.itemList.length.toString() + ' Item(s)' ?? '[null]',
-  //                     style: kPriceTextStyle,
-  //                   ),
-  //                 ],
-  //               ),
-  //               Divider(
-  //                 thickness: 2,
-  //               )
-  //             ],
-  //           ),
-  //           Expanded(
-  //             child: Padding(
-  //               padding: const EdgeInsets.symmetric(vertical: 5.0),
-  //               child: Container(
-  //                 child: ListView.builder(
-  //                     itemCount: box.itemList.length,
-  //                     itemBuilder: (context, index) {
-  //                       var itemList = box.itemList;
-  //                       return Padding(
-  //                         padding: const EdgeInsets.symmetric(
-  //                             vertical: 8.0, horizontal: 5),
-  //                         child: Row(
-  //                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
-  //                           children: <Widget>[
-  //                             Row(
-  //                               children: <Widget>[
-  //                                 Text(
-  //                                   'x${itemList[index].quantity}',
-  //                                   style: kStruckTextStyle,
-  //                                 ),
-  //                                 SizedBox(width: 15),
-  //                                 Text(
-  //                                   itemList[index].productName,
-  //                                   style: kStruckTextStyle,
-  //                                 ),
-  //                               ],
-  //                             ),
-  //                             Text(
-  //                               Formatter.currencyFormat(itemList[index].price *
-  //                                   itemList[index].quantity),
-  //                               style: kStruckTextStyle,
-  //                             ),
-  //                           ],
-  //                         ),
-  //                       );
-  //                     }),
-  //               ),
-  //             ),
-  //           ),
-  //           Column(
-  //             children: <Widget>[
-  //               FooterOrderList(
-  //                 dicount: box.discount,
-  //                 grandTotal: box.grandTotal,
-  //                 subtotal: box.subtotal,
-  //                 tax: 0.1,
-  //               ),
-  //               Padding(
-  //                 padding: const EdgeInsets.symmetric(horizontal: 8.0),
-  //                 child: Row(
-  //                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
-  //                   children: <Widget>[
-  //                     Text(
-  //                       'Pembayaran',
-  //                       style: kPriceTextStyle,
-  //                     ),
-  //                     Text(
-  //                       box.paymentType == PaymentType.CASH
-  //                           ? Formatter.currencyFormat(box.tender)
-  //                           : Formatter.currencyFormat(box.grandTotal),
-  //                       style: kPriceTextStyle,
-  //                     ),
-  //                   ],
-  //                 ),
-  //               ),
-  //               Padding(
-  //                 padding: const EdgeInsets.symmetric(horizontal: 8.0),
-  //                 child: Row(
-  //                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
-  //                   children: <Widget>[
-  //                     Text(
-  //                       'Kembali',
-  //                       style: kPriceTextStyle,
-  //                     ),
-  //                     Text(
-  //                       box.paymentType == PaymentType.CASH
-  //                           ? Formatter.currencyFormat(box.change)
-  //                           : Formatter.currencyFormat(0),
-  //                       style: kPriceTextStyle,
-  //                     ),
-  //                   ],
-  //                 ),
-  //               ),
-  //               Divider(
-  //                 thickness: 2,
-  //               ),
-  //               Text(
-  //                 'Terima Kasih Atas Kunjungan Anda',
-  //                 style: kStruckTextStyle,
-  //               ),
-  //               Divider(
-  //                 thickness: 2,
-  //               ),
-  //             ],
-  //           ),
-  //         ],
-  //       ),
-  //     ),
-  //   );
-  // }
 }

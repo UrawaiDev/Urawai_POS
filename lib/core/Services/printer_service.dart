@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:esc_pos_bluetooth/esc_pos_bluetooth.dart';
 import 'package:esc_pos_utils/esc_pos_utils.dart';
 import 'package:flutter/foundation.dart';
@@ -7,6 +8,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:urawai_pos/core/Models/orderList.dart';
 import 'package:urawai_pos/core/Provider/orderList_provider.dart';
 import 'package:urawai_pos/core/Provider/postedOrder_provider.dart';
+import 'package:urawai_pos/ui/Widgets/costum_DialogBox.dart';
 
 class PrinterService {
   static Future<BluetoothDevice> loadPrinterDevice() async {
@@ -187,5 +189,125 @@ class PrinterService {
     //   content: Text(res.msg),
     //   duration: Duration(seconds: 2),
     // ));
+  }
+
+  static Future<PosPrintResult> printStruckDetailTransaction({
+    @required PrinterBluetooth printer,
+    @required DocumentSnapshot documents,
+    @required String shopName,
+  }) async {
+    PrinterBluetoothManager _printerBluetoothManager =
+        PrinterBluetoothManager();
+    _printerBluetoothManager.selectPrinter(printer);
+    const PaperSize paper = PaperSize.mm58;
+
+    final Ticket ticket = Ticket(paper);
+
+    //* NAMA TOKO
+    ticket.text(shopName,
+        styles: PosStyles(
+          align: PosAlign.center,
+          height: PosTextSize.size2,
+          width: PosTextSize.size2,
+        ),
+        linesAfter: 1);
+
+    //* ALAMAT TOKO
+    ticket.text('Griya Jasmine Rawageni',
+        styles: PosStyles(align: PosAlign.center));
+    ticket.text('Kp. Rawageni No. 5',
+        styles: PosStyles(align: PosAlign.center));
+    ticket.text('Depok, Jawa Barat', styles: PosStyles(align: PosAlign.center));
+    ticket.text('Web: www.warungmakyos.com',
+        styles: PosStyles(align: PosAlign.center), linesAfter: 1);
+
+    ticket.hr();
+
+    //* HEADER LIST ORDER
+    ticket.row([
+      PosColumn(text: 'Qty', width: 1),
+      PosColumn(text: 'Item', width: 7),
+      // PosColumn(
+      //     text: 'Harga', width: 2, styles: PosStyles(align: PosAlign.right)),
+      PosColumn(
+          text: 'Total', width: 4, styles: PosStyles(align: PosAlign.right)),
+    ]);
+
+    //* ITEM LIST ORDER
+    documents.data['orderlist'].forEach((transaction) {
+      print(transaction);
+      ticket.row([
+        PosColumn(text: transaction['quantity'].toString(), width: 1),
+        PosColumn(text: transaction['productName'], width: 7),
+        PosColumn(
+            text: ((transaction['price'] as double) *
+                    (transaction['quantity'] as int))
+                .toString(),
+            width: 4,
+            styles: PosStyles(align: PosAlign.right)),
+      ]);
+    });
+
+    ticket.hr();
+
+    ticket.row([
+      PosColumn(
+          text: 'TOTAL',
+          width: 3,
+          styles: PosStyles(
+            height: PosTextSize.size1,
+            width: PosTextSize.size1,
+          )),
+      PosColumn(
+          text: '\Rp. ${documents.data['subtotal']}',
+          width: 9,
+          styles: PosStyles(
+            align: PosAlign.right,
+            height: PosTextSize.size1,
+            width: PosTextSize.size1,
+          )),
+    ]);
+
+    ticket.hr(ch: '=', linesAfter: 1);
+
+    ticket.row([
+      PosColumn(
+          text: 'Bayar',
+          width: 4,
+          styles: PosStyles(align: PosAlign.right, width: PosTextSize.size1)),
+      PosColumn(
+          text: '\Rp. ${documents.data['tender']}',
+          width: 8,
+          styles: PosStyles(align: PosAlign.right, width: PosTextSize.size1)),
+    ]);
+
+    ticket.row([
+      PosColumn(
+          text: 'Kembali',
+          width: 4,
+          styles: PosStyles(align: PosAlign.right, width: PosTextSize.size1)),
+      PosColumn(
+          text: '\Rp. ${documents.data['change']}',
+          width: 8,
+          styles: PosStyles(align: PosAlign.right, width: PosTextSize.size1)),
+    ]);
+
+    ticket.feed(2);
+    ticket.text('Terima Kasih.',
+        styles: PosStyles(align: PosAlign.center, bold: true));
+
+    final now = DateTime.now();
+    final formatter = DateFormat('MM/dd/yyyy H:mm');
+    final String timestamp = formatter.format(now);
+    ticket.text(timestamp,
+        styles: PosStyles(align: PosAlign.center), linesAfter: 2);
+
+    ticket.feed(1);
+    ticket.cut();
+
+    final PosPrintResult result =
+        await _printerBluetoothManager.printTicket(ticket);
+
+    return result;
   }
 }

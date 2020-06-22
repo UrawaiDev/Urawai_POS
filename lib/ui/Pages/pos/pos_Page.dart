@@ -8,7 +8,6 @@ import 'package:get_it/get_it.dart';
 import 'package:hive/hive.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:provider/provider.dart';
-import 'package:responsive_builder/responsive_builder.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:urawai_pos/core/Models/postedOrder.dart';
@@ -241,7 +240,7 @@ class _POSPageState extends State<POSPage> with SingleTickerProviderStateMixin {
                             builder: (context, value, _) =>
                                 ConnectionStatusWidget(TextStyle(
                               color: Colors.white,
-                              fontSize: 22,
+                              fontSize: 20,
                               fontWeight: FontWeight.bold,
                             )),
                           ),
@@ -445,7 +444,7 @@ class _POSPageState extends State<POSPage> with SingleTickerProviderStateMixin {
                                                                         color: Colors
                                                                             .white,
                                                                         fontSize:
-                                                                            35,
+                                                                            30,
                                                                         fontWeight:
                                                                             FontWeight.bold),
                                                                   ),
@@ -595,7 +594,7 @@ class _POSPageState extends State<POSPage> with SingleTickerProviderStateMixin {
                     'BAYAR',
                     style: TextStyle(
                       color: Colors.white,
-                      fontSize: 25,
+                      fontSize: 22,
                       fontWeight: FontWeight.bold,
                     ),
                   )),
@@ -626,7 +625,7 @@ class _POSPageState extends State<POSPage> with SingleTickerProviderStateMixin {
                 children: <Widget>[
                   IconButton(
                     icon: Icon(Icons.restaurant_menu),
-                    iconSize: 35,
+                    iconSize: 25,
                     onPressed: () {
                       if (orderlistProvider.referenceOrder.isNotEmpty) {
                         CostumDialogBox.showCostumDialogBox(
@@ -672,7 +671,7 @@ class _POSPageState extends State<POSPage> with SingleTickerProviderStateMixin {
             Consumer<OrderListProvider>(builder: (_, orderlistState, __) {
               return Text(
                 'Pesanan (${totalOrderLength(orderlistState.orderlist)})',
-                style: TextStyle(fontSize: 25, fontWeight: FontWeight.bold),
+                style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
               );
             }),
             ScaleTransition(
@@ -687,8 +686,8 @@ class _POSPageState extends State<POSPage> with SingleTickerProviderStateMixin {
                           child: CircularProgressIndicator(),
                         )
                       : IconButton(
-                          icon: Icon(Icons.add),
-                          iconSize: 35,
+                          icon: Icon(Icons.add_circle_outline),
+                          iconSize: 25,
                           onPressed: () {
                             if (orderlistProvider.orderlist.isEmpty) {
                               _createNewOrder(orderlistProvider);
@@ -725,7 +724,7 @@ class _POSPageState extends State<POSPage> with SingleTickerProviderStateMixin {
               'Ref. Order: ',
               style: TextStyle(
                 color: priceColor,
-                fontSize: 18,
+                fontSize: 17,
               ),
             ),
             Container(
@@ -735,7 +734,7 @@ class _POSPageState extends State<POSPage> with SingleTickerProviderStateMixin {
                   overflow: TextOverflow.ellipsis,
                   style: TextStyle(
                     color: priceColor,
-                    fontSize: 18,
+                    fontSize: 17,
                   ),
                 ),
               ),
@@ -751,14 +750,14 @@ class _POSPageState extends State<POSPage> with SingleTickerProviderStateMixin {
                   'Order ID: ' + orderlistState.orderID.toString(),
                   style: TextStyle(
                     color: priceColor,
-                    fontSize: 18,
+                    fontSize: 17,
                   ),
                 ),
               ),
               Text(Formatter.dateFormat(orderlistState.orderDate),
                   style: TextStyle(
                     color: priceColor,
-                    fontSize: 16,
+                    fontSize: 17,
                   )),
             ],
           ),

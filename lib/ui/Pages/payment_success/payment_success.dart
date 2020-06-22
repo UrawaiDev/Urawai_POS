@@ -40,17 +40,19 @@ class _PaymentSuccessState extends State<PaymentSuccess> {
 
   static const int BLUETOOTH_DISCONNECTED = 10;
   int bluetoothStatus;
-  BluetoothManager bluetoothManager;
+  BluetoothManager bluetoothManager = BluetoothManager.instance;
 
   @override
   void initState() {
     super.initState();
 
-    // ? Return Null When using Emulator
-    // bluetoothManager.state.listen((status) {
-    //   bluetoothStatus = status;
-    //   print(status);
-    // });
+    bluetoothManager.state.listen((status) {
+      bluetoothStatus = status;
+    });
+
+    locatorAuth.currentUserXXX.then((data) {
+      printStruck(data.shopName);
+    });
   }
 
   @override
@@ -287,42 +289,29 @@ class _PaymentSuccessState extends State<PaymentSuccess> {
                                   style: kPriceTextStyle,
                                 ),
                                 SizedBox(width: 10),
-                                //* Temporary Code
-                                (bluetoothStatus == BLUETOOTH_DISCONNECTED ||
-                                        bluetoothStatus == null)
-                                    ? Text(
-                                        'Disconnected',
-                                        style: kPriceTextStyle,
-                                      )
-                                    : Text(
-                                        'Connected',
-                                        style: kPriceTextStyle,
-                                      ),
+                                StreamBuilder<int>(
+                                    stream: bluetoothManager.state,
+                                    builder: (context, snapshot) {
+                                      if (snapshot.hasError)
+                                        return Text(snapshot.error.toString(),
+                                            style: kPriceTextStyle);
+                                      if (!snapshot.hasData ||
+                                          snapshot.connectionState ==
+                                              ConnectionState.waiting)
+                                        return Text(
+                                          'Loading...',
+                                          style: kPriceTextStyle,
+                                        );
 
-                                //! ERROR When User Emulator to TEST
-                                // StreamBuilder<int>(
-                                //     stream: bluetoothManager.state,
-                                //     builder: (context, snapshot) {
-                                //       if (snapshot.hasError)
-                                //         return Text(snapshot.error.toString(),
-                                //             style: kPriceTextStyle);
-                                //       if (!snapshot.hasData ||
-                                //           snapshot.connectionState ==
-                                //               ConnectionState.waiting)
-                                //         return Text(
-                                //           'Loading...',
-                                //           style: kPriceTextStyle,
-                                //         );
-
-                                //       return snapshot.data ==
-                                //               BLUETOOTH_DISCONNECTED
-                                //           ? Text('Disconnected',
-                                //               style: kPriceTextStyle)
-                                //           : Text(
-                                //               'Connected',
-                                //               style: kPriceTextStyle,
-                                //             );
-                                //     }),
+                                      return snapshot.data ==
+                                              BLUETOOTH_DISCONNECTED
+                                          ? Text('Disconnected',
+                                              style: kPriceTextStyle)
+                                          : Text(
+                                              'Connected',
+                                              style: kPriceTextStyle,
+                                            );
+                                    }),
                                 SizedBox(width: 10),
                               ],
                             ),
@@ -340,42 +329,14 @@ class _PaymentSuccessState extends State<PaymentSuccess> {
                                 'Pembayaran Berhasil',
                                 style: TextStyle(fontSize: 35),
                               ),
-                              SizedBox(height: 100),
+                              SizedBox(height: 20),
                               Padding(
                                 padding: const EdgeInsets.all(10.0),
                                 child: Column(
                                   children: <Widget>[
                                     CostumButton.squareButton('Cetak Kwitansi',
                                         prefixIcon: Icons.print,
-                                        onTap: () async {
-                                      var printer = await PrinterService
-                                          .loadPrinterDevice();
-                                      //* Print if printer has set and bluetooth is active
-                                      if (printer.name != null &&
-                                          bluetoothStatus !=
-                                              BLUETOOTH_DISCONNECTED) {
-                                        PrinterService.printStruck(
-                                          printer: PrinterBluetooth(printer),
-                                          state: widget.state,
-                                          shopName: _shopName,
-                                          itemList: widget.itemList,
-                                          pembayaran: widget.pembayaran,
-                                          kembali: widget.kembali,
-                                        );
-                                      } else {
-                                        CostumDialogBox.showDialogInformation(
-                                          context: context,
-                                          title: 'Informasi',
-                                          contentText:
-                                              'Printer Tidak terhubung. \n• Periksa Koneksi Bluetooth. \n• Printer belum diset pada pengaturan',
-                                          icon: Icons.bluetooth_disabled,
-                                          iconColor: Colors.blue,
-                                          onTap: () => Navigator.pop(context),
-                                        );
-                                        print(
-                                            'Something when wrong with the printer, please check connection and make sure you have set the printer.');
-                                      }
-                                    }),
+                                        onTap: () => printStruck(_shopName)),
                                     SizedBox(height: 20),
                                     CostumButton.squareButton(
                                       'Selesai',
@@ -398,6 +359,33 @@ class _PaymentSuccessState extends State<PaymentSuccess> {
         ),
       ),
     );
+  }
+
+  Future<void> printStruck(String shopName) async {
+    var printer = await PrinterService.loadPrinterDevice();
+    //* Print if printer has set and bluetooth is active
+    if (printer.name != null && bluetoothStatus != BLUETOOTH_DISCONNECTED) {
+      PrinterService.printStruck(
+        printer: PrinterBluetooth(printer),
+        state: widget.state,
+        shopName: shopName,
+        itemList: widget.itemList,
+        pembayaran: widget.pembayaran,
+        kembali: widget.kembali,
+      );
+    } else {
+      CostumDialogBox.showDialogInformation(
+        context: context,
+        title: 'Informasi',
+        contentText:
+            'Printer Tidak terhubung. \n• Periksa Koneksi Bluetooth. \n• Printer belum diset pada pengaturan',
+        icon: Icons.bluetooth_disabled,
+        iconColor: Colors.blue,
+        onTap: () => Navigator.pop(context),
+      );
+      print(
+          'Something when wrong with the printer, please check connection and make sure you have set the printer.');
+    }
   }
 
   Future<void> _onTransactionComplete(BuildContext context) {

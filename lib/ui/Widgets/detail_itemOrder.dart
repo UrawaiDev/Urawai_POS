@@ -43,9 +43,10 @@ class DetailItemOrder extends StatelessWidget {
                       children: <Widget>[
                         Text(
                           itemList.productName,
-                          style: screenWidth > 1024
-                              ? kProductNameBigScreenTextStyle
-                              : kProductNameSmallScreenTextStyle,
+                          style: TextStyle(
+                            fontSize: 17,
+                            fontWeight: FontWeight.w400,
+                          ),
                         ),
                         SizedBox(height: 5),
                         Text(
@@ -82,8 +83,8 @@ class DetailItemOrder extends StatelessWidget {
                         children: <Widget>[
                           GestureDetector(
                             child: Container(
-                              width: 30,
-                              height: 30,
+                              width: 25,
+                              height: 25,
                               color: greyColor,
                               child: Icon(
                                 Icons.remove,
@@ -106,8 +107,8 @@ class DetailItemOrder extends StatelessWidget {
                           ),
                           GestureDetector(
                             child: Container(
-                              width: 30,
-                              height: 30,
+                              width: 25,
+                              height: 25,
                               color: greyColor,
                               child: Icon(
                                 Icons.add,

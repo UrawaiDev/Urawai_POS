@@ -72,7 +72,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
                         child: Container(
                             // color: Colors.blue,
                             child: Padding(
-                          padding: const EdgeInsets.fromLTRB(20, 10, 20, 20),
+                          padding: const EdgeInsets.fromLTRB(20, 10, 20, 10),
                           child: Column(
                             children: <Widget>[
                               ConnectionStatusWidget(kPriceTextStyle),
@@ -93,7 +93,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
                                                     Duration(milliseconds: 700),
                                                 curve: Curves.easeIn,
                                                 alignment: Alignment.center,
-                                                width: 200,
+                                                width: 150,
                                                 decoration: BoxDecoration(
                                                     color: index ==
                                                             state.paymentType
@@ -104,7 +104,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
                                                         BorderRadius.circular(
                                                             10)),
                                                 margin: EdgeInsets.symmetric(
-                                                    vertical: 10),
+                                                    vertical: 5),
                                                 child: Column(
                                                   mainAxisAlignment:
                                                       MainAxisAlignment.center,
@@ -116,7 +116,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
                                                                         .values[
                                                                     index]),
                                                         size: 35),
-                                                    SizedBox(height: 10),
+                                                    SizedBox(height: 5),
                                                     Text(
                                                       PaymentHelper
                                                           .getPaymentType(
@@ -138,9 +138,8 @@ class _PaymentScreenState extends State<PaymentScreen> {
                                       },
                                     ),
                                   )),
-                              SizedBox(height: 20),
                               Expanded(
-                                flex: 7,
+                                flex: 8,
                                 child: Container(
                                   decoration: BoxDecoration(
                                     border: Border.all(
@@ -223,7 +222,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
               text: Text(
                 'BAYAR',
                 style: TextStyle(
-                  fontSize: 30,
+                  fontSize: 20,
                   color: Colors.white,
                   fontWeight: FontWeight.bold,
                 ),
@@ -300,7 +299,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
           Column(
             children: <Widget>[
               Padding(
-                padding: const EdgeInsets.all(10.0),
+                padding: const EdgeInsets.all(8.0),
                 child: Container(
                   decoration: BoxDecoration(
                       color: Colors.black,
@@ -309,21 +308,21 @@ class _PaymentScreenState extends State<PaymentScreen> {
                         width: 3,
                       )),
                   child: Padding(
-                    padding: const EdgeInsets.all(10.0),
+                    padding: const EdgeInsets.all(5.0),
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: <Widget>[
                         Text(
                           'Total Bayar',
                           style: TextStyle(
-                            fontSize: 27,
+                            fontSize: 20,
                             color: Colors.white,
                           ),
                         ),
                         Text(
                           Formatter.currencyFormat(state.grandTotal),
                           style: TextStyle(
-                            fontSize: 27,
+                            fontSize: 20,
                             color: Colors.white,
                             fontWeight: FontWeight.bold,
                           ),
@@ -333,7 +332,6 @@ class _PaymentScreenState extends State<PaymentScreen> {
                   ),
                 ),
               ),
-              SizedBox(width: 10),
               Padding(
                 padding: const EdgeInsets.all(10.0),
                 child: Container(
@@ -343,17 +341,17 @@ class _PaymentScreenState extends State<PaymentScreen> {
                     width: 3,
                   )),
                   child: Padding(
-                    padding: const EdgeInsets.all(10.0),
+                    padding: const EdgeInsets.all(5.0),
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: <Widget>[
                         Text(
                           'Pembayaran',
-                          style: TextStyle(fontSize: 27),
+                          style: TextStyle(fontSize: 20),
                         ),
                         Text(
                           Formatter.currencyFormat(state.finalPayment),
-                          style: TextStyle(fontSize: 27),
+                          style: TextStyle(fontSize: 20),
                         ),
                       ],
                     ),
@@ -370,13 +368,13 @@ class _PaymentScreenState extends State<PaymentScreen> {
                     width: 3,
                   )),
                   child: Padding(
-                    padding: const EdgeInsets.all(10.0),
+                    padding: const EdgeInsets.all(5.0),
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: <Widget>[
                         Text(
                           'Kembali',
-                          style: TextStyle(fontSize: 27),
+                          style: TextStyle(fontSize: 20),
                         ),
                         // Only return value when bigger dan grandTotal
                         Text(
@@ -385,7 +383,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
                               ? Formatter.currencyFormat(
                                   state.finalPayment - state.grandTotal)
                               : 'Rp. 0',
-                          style: TextStyle(fontSize: 27),
+                          style: TextStyle(fontSize: 20),
                         ),
                       ],
                     ),
@@ -525,7 +523,10 @@ class _PaymentScreenState extends State<PaymentScreen> {
                     child: _buttonPayment(
                         text: Text(
                           'Uang Pas',
-                          style: kProductNameSmallScreenTextStyle,
+                          style: TextStyle(
+                            fontSize: 15,
+                            fontWeight: FontWeight.w400,
+                          ),
                         ),
                         color: Colors.grey[300],
                         onTap: () {
@@ -533,7 +534,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
                         }),
                   ),
                   Expanded(
-                    flex: 2,
+                    flex: 1,
                     child: Row(
                       children: <Widget>[
                         _buttonPaymentSuggestion(
@@ -554,7 +555,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
                       text: Text(
                         'BAYAR',
                         style: TextStyle(
-                          fontSize: 30,
+                          fontSize: 20,
                           color: Colors.white,
                           fontWeight: FontWeight.bold,
                         ),
@@ -661,22 +662,18 @@ class _PaymentScreenState extends State<PaymentScreen> {
     final screenWidth = MediaQuery.of(context).size.width;
     return Expanded(
       child: Padding(
-        padding: const EdgeInsets.all(8.0),
+        padding: const EdgeInsets.all(5.0),
         child: GestureDetector(
           onTap: onTap,
           child: Container(
             alignment: Alignment.center,
-            width: 80,
-            height: 100,
             decoration: BoxDecoration(
               color: Colors.grey[300],
               borderRadius: BorderRadius.circular(10),
             ),
             child: Text(
               text,
-              style: screenWidth > 1024
-                  ? kProductNameBigScreenTextStyle
-                  : kProductNameSmallScreenTextStyle,
+              style: TextStyle(fontSize: 17),
             ),
           ),
         ),
@@ -698,7 +695,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
         height: 80,
         child: Text(title,
             style: TextStyle(
-              fontSize: 30,
+              fontSize: 18,
               fontWeight: FontWeight.bold,
             )),
       ),
