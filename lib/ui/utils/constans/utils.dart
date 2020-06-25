@@ -37,7 +37,7 @@ TextStyle kErrorTextStyle = TextStyle(
 
 TextStyle kGrandTotalTextStyle = TextStyle(
   fontWeight: FontWeight.bold,
-  fontSize: 18,
+  fontSize: 17,
 );
 
 TextStyle kButtonPaymentTextStyle = TextStyle(
@@ -60,5 +60,5 @@ TextStyle kDialogTextStyle = TextStyle(
 );
 
 TextStyle kStruckTextStyle = TextStyle(
-  fontSize: 18,
+  fontSize: 17,
 );

@@ -19,13 +19,13 @@ class FooterOrderList extends StatelessWidget {
       child: Column(
         children: <Widget>[
           Divider(thickness: 3),
-          SizedBox(height: 8),
+          SizedBox(height: 5),
           _bottomInfo(
               title: 'Subtotal', value: Formatter.currencyFormat(subtotal)),
-          SizedBox(height: 8),
+          SizedBox(height: 5),
           _bottomInfo(
               title: 'Diskon', value: Formatter.currencyFormat(dicount)),
-          SizedBox(height: 8),
+          SizedBox(height: 5),
           FutureBuilder<bool>(
             future: getVAT(),
             builder: (context, snapshot) {
@@ -39,7 +39,7 @@ class FooterOrderList extends StatelessWidget {
               return Container();
             },
           ),
-          SizedBox(height: 8),
+          SizedBox(height: 5),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: <Widget>[

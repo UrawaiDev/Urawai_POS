@@ -159,7 +159,6 @@ class _SettingPageState extends State<SettingPage> {
                                         });
                                   }),
                             ),
-                            //* TODO: Load Offline Transaction Order
                             ListTile(
                               title: Text(
                                 'Terdapat [${hiveBox.length}] Transaksi Offline',

@@ -98,33 +98,11 @@ class _SearchPrinterPageState extends State<SearchPrinterPage> {
           )
         ],
       ),
-      floatingActionButton: FloatingActionButton(
-          child: Icon(Icons.search),
-          onPressed: () async {
-            if (connectionStatus == BLUETOOTH_DISCONNECTED ||
-                connectionStatus == null) {
-              _scaffoldKey.currentState.showSnackBar(SnackBar(
-                  content: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: <Widget>[
-                  Text('Bluetooth tidak Aktif'),
-                  IconButton(
-                      icon: Icon(Icons.settings),
-                      onPressed: () => AppSettings.openBluetoothSettings()),
-                ],
-              )));
-            } else {
-              _printerBluetoothManager.startScan(Duration(seconds: 4));
-              _printerBluetoothManager.scanResults.listen(
-                (scannedDevices) {
-                  // print(scannedDevices);
-                  if (scannedDevices != null) {
-                    setState(() => _devices = scannedDevices);
-                  }
-                },
-                onError: () => print('error happen'),
-              );
-            }
+      floatingActionButton: StreamBuilder<bool>(
+          stream: _bluetoothManager.isScanning,
+          builder: (context, snapshot) {
+            if (snapshot.data == true) return _stopScan();
+            return _starScan();
           }),
       body: Padding(
         padding: const EdgeInsets.all(10.0),
@@ -174,6 +152,45 @@ class _SearchPrinterPageState extends State<SearchPrinterPage> {
         ),
       ),
     );
+  }
+
+  FloatingActionButton _stopScan() {
+    return FloatingActionButton(
+      backgroundColor: Colors.red,
+      child: Icon(Icons.stop),
+      onPressed: () => _printerBluetoothManager.stopScan(),
+    );
+  }
+
+  FloatingActionButton _starScan() {
+    return FloatingActionButton(
+        child: Icon(Icons.search),
+        onPressed: () async {
+          if (connectionStatus == BLUETOOTH_DISCONNECTED ||
+              connectionStatus == null) {
+            _scaffoldKey.currentState.showSnackBar(SnackBar(
+                content: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: <Widget>[
+                Text('Bluetooth tidak Aktif'),
+                IconButton(
+                    icon: Icon(Icons.settings),
+                    onPressed: () => AppSettings.openBluetoothSettings()),
+              ],
+            )));
+          } else {
+            _printerBluetoothManager.startScan(Duration(seconds: 4));
+            _printerBluetoothManager.scanResults.listen(
+              (scannedDevices) {
+                // print(scannedDevices);
+                if (scannedDevices != null) {
+                  setState(() => _devices = scannedDevices);
+                }
+              },
+              onError: () => print('error happen'),
+            );
+          }
+        });
   }
 
   Future<BluetoothDevice> loadPrinterDevice() async {

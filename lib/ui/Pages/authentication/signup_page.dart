@@ -10,6 +10,7 @@ import 'package:urawai_pos/core/Services/firebase_auth.dart';
 import 'package:urawai_pos/ui/Widgets/costum_button.dart';
 import 'package:urawai_pos/ui/utils/constans/utils.dart';
 import 'package:urawai_pos/ui/utils/functions/routeGenerator.dart';
+import 'package:validators/validators.dart';
 
 class SignUpPage extends StatefulWidget {
   @override
@@ -224,7 +225,10 @@ class _SignUpPageState extends State<SignUpPage> {
           keyboardType: TextInputType.number,
           obscureText: true,
           validator: (value) {
-            if (value.isEmpty) return 'Password Tidak Boleh Kosong.';
+            if (value.isEmpty)
+              return 'Password Tidak Boleh Kosong.';
+            else if (!isNumeric(value))
+              return 'Hanya Password Angka yg diperbolehkan.';
             return null;
           },
         ),

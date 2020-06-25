@@ -1,3 +1,4 @@
+import 'package:auto_size_text/auto_size_text.dart';
 import 'package:esc_pos_bluetooth/esc_pos_bluetooth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bluetooth_basic/flutter_bluetooth_basic.dart';
@@ -93,7 +94,7 @@ class _PaymentSuccessState extends State<PaymentSuccess> {
                   flex: 2,
                   child: Container(
                     // color: Colors.blue,
-                    padding: EdgeInsets.fromLTRB(10, 20, 5, 15),
+                    padding: EdgeInsets.fromLTRB(10, 5, 5, 15),
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: <Widget>[
@@ -115,7 +116,7 @@ class _PaymentSuccessState extends State<PaymentSuccess> {
                                   return Text(
                                       snapshot.data.shopName.toUpperCase(),
                                       style: TextStyle(
-                                        fontSize: 30,
+                                        fontSize: 20,
                                         fontWeight: FontWeight.bold,
                                         color: Colors.blue,
                                       ));
@@ -168,28 +169,25 @@ class _PaymentSuccessState extends State<PaymentSuccess> {
                                         children: <Widget>[
                                           Row(
                                             children: <Widget>[
-                                              Text(
+                                              AutoSizeText(
                                                 'x${widget.itemList[index].quantity}',
-                                                style: kStruckTextStyle,
                                               ),
                                               SizedBox(width: 15),
                                               Container(
                                                 width: 250,
-                                                child: Text(
+                                                child: AutoSizeText(
                                                   widget.itemList[index]
                                                       .productName,
-                                                  style: kStruckTextStyle,
                                                 ),
                                               ),
                                             ],
                                           ),
                                           Container(
-                                            child: Text(
+                                            child: AutoSizeText(
                                               Formatter.currencyFormat(
                                                   widget.itemList[index].price *
                                                       widget.itemList[index]
                                                           .quantity),
-                                              style: kStruckTextStyle,
                                             ),
                                           ),
                                         ],
@@ -305,10 +303,10 @@ class _PaymentSuccessState extends State<PaymentSuccess> {
 
                                       return snapshot.data ==
                                               BLUETOOTH_DISCONNECTED
-                                          ? Text('Disconnected',
+                                          ? Text('Tidak Aktif',
                                               style: kPriceTextStyle)
                                           : Text(
-                                              'Connected',
+                                              'Aktif',
                                               style: kPriceTextStyle,
                                             );
                                     }),
@@ -322,23 +320,24 @@ class _PaymentSuccessState extends State<PaymentSuccess> {
                             children: <Widget>[
                               Icon(
                                 Icons.check_circle_outline,
-                                size: 200,
+                                size: MediaQuery.of(context).size.width * 0.15,
                                 color: Colors.green,
                               ),
                               Text(
                                 'Pembayaran Berhasil',
-                                style: TextStyle(fontSize: 35),
+                                style: TextStyle(fontSize: 25),
                               ),
                               SizedBox(height: 20),
                               Padding(
                                 padding: const EdgeInsets.all(10.0),
                                 child: Column(
                                   children: <Widget>[
-                                    CostumButton.squareButton('Cetak Kwitansi',
+                                    CostumButton.squareButtonSmall(
+                                        'Cetak Kwitansi',
                                         prefixIcon: Icons.print,
                                         onTap: () => printStruck(_shopName)),
-                                    SizedBox(height: 20),
-                                    CostumButton.squareButton(
+                                    SizedBox(height: 10),
+                                    CostumButton.squareButtonSmall(
                                       'Selesai',
                                       prefixIcon: Icons.done,
                                       borderColor: Colors.green,

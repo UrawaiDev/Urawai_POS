@@ -23,8 +23,6 @@ class OrderList {
   @HiveField(8)
   double discount;
 
-  //TODO: delete column cashier Name , Reference Order , dateTime
-
   OrderList({
     this.id,
     this.productName,

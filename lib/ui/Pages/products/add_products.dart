@@ -5,12 +5,14 @@ import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
+import 'package:responsive_builder/responsive_builder.dart';
 import 'package:urawai_pos/core/Provider/general_provider.dart';
 import 'package:urawai_pos/ui/Widgets/costum_button.dart';
 import 'package:urawai_pos/ui/utils/constans/products.dart';
 import 'package:urawai_pos/ui/utils/constans/utils.dart';
 import 'package:urawai_pos/ui/utils/functions/getCurrentUser.dart';
 import 'package:urawai_pos/ui/utils/functions/imagePicker.dart';
+import 'package:validators/validators.dart';
 
 class AddProductPage extends StatefulWidget {
   @override
@@ -38,6 +40,11 @@ class _AddProductPageState extends State<AddProductPage> {
 
   @override
   Widget build(BuildContext context) {
+    var deviceScreenType = getDeviceType(MediaQuery.of(context).size);
+
+    print(deviceScreenType);
+    if (deviceScreenType == DeviceScreenType.mobile) {}
+
     return SafeArea(
         child: GestureDetector(
       onTap: () => FocusScope.of(context).unfocus(),
@@ -101,7 +108,7 @@ class _AddProductPageState extends State<AddProductPage> {
                                             return null;
                                           },
                                         ),
-                                        SizedBox(height: 40),
+                                        SizedBox(height: 20),
                                         TextFormField(
                                           controller: _textProductPrice,
                                           style: kPriceTextStyle,
@@ -124,11 +131,13 @@ class _AddProductPageState extends State<AddProductPage> {
                                           validator: (value) {
                                             if (value.isEmpty)
                                               return 'Kolom Ini Tidak Boleh Kosong.';
+                                            else if (!isNumeric(value))
+                                              return 'Format Angka tidak sesuai';
 
                                             return null;
                                           },
                                         ),
-                                        SizedBox(height: 40),
+                                        SizedBox(height: 20),
                                         Row(
                                           crossAxisAlignment:
                                               CrossAxisAlignment.start,
@@ -208,7 +217,7 @@ class _AddProductPageState extends State<AddProductPage> {
                                             )
                                           ],
                                         ),
-                                        SizedBox(height: 40),
+                                        SizedBox(height: 20),
                                         Column(
                                           crossAxisAlignment:
                                               CrossAxisAlignment.start,

@@ -33,7 +33,6 @@ class SalesChart extends StatelessWidget {
     double twoMonthAgoTransaction = 0;
     List<LinearSales> linearSales = [];
 
-    //? TODO: Will filter based on selected Date
     for (var transaction in transactions) {
       if (transaction.date.month == DateTime.now().month) {
         currentMonthTransaction =

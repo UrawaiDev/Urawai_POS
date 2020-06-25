@@ -1,8 +1,10 @@
+import 'package:auto_size_text/auto_size_text.dart';
 import 'package:email_validator/email_validator.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:provider/provider.dart';
+import 'package:responsive_builder/responsive_builder.dart';
 import 'package:urawai_pos/core/Models/users.dart';
 import 'package:urawai_pos/core/Provider/general_provider.dart';
 import 'package:urawai_pos/core/Services/error_handling.dart';
@@ -52,6 +54,7 @@ class _LoginPageState extends State<LoginPage> {
                   padding: const EdgeInsets.all(10.0),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceAround,
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: <Widget>[
                       //* LEFT SIDE
                       Expanded(
@@ -72,20 +75,32 @@ class _LoginPageState extends State<LoginPage> {
                                   color: Colors.black,
                                   fontStyle: FontStyle.italic),
                             ),
-                            SizedBox(height: 50),
-                            Container(
-                              width: 400,
-                              height: 400,
-                              child: Image.asset(
-                                'assets/images/login_image.jpg',
-                                fit: BoxFit.fill,
+                            SizedBox(height: 10),
+                            SizedBox.fromSize(
+                              child: ScreenTypeLayout(
+                                mobile: Container(
+                                  width: 200,
+                                  height: 200,
+                                  child: Image.asset(
+                                    'assets/images/login_image.jpg',
+                                    fit: BoxFit.fill,
+                                  ),
+                                ),
+                                tablet: Container(
+                                  width: 400,
+                                  height: 400,
+                                  child: Image.asset(
+                                    'assets/images/login_image.jpg',
+                                    fit: BoxFit.fill,
+                                  ),
+                                ),
                               ),
                             ),
                           ],
                         ),
                       ),
                       //* RIGHT SIDE
-                      _buildRightSide(generalProvider, context)
+                      Expanded(child: _buildRightSide(generalProvider, context))
                     ],
                   ),
                 ),
@@ -102,15 +117,14 @@ class _LoginPageState extends State<LoginPage> {
 
   Widget _buildRightSide(
       GeneralProvider generalProvider, BuildContext context) {
-    return Expanded(
-      child: Container(
-        child: Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: Form(
-            key: _formKey,
-            child: Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: _formSignIn(generalProvider, context)),
+    return Container(
+      child: Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: Form(
+          key: _formKey,
+          child: Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: _formSignIn(generalProvider, context),
           ),
         ),
       ),
@@ -120,6 +134,7 @@ class _LoginPageState extends State<LoginPage> {
   Widget _formSignIn(GeneralProvider generalProvider, BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisAlignment: MainAxisAlignment.start,
       children: <Widget>[
         Text(
           'Masuk',
@@ -176,13 +191,14 @@ class _LoginPageState extends State<LoginPage> {
             return null;
           },
         ),
-        SizedBox(height: 20),
+        SizedBox(height: 10),
         Text(
           errorMessageSignIn.isEmpty ? '' : errorMessageSignIn,
           style: kErrorTextStyle,
         ),
         SizedBox(height: 10),
         Row(
+          mainAxisAlignment: MainAxisAlignment.spaceAround,
           children: <Widget>[
             CostumButton.squareButtonSmall('Masuk',
                 prefixIcon: FontAwesomeIcons.signInAlt, onTap: () async {
@@ -214,14 +230,19 @@ class _LoginPageState extends State<LoginPage> {
                 }
               }
             }),
-            SizedBox(width: 20),
+            SizedBox(width: 10),
             GestureDetector(
-              child: Text(
-                'Daftar disini',
-                style: TextStyle(
-                    fontSize: 22,
-                    fontStyle: FontStyle.italic,
-                    decoration: TextDecoration.underline),
+              child: Container(
+                alignment: Alignment.center,
+                width: 130,
+                height: 40,
+                child: AutoSizeText(
+                  'Daftar disini',
+                  style: TextStyle(
+                      fontSize: 22,
+                      fontStyle: FontStyle.italic,
+                      decoration: TextDecoration.underline),
+                ),
               ),
               onTap: () =>
                   Navigator.pushNamed(context, RouteGenerator.kRouteSignUpPage),

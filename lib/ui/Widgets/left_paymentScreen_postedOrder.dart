@@ -1,7 +1,9 @@
+import 'package:auto_size_text/auto_size_text.dart';
 import 'package:connectivity/connectivity.dart';
 import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
 import 'package:provider/provider.dart';
+import 'package:responsive_builder/responsive_builder.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:urawai_pos/core/Models/postedOrder.dart';
 import 'package:urawai_pos/core/Models/transaction.dart';
@@ -46,6 +48,9 @@ class _PaymentScreenLeftPostedOrderState
 
     //set VAT if tax is Activated.
     _setTaxPostedOrder(postedOrderProvider);
+
+    DeviceScreenType deviceScreenType =
+        getDeviceType(MediaQuery.of(context).size);
 
     return Expanded(
         child: Container(
@@ -98,27 +103,35 @@ class _PaymentScreenLeftPostedOrderState
                     },
                     child: Container(
                       alignment: Alignment.center,
-                      width: 120,
+                      width: deviceScreenType == DeviceScreenType.tablet
+                          ? 120
+                          : 50,
                       height: 40,
                       color: Colors.blue,
-                      child: Row(
-                        children: <Widget>[
-                          Icon(
-                            Icons.arrow_back,
-                            size: 25,
-                            color: Colors.white,
-                          ),
-                          SizedBox(width: 8),
-                          Text(
-                            'Kembali',
-                            style: TextStyle(
-                              fontSize: 18,
+                      child: deviceScreenType == DeviceScreenType.tablet
+                          ? Row(
+                              children: <Widget>[
+                                Icon(
+                                  Icons.arrow_back,
+                                  size: 25,
+                                  color: Colors.white,
+                                ),
+                                SizedBox(width: 8),
+                                Text(
+                                  'Kembali',
+                                  style: TextStyle(
+                                    fontSize: 18,
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ],
+                            )
+                          : Icon(
+                              Icons.arrow_back,
+                              size: 25,
                               color: Colors.white,
-                              fontWeight: FontWeight.bold,
                             ),
-                          ),
-                        ],
-                      ),
                     ),
                   ),
                 ],
@@ -207,7 +220,7 @@ class _PaymentScreenLeftPostedOrderState
                             color: Colors.red,
                             border: Border.all(color: Colors.grey),
                           ),
-                          child: Text('Void Traksaksi',
+                          child: AutoSizeText('Void Traksaksi',
                               style: TextStyle(
                                 fontSize: 25,
                                 color: Colors.white,

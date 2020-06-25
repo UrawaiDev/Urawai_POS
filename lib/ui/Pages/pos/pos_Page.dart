@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:auto_size_text/auto_size_text.dart';
 import 'package:connectivity/connectivity.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -8,6 +9,7 @@ import 'package:get_it/get_it.dart';
 import 'package:hive/hive.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:provider/provider.dart';
+import 'package:responsive_builder/responsive_builder.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:urawai_pos/core/Models/postedOrder.dart';
@@ -24,6 +26,7 @@ import 'package:urawai_pos/ui/Widgets/costum_button.dart';
 import 'package:urawai_pos/ui/Widgets/detail_itemOrder.dart';
 import 'package:urawai_pos/ui/Widgets/drawerMenu.dart';
 import 'package:urawai_pos/ui/Widgets/extraDiscount.dart';
+import 'package:urawai_pos/ui/Widgets/floating_button.dart';
 import 'package:urawai_pos/ui/Widgets/footer_OrderList.dart';
 import 'package:urawai_pos/ui/Widgets/loading_card.dart';
 import 'package:urawai_pos/ui/utils/constans/formatter.dart';
@@ -110,6 +113,10 @@ class _POSPageState extends State<POSPage> with SingleTickerProviderStateMixin {
     final generalProvider =
         Provider.of<GeneralProvider>(context, listen: false);
 
+    DeviceScreenType deviceType = getDeviceType(MediaQuery.of(context).size);
+
+    print(deviceType);
+
     return SafeArea(
       child: FutureBuilder<Users>(
           future: currentUser,
@@ -131,19 +138,33 @@ class _POSPageState extends State<POSPage> with SingleTickerProviderStateMixin {
 
             return GestureDetector(
               onTap: () {
-                //dismiss softkeyboar
+                //dismiss softkeyboard
                 FocusScope.of(context).unfocus();
               },
               child: WillPopScope(
                 onWillPop: () => _isBackButtonPressed(),
                 child: Scaffold(
+                  floatingActionButton: deviceType == DeviceScreenType.tablet
+                      ? Container()
+                      : Container(
+                          margin: EdgeInsets.only(left: 10),
+                          alignment: Alignment.bottomLeft,
+                          child: FloatingButton(
+                            onDeleteTap: () => _onDeleteTap(orderlistState),
+                            onDiscountTap: () => _onDiscountTap(orderlistState),
+                            onSaveTap: () => _onSaveTap(orderlistState),
+                            onPayTap: () => _onPayTap(orderlistState),
+                          ),
+                        ),
+                  floatingActionButtonLocation:
+                      FloatingActionButtonLocation.centerFloat,
                   resizeToAvoidBottomPadding: false,
                   appBar: AppBar(
                     // title: myAppBar(_textQuery, context),
                     title: Row(
                       children: <Widget>[
                         GestureDetector(
-                          child: Text(currentUser.shopName ?? '[null]',
+                          child: AutoSizeText(currentUser.shopName ?? '[null]',
                               style: TextStyle(
                                 color: Colors.white,
                                 fontSize: 22,
@@ -336,7 +357,7 @@ class _POSPageState extends State<POSPage> with SingleTickerProviderStateMixin {
                                                                       SizedBox(
                                                                           height:
                                                                               30),
-                                                                      CostumButton.squareButton(
+                                                                      CostumButton.squareButtonSmall(
                                                                           'Tambah Produk',
                                                                           onTap:
                                                                               () {
@@ -497,16 +518,26 @@ class _POSPageState extends State<POSPage> with SingleTickerProviderStateMixin {
                                               ),
                                             ),
 
-                                      Container(
-                                        child: FooterOrderList(
-                                          dicount: orderlistState.discountTotal,
-                                          grandTotal: orderlistState.grandTotal,
-                                          subtotal: orderlistState.subTotal,
-                                          vat: orderlistState.taxFinal,
-                                        ),
-                                      ),
-                                      transactionButton(
-                                          orderlistState, context),
+                                      deviceType == DeviceScreenType.tablet
+                                          ? Column(
+                                              children: <Widget>[
+                                                Container(
+                                                  child: FooterOrderList(
+                                                    dicount: orderlistState
+                                                        .discountTotal,
+                                                    grandTotal: orderlistState
+                                                        .grandTotal,
+                                                    subtotal:
+                                                        orderlistState.subTotal,
+                                                    vat:
+                                                        orderlistState.taxFinal,
+                                                  ),
+                                                ),
+                                                transactionButton(
+                                                    orderlistState, context),
+                                              ],
+                                            )
+                                          : Container()
                                     ]))),
 
                         //Right side -- menu penjuala
@@ -520,6 +551,59 @@ class _POSPageState extends State<POSPage> with SingleTickerProviderStateMixin {
     );
   }
 
+  void _onSaveTap(OrderListProvider orderlistState) {
+    if (orderlistState.orderID.isNotEmpty &&
+        orderlistState.orderlist.isNotEmpty) {
+      if (orderlistState.addPostedOrder(orderlistState)) {
+        CostumDialogBox.showDialogInformation(
+            title: 'Information',
+            contentText: 'Daftar sudah disimpan kedalam Draft',
+            context: context,
+            icon: Icons.info,
+            iconColor: Colors.blue,
+            onTap: () {
+              orderlistState.resetOrderList();
+              Navigator.pop(context);
+            });
+      }
+      //set cashier name for PostedOrder Provider
+      Provider.of<PostedOrderProvider>(context, listen: false).cashierName =
+          orderlistState.cashierName;
+    }
+  }
+
+  void _onDiscountTap(OrderListProvider orderlistState) {
+    if (orderlistState.orderlist.isNotEmpty) {
+      showDialog(
+          context: context,
+          barrierDismissible: false,
+          builder: (context) => ExtraDiscoutDialog(orderlistState));
+    }
+  }
+
+  void _onDeleteTap(OrderListProvider orderlistState) {
+    print('delete button Tapped');
+    if (orderlistState.orderlist.isNotEmpty) {
+      CostumDialogBox.showCostumDialogBox(
+          context: context,
+          title: 'Konfirmasi',
+          contentString: 'List Order akan di Hapus',
+          icon: Icons.delete,
+          iconColor: Colors.red,
+          confirmButtonTitle: 'Hapus',
+          onConfirmPressed: () {
+            orderlistState.resetOrderList();
+            Navigator.pop(context);
+          });
+    }
+  }
+
+  void _onPayTap(OrderListProvider orderlistState) {
+    if (orderlistState.orderlist.isNotEmpty)
+      Navigator.pushNamed(context, RouteGenerator.kRoutePaymentScreen,
+          arguments: orderlistState.orderlist);
+  }
+
   Row transactionButton(
       OrderListProvider orderlistState, BuildContext context) {
     return Row(
@@ -531,56 +615,15 @@ class _POSPageState extends State<POSPage> with SingleTickerProviderStateMixin {
             _bottomButton(
                 icon: Icon(Icons.save, color: Colors.blue),
                 title: 'Simpan',
-                onTap: () {
-                  if (orderlistState.orderID.isNotEmpty &&
-                      orderlistState.orderlist.isNotEmpty) {
-                    if (orderlistState.addPostedOrder(orderlistState)) {
-                      CostumDialogBox.showDialogInformation(
-                          title: 'Information',
-                          contentText: 'Daftar sudah disimpan kedalam Draft',
-                          context: context,
-                          icon: Icons.info,
-                          iconColor: Colors.blue,
-                          onTap: () {
-                            orderlistState.resetOrderList();
-                            Navigator.pop(context);
-                          });
-                    }
-                    //set cashier name for PostedOrder Provider
-                    Provider.of<PostedOrderProvider>(context, listen: false)
-                        .cashierName = orderlistState.cashierName;
-                  }
-                }),
+                onTap: () => _onSaveTap(orderlistState)),
             _bottomButton(
                 icon: Icon(Icons.disc_full),
                 title: 'Diskon',
-                onTap: () {
-                  if (orderlistState.orderlist.isNotEmpty) {
-                    showDialog(
-                        context: context,
-                        barrierDismissible: false,
-                        builder: (context) =>
-                            ExtraDiscoutDialog(orderlistState));
-                  }
-                }),
+                onTap: () => _onDiscountTap(orderlistState)),
             _bottomButton(
                 icon: Icon(Icons.delete, color: Colors.red),
                 title: 'Hapus',
-                onTap: () {
-                  if (orderlistState.orderlist.isNotEmpty) {
-                    CostumDialogBox.showCostumDialogBox(
-                        context: context,
-                        title: 'Konfirmasi',
-                        contentString: 'List Order akan di Hapus',
-                        icon: Icons.delete,
-                        iconColor: Colors.red,
-                        confirmButtonTitle: 'Hapus',
-                        onConfirmPressed: () {
-                          orderlistState.resetOrderList();
-                          Navigator.pop(context);
-                        });
-                  }
-                }),
+                onTap: () => _onDeleteTap(orderlistState)),
           ],
         ),
         Expanded(
@@ -590,20 +633,15 @@ class _POSPageState extends State<POSPage> with SingleTickerProviderStateMixin {
                   alignment: Alignment.center,
                   height: 60,
                   color: Color(0xFF408be5),
-                  child: Text(
+                  child: AutoSizeText(
                     'BAYAR',
                     style: TextStyle(
                       color: Colors.white,
-                      fontSize: 22,
+                      fontSize: 20,
                       fontWeight: FontWeight.bold,
                     ),
                   )),
-              onPressed: () {
-                if (orderlistState.orderlist.isNotEmpty)
-                  Navigator.pushNamed(
-                      context, RouteGenerator.kRoutePaymentScreen,
-                      arguments: orderlistState.orderlist);
-              }),
+              onPressed: () => _onPayTap(orderlistState)),
         )
       ],
     );
@@ -671,7 +709,7 @@ class _POSPageState extends State<POSPage> with SingleTickerProviderStateMixin {
             Consumer<OrderListProvider>(builder: (_, orderlistState, __) {
               return Text(
                 'Pesanan (${totalOrderLength(orderlistState.orderlist)})',
-                style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
               );
             }),
             ScaleTransition(
@@ -681,8 +719,8 @@ class _POSPageState extends State<POSPage> with SingleTickerProviderStateMixin {
                 child: Consumer<GeneralProvider>(
                   builder: (_, generalProvider, __) => generalProvider.isLoading
                       ? Container(
-                          width: 30,
-                          height: 30,
+                          width: 25,
+                          height: 25,
                           child: CircularProgressIndicator(),
                         )
                       : IconButton(
@@ -947,92 +985,97 @@ class _POSPageState extends State<POSPage> with SingleTickerProviderStateMixin {
     final screenWidth = MediaQuery.of(context).size.width;
 
     return GestureDetector(
-      child: Container(
-        // color: Colors.blue,
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            Expanded(
-              child: Stack(
-                alignment: Alignment.center,
-                children: <Widget>[
-                  Container(
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(10),
-                      color: greyColor,
-                    ),
-                    child: Container(
-                      margin: EdgeInsets.all(15),
+        child: Container(
+          // color: Colors.blue,
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: <Widget>[
+              Expanded(
+                child: Stack(
+                  alignment: Alignment.center,
+                  children: <Widget>[
+                    Container(
                       decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          image: DecorationImage(
-                            image: NetworkImage(
-                              product.image,
-                            ),
-                            fit: BoxFit.cover,
-                          )),
-                      // color: Colors.yellow,
+                        borderRadius: BorderRadius.circular(10),
+                        color: greyColor,
+                      ),
+                      child: Container(
+                        margin: EdgeInsets.all(15),
+                        decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            image: DecorationImage(
+                              image: NetworkImage(
+                                product.image,
+                              ),
+                              fit: BoxFit.cover,
+                            )),
+                        // color: Colors.yellow,
+                      ),
                     ),
-                  ),
-                  product.isRecommended
-                      ? Positioned(
-                          top: 10,
-                          right: 10,
-                          child: Container(
-                            width: 30,
-                            height: 30,
-                            child: Image.asset('assets/images/chef-hat.png'),
-                          ),
-                        )
-                      : Container(),
-                ],
+                    product.isRecommended
+                        ? Positioned(
+                            top: 10,
+                            right: 10,
+                            child: Container(
+                              width: 30,
+                              height: 30,
+                              child: Image.asset('assets/images/chef-hat.png'),
+                            ),
+                          )
+                        : Container(),
+                  ],
+                ),
               ),
-            ),
-            SizedBox(height: 10),
-            Text(
-              product.name,
-              style: screenWidth > 1024
-                  ? kProductNameBigScreenTextStyle
-                  : kProductNameSmallScreenTextStyle,
-            ),
-            SizedBox(height: 5),
-            product.discount == 0 || product.discount == null
-                ? Text(
-                    Formatter.currencyFormat(product.price),
-                    style: kPriceTextStyle,
-                  )
-                : Column(
-                    children: <Widget>[
-                      Text(
-                        Formatter.currencyFormat(product.price),
-                        style: TextStyle(
-                          decoration: TextDecoration.lineThrough,
+              SizedBox(height: 10),
+              Text(
+                product.name,
+                style: screenWidth > 1024
+                    ? kProductNameBigScreenTextStyle
+                    : kProductNameSmallScreenTextStyle,
+              ),
+              SizedBox(height: 5),
+              product.discount == 0 || product.discount == null
+                  ? Text(
+                      Formatter.currencyFormat(product.price),
+                      style: kPriceTextStyle,
+                    )
+                  : Column(
+                      children: <Widget>[
+                        Text(
+                          Formatter.currencyFormat(product.price),
+                          style: TextStyle(
+                            decoration: TextDecoration.lineThrough,
+                          ),
                         ),
-                      ),
-                      Text(
-                        Formatter.currencyFormat(product.price -
-                            (product.price * (product.discount / 100))),
-                        style: kPriceTextStyle,
-                      ),
-                    ],
-                  )
-          ],
+                        Text(
+                          Formatter.currencyFormat(product.price -
+                              (product.price * (product.discount / 100))),
+                          style: kPriceTextStyle,
+                        ),
+                      ],
+                    )
+            ],
+          ),
         ),
-      ),
-      onDoubleTap: () async {
-        SharedPreferences _prefs = await SharedPreferences.getInstance();
+        onLongPress: () => _addItemtoOrderList(
+            orderlistProvider: orderlistProvider, product: product),
+        onDoubleTap: () => _addItemtoOrderList(
+            orderlistProvider: orderlistProvider, product: product));
+  }
 
-        if (orderlistProvider.orderID.isNotEmpty) {
-          orderlistProvider.addToList(
-            item: product,
-            referenceOrder: orderlistProvider.referenceOrder,
-            vat: _prefs.getBool('vat'),
-          );
-        } else {
-          _animationController.forward();
-        }
-      },
-    );
+  Future<void> _addItemtoOrderList(
+      {OrderListProvider orderlistProvider, Product product}) async {
+    SharedPreferences _prefs = await SharedPreferences.getInstance();
+
+    if (orderlistProvider.orderID.isNotEmpty) {
+      orderlistProvider.addToList(
+        item: product,
+        referenceOrder: orderlistProvider.referenceOrder,
+        vat: _prefs.getBool('vat'),
+      );
+    } else {
+      _animationController.forward();
+    }
   }
 
   Widget _bottomButton({String title, Icon icon, Function onTap}) {

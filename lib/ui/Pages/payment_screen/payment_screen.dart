@@ -1,8 +1,10 @@
+import 'package:auto_size_text/auto_size_text.dart';
 import 'package:connectivity/connectivity.dart';
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import 'package:hive/hive.dart';
 import 'package:provider/provider.dart';
+import 'package:responsive_builder/responsive_builder.dart';
 import 'package:urawai_pos/core/Models/postedOrder.dart';
 import 'package:urawai_pos/core/Models/transaction.dart';
 import 'package:urawai_pos/core/Models/users.dart';
@@ -49,6 +51,9 @@ class _PaymentScreenState extends State<PaymentScreen> {
   Widget build(BuildContext context) {
     final generalState = Provider.of<GeneralProvider>(context);
 
+    DeviceScreenType deviceScreenType =
+        getDeviceType(MediaQuery.of(context).size);
+
     return WillPopScope(
       onWillPop: () => Future.value(false),
       child: Container(
@@ -72,10 +77,11 @@ class _PaymentScreenState extends State<PaymentScreen> {
                         child: Container(
                             // color: Colors.blue,
                             child: Padding(
-                          padding: const EdgeInsets.fromLTRB(20, 10, 20, 10),
+                          padding: const EdgeInsets.fromLTRB(20, 0, 20, 10),
                           child: Column(
                             children: <Widget>[
-                              ConnectionStatusWidget(kPriceTextStyle),
+                              //! will check best place for this widget
+                              // ConnectionStatusWidget(kPriceTextStyle),
                               Expanded(
                                   flex: 2,
                                   child: Container(
@@ -93,7 +99,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
                                                     Duration(milliseconds: 700),
                                                 curve: Curves.easeIn,
                                                 alignment: Alignment.center,
-                                                width: 150,
+                                                width: 180,
                                                 decoration: BoxDecoration(
                                                     color: index ==
                                                             state.paymentType
@@ -105,7 +111,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
                                                             10)),
                                                 margin: EdgeInsets.symmetric(
                                                     vertical: 5),
-                                                child: Column(
+                                                child: Row(
                                                   mainAxisAlignment:
                                                       MainAxisAlignment.center,
                                                   children: <Widget>[
@@ -116,8 +122,8 @@ class _PaymentScreenState extends State<PaymentScreen> {
                                                                         .values[
                                                                     index]),
                                                         size: 35),
-                                                    SizedBox(height: 5),
-                                                    Text(
+                                                    SizedBox(width: 5),
+                                                    AutoSizeText(
                                                       PaymentHelper
                                                           .getPaymentType(
                                                               PaymentType
@@ -288,121 +294,140 @@ class _PaymentScreenState extends State<PaymentScreen> {
   Widget _cashPaymentWidget() {
     return Consumer2<PostedOrderProvider, OrderListProvider>(
         builder: (context, statePostedOrder, stateOrderList, _) {
+      var deviceScreenType = getDeviceType(MediaQuery.of(context).size);
       var state;
       if (widget.itemList is PostedOrder)
         state = statePostedOrder;
       else
         state = stateOrderList;
 
-      return Column(
-        children: <Widget>[
-          Column(
-            children: <Widget>[
-              Padding(
-                padding: const EdgeInsets.all(8.0),
+      return Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 8.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: <Widget>[
+            Expanded(
+              flex: 2,
+              child: Padding(
+                padding: const EdgeInsets.symmetric(vertical: 5.0),
                 child: Container(
-                  decoration: BoxDecoration(
-                      color: Colors.black,
-                      border: Border.all(
-                        color: Colors.blue,
-                        width: 3,
-                      )),
-                  child: Padding(
-                    padding: const EdgeInsets.all(5.0),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: <Widget>[
-                        Text(
-                          'Total Bayar',
-                          style: TextStyle(
-                            fontSize: 20,
-                            color: Colors.white,
+                  // color: Colors.blue,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: <Widget>[
+                      Container(
+                        height: deviceScreenType == DeviceScreenType.tablet
+                            ? 40
+                            : 30,
+                        decoration: BoxDecoration(
+                            color: Colors.black,
+                            border: Border.all(
+                              color: Colors.blue,
+                              width: 2,
+                            )),
+                        child: Padding(
+                          padding: const EdgeInsets.all(5.0),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: <Widget>[
+                              AutoSizeText(
+                                'Total Bayar',
+                                style: TextStyle(
+                                  fontSize: 20,
+                                  color: Colors.white,
+                                ),
+                              ),
+                              AutoSizeText(
+                                Formatter.currencyFormat(state.grandTotal),
+                                style: TextStyle(
+                                  fontSize: 20,
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ],
                           ),
                         ),
-                        Text(
-                          Formatter.currencyFormat(state.grandTotal),
-                          style: TextStyle(
-                            fontSize: 20,
-                            color: Colors.white,
-                            fontWeight: FontWeight.bold,
+                      ),
+                      SizedBox(height: 5),
+                      Container(
+                        height: deviceScreenType == DeviceScreenType.tablet
+                            ? 40
+                            : 30,
+                        decoration: BoxDecoration(
+                            border: Border.all(
+                          color: Colors.blue,
+                          width: 2,
+                        )),
+                        child: Padding(
+                          padding: const EdgeInsets.all(5.0),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: <Widget>[
+                              AutoSizeText(
+                                'Pembayaran',
+                                style: TextStyle(fontSize: 20),
+                              ),
+                              AutoSizeText(
+                                Formatter.currencyFormat(state.finalPayment),
+                                style: TextStyle(fontSize: 20),
+                              ),
+                            ],
                           ),
                         ),
-                      ],
-                    ),
+                      ),
+                      SizedBox(height: 5),
+                      Container(
+                        height: deviceScreenType == DeviceScreenType.tablet
+                            ? 40
+                            : 30,
+                        decoration: BoxDecoration(
+                            border: Border.all(
+                          color: Colors.blue,
+                          width: 2,
+                        )),
+                        child: Padding(
+                          padding: const EdgeInsets.all(5.0),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: <Widget>[
+                              AutoSizeText(
+                                'Kembali',
+                                style: TextStyle(fontSize: 20),
+                              ),
+                              // Only return value when bigger dan grandTotal
+                              AutoSizeText(
+                                state.finalPayment != 0 &&
+                                        state.finalPayment > state.grandTotal
+                                    ? Formatter.currencyFormat(
+                                        state.finalPayment - state.grandTotal)
+                                    : 'Rp. 0',
+                                style: TextStyle(fontSize: 20),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               ),
-              Padding(
-                padding: const EdgeInsets.all(10.0),
-                child: Container(
-                  decoration: BoxDecoration(
-                      border: Border.all(
-                    color: Colors.blue,
-                    width: 3,
-                  )),
-                  child: Padding(
-                    padding: const EdgeInsets.all(5.0),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: <Widget>[
-                        Text(
-                          'Pembayaran',
-                          style: TextStyle(fontSize: 20),
-                        ),
-                        Text(
-                          Formatter.currencyFormat(state.finalPayment),
-                          style: TextStyle(fontSize: 20),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ),
-              SizedBox(width: 10),
-              Padding(
-                padding: const EdgeInsets.all(10.0),
-                child: Container(
-                  decoration: BoxDecoration(
-                      border: Border.all(
-                    color: Colors.blue,
-                    width: 3,
-                  )),
-                  child: Padding(
-                    padding: const EdgeInsets.all(5.0),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: <Widget>[
-                        Text(
-                          'Kembali',
-                          style: TextStyle(fontSize: 20),
-                        ),
-                        // Only return value when bigger dan grandTotal
-                        Text(
-                          state.finalPayment != 0 &&
-                                  state.finalPayment > state.grandTotal
-                              ? Formatter.currencyFormat(
-                                  state.finalPayment - state.grandTotal)
-                              : 'Rp. 0',
-                          style: TextStyle(fontSize: 20),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ),
-            ],
-          ),
-          Expanded(
-            child: Container(
-              child: keyPadArea(context),
             ),
-          ),
-        ],
+            Expanded(
+              flex: 3,
+              child: Container(
+                child: keyPadArea(context),
+              ),
+            ),
+          ],
+        ),
       );
     });
   }
 
-  Padding keyPadArea(BuildContext context) {
+  Widget keyPadArea(BuildContext context) {
+    var deviceScreenType = getDeviceType(MediaQuery.of(context).size);
+
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8.0),
       child: Container(
@@ -420,12 +445,12 @@ class _PaymentScreenState extends State<PaymentScreen> {
               state = stateOrderList;
 
             return Column(
-              mainAxisAlignment: MainAxisAlignment.center,
+              mainAxisAlignment: MainAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
                 Expanded(
                   child: Row(
                     children: <Widget>[
-                      SizedBox(width: 10),
                       _keypadCard('1', () => _keyPadNumber('1', state)),
                       SizedBox(width: 10),
                       _keypadCard('2', () => _keyPadNumber('2', state)),
@@ -439,7 +464,6 @@ class _PaymentScreenState extends State<PaymentScreen> {
                 Expanded(
                   child: Row(
                     children: <Widget>[
-                      SizedBox(width: 10),
                       _keypadCard('4', () => _keyPadNumber('4', state)),
                       SizedBox(width: 10),
                       _keypadCard('5', () => _keyPadNumber('5', state)),
@@ -449,11 +473,10 @@ class _PaymentScreenState extends State<PaymentScreen> {
                     ],
                   ),
                 ),
-                SizedBox(height: 10),
+                SizedBox(height: 8),
                 Expanded(
                   child: Row(
                     children: <Widget>[
-                      SizedBox(width: 10),
                       _keypadCard('7', () => _keyPadNumber('7', state)),
                       SizedBox(width: 10),
                       _keypadCard('8', () => _keyPadNumber('8', state)),
@@ -463,35 +486,21 @@ class _PaymentScreenState extends State<PaymentScreen> {
                     ],
                   ),
                 ),
-                SizedBox(height: 10),
+                SizedBox(height: 8),
                 Expanded(
                   child: Row(
                     children: <Widget>[
-                      SizedBox(width: 10),
-                      GestureDetector(
-                        onTap: () {
-                          if (state.totalPayment.isNotEmpty) {
-                            var result = state.totalPayment
-                                .substring(0, state.totalPayment.length - 1);
-                            state.totalPayment = result;
-                            if (result.isNotEmpty) {
-                              state.finalPayment = double.parse(result);
-                            } else
-                              state.finalPayment = 0.0;
-                          }
-                        },
-                        child: Container(
-                          padding: EdgeInsets.all(8),
-                          alignment: Alignment.center,
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(10),
-                            color: Colors.grey[400],
-                          ),
-                          width: 150,
-                          height: 80,
-                          child: Icon(Icons.backspace),
-                        ),
-                      ),
+                      _keypadCard('Hapus', () {
+                        if (state.totalPayment.isNotEmpty) {
+                          var result = state.totalPayment
+                              .substring(0, state.totalPayment.length - 1);
+                          state.totalPayment = result;
+                          if (result.isNotEmpty) {
+                            state.finalPayment = double.parse(result);
+                          } else
+                            state.finalPayment = 0.0;
+                        }
+                      }),
                       SizedBox(width: 10),
                       _keypadCard('0', () => _keyPadNumber('0', state)),
                       SizedBox(width: 10),
@@ -550,79 +559,84 @@ class _PaymentScreenState extends State<PaymentScreen> {
                       ],
                     ),
                   ),
-                  _buttonPayment(
-                      color: Colors.blue,
-                      text: Text(
-                        'BAYAR',
-                        style: TextStyle(
-                          fontSize: 20,
-                          color: Colors.white,
-                          fontWeight: FontWeight.bold,
+                  Expanded(
+                    flex: 2,
+                    child: _buttonPayment(
+                        color: Colors.blue,
+                        text: Text(
+                          'BAYAR',
+                          style: TextStyle(
+                            fontSize: 20,
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
-                      ),
-                      onTap: () {
-                        if (state.finalPayment != 0 &&
-                            state.finalPayment >= state.grandTotal) {
-                          CostumDialogBox.showCostumDialogBox(
-                            context: context,
-                            title: 'Konfirmasi',
-                            icon: Icons.receipt,
-                            iconColor: Colors.blue,
-                            contentString:
-                                'Pembayaran telah dilakukan dan Cetak Kwitansi, Lanjutkan?',
-                            confirmButtonTitle: 'Proses',
-                            onConfirmPressed: () async {
-                              final transactionProvider =
-                                  Provider.of<TransactionOrderProvider>(context,
-                                      listen: false);
-                              final connectionStatus =
-                                  Provider.of<ConnectivityResult>(context,
-                                      listen: false);
+                        onTap: () {
+                          if (state.finalPayment != 0 &&
+                              state.finalPayment >= state.grandTotal) {
+                            CostumDialogBox.showCostumDialogBox(
+                              context: context,
+                              title: 'Konfirmasi',
+                              icon: Icons.receipt,
+                              iconColor: Colors.blue,
+                              contentString:
+                                  'Pembayaran telah dilakukan dan Cetak Kwitansi, Lanjutkan?',
+                              confirmButtonTitle: 'Proses',
+                              onConfirmPressed: () async {
+                                final transactionProvider =
+                                    Provider.of<TransactionOrderProvider>(
+                                        context,
+                                        listen: false);
+                                final connectionStatus =
+                                    Provider.of<ConnectivityResult>(context,
+                                        listen: false);
 
-                              final currentUser =
-                                  await locatorAuth.currentUserXXX;
-                              if (connectionStatus == ConnectivityResult.none) {
-                                //Add Transaction to Hive DB when Offline
-                                Provider.of<TransactionOrderProvider>(context,
-                                        listen: false)
-                                    .addTransactionOrder(
-                                  stateProvider: state,
-                                  paymentStatus: PaymentStatus.COMPLETED,
-                                  paymentType: PaymentType.CASH,
-                                );
-                              } else {
-                                // add to Firestore DB when Online
-                                transactionProvider.addTransactionToFirestore(
+                                final currentUser =
+                                    await locatorAuth.currentUserXXX;
+                                if (connectionStatus ==
+                                    ConnectivityResult.none) {
+                                  //Add Transaction to Hive DB when Offline
+                                  Provider.of<TransactionOrderProvider>(context,
+                                          listen: false)
+                                      .addTransactionOrder(
                                     stateProvider: state,
                                     paymentStatus: PaymentStatus.COMPLETED,
                                     paymentType: PaymentType.CASH,
-                                    shopName: currentUser.shopName);
-                              }
+                                  );
+                                } else {
+                                  // add to Firestore DB when Online
+                                  transactionProvider.addTransactionToFirestore(
+                                      stateProvider: state,
+                                      paymentStatus: PaymentStatus.COMPLETED,
+                                      paymentType: PaymentType.CASH,
+                                      shopName: currentUser.shopName);
+                                }
 
-                              //delete Posted Order
-                              if (widget.itemList is PostedOrder) {
-                                Hive.box<PostedOrder>(POSPage.postedBoxName)
-                                    .delete(state.postedOrder.id);
-                              }
+                                //delete Posted Order
+                                if (widget.itemList is PostedOrder) {
+                                  Hive.box<PostedOrder>(POSPage.postedBoxName)
+                                      .delete(state.postedOrder.id);
+                                }
 
-                              //Navigate to Payment Success Screen
-                              Navigator.pushNamed(context,
-                                  RouteGenerator.kRoutePaymentSuccessPage,
-                                  arguments: state);
-                            },
-                          );
-                        } else {
-                          print('Pastikan sudah di bayar');
-                          CostumDialogBox.showDialogInformation(
-                              title: 'Informasi',
-                              context: context,
-                              contentText:
-                                  'Pastikan pembayaran telah dilakukan.',
-                              icon: Icons.warning,
-                              iconColor: Colors.yellow,
-                              onTap: () => Navigator.pop(context));
-                        }
-                      }),
+                                //Navigate to Payment Success Screen
+                                Navigator.pushNamed(context,
+                                    RouteGenerator.kRoutePaymentSuccessPage,
+                                    arguments: state);
+                              },
+                            );
+                          } else {
+                            print('Pastikan sudah di bayar');
+                            CostumDialogBox.showDialogInformation(
+                                title: 'Informasi',
+                                context: context,
+                                contentText:
+                                    'Pastikan pembayaran telah dilakukan.',
+                                icon: Icons.warning,
+                                iconColor: Colors.yellow,
+                                onTap: () => Navigator.pop(context));
+                          }
+                        }),
+                  ),
                 ],
               ),
             );
@@ -659,7 +673,6 @@ class _PaymentScreenState extends State<PaymentScreen> {
 
   Widget _buttonPaymentSuggestion(
       {String text, Function onTap, BuildContext context}) {
-    final screenWidth = MediaQuery.of(context).size.width;
     return Expanded(
       child: Padding(
         padding: const EdgeInsets.all(5.0),
@@ -671,7 +684,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
               color: Colors.grey[300],
               borderRadius: BorderRadius.circular(10),
             ),
-            child: Text(
+            child: AutoSizeText(
               text,
               style: TextStyle(fontSize: 17),
             ),
@@ -682,6 +695,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
   }
 
   Widget _keypadCard(String title, Function onTap) {
+    var deviceScreenType = getDeviceType(MediaQuery.of(context).size);
     return GestureDetector(
       onTap: onTap,
       child: Container(
@@ -691,9 +705,8 @@ class _PaymentScreenState extends State<PaymentScreen> {
           borderRadius: BorderRadius.circular(10),
           color: Colors.grey[400],
         ),
-        width: 150,
-        height: 80,
-        child: Text(title,
+        width: deviceScreenType == DeviceScreenType.tablet ? 120 : 85,
+        child: AutoSizeText(title,
             style: TextStyle(
               fontSize: 18,
               fontWeight: FontWeight.bold,

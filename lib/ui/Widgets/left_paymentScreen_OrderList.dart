@@ -1,6 +1,8 @@
+import 'package:auto_size_text/auto_size_text.dart';
 import 'package:connectivity/connectivity.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:responsive_builder/responsive_builder.dart';
 import 'package:urawai_pos/core/Models/orderList.dart';
 import 'package:urawai_pos/core/Models/transaction.dart';
 import 'package:urawai_pos/core/Provider/orderList_provider.dart';
@@ -39,6 +41,8 @@ class _PaymentScreenLeftOrderListState
   Widget build(BuildContext context) {
     final orderListProvider =
         Provider.of<OrderListProvider>(context, listen: false);
+    DeviceScreenType deviceScreenType =
+        getDeviceType(MediaQuery.of(context).size);
 
     return Expanded(
         child: Container(
@@ -75,27 +79,35 @@ class _PaymentScreenLeftOrderListState
                     },
                     child: Container(
                       alignment: Alignment.center,
-                      width: 120,
+                      width: deviceScreenType == DeviceScreenType.tablet
+                          ? 120
+                          : 50,
                       height: 40,
                       color: Colors.blue,
-                      child: Row(
-                        children: <Widget>[
-                          Icon(
-                            Icons.arrow_back,
-                            size: 25,
-                            color: Colors.white,
-                          ),
-                          SizedBox(width: 8),
-                          Text(
-                            'Kembali',
-                            style: TextStyle(
-                              fontSize: 18,
+                      child: deviceScreenType == DeviceScreenType.tablet
+                          ? Row(
+                              children: <Widget>[
+                                Icon(
+                                  Icons.arrow_back,
+                                  size: 25,
+                                  color: Colors.white,
+                                ),
+                                SizedBox(width: 8),
+                                Text(
+                                  'Kembali',
+                                  style: TextStyle(
+                                    fontSize: 18,
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ],
+                            )
+                          : Icon(
+                              Icons.arrow_back,
+                              size: 25,
                               color: Colors.white,
-                              fontWeight: FontWeight.bold,
                             ),
-                          ),
-                        ],
-                      ),
                     ),
                   ),
                 ],
@@ -184,7 +196,7 @@ class _PaymentScreenLeftOrderListState
                             color: Colors.red,
                             border: Border.all(color: Colors.grey),
                           ),
-                          child: Text('Void Traksaksi',
+                          child: AutoSizeText('Void Traksaksi',
                               style: TextStyle(
                                 fontSize: 25,
                                 color: Colors.white,

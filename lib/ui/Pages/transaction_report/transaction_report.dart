@@ -57,7 +57,7 @@ class TransactionReport extends StatelessWidget {
                     child: DrawerMenu(currentUser),
                   ),
                   body: Padding(
-                    padding: const EdgeInsets.all(10.0),
+                    padding: const EdgeInsets.all(8.0),
                     child: Container(
                       child: Column(
                         children: <Widget>[
@@ -133,70 +133,72 @@ class TransactionReport extends StatelessWidget {
                               )
                             ],
                           ),
-                          SizedBox(height: 20),
-                          Consumer<GeneralProvider>(
-                            builder: (context, value, _) =>
-                                FutureBuilder<List<TransactionOrder>>(
-                                    future: value.selectedDate.isEmpty
-                                        ? _firestoreServices
-                                            .getAllDocumentsWithoutVOID(
-                                                currentUser.shopName)
-                                        : _firestoreServices.getDocumentByDate(
-                                            currentUser.shopName,
-                                            value.selectedDate,
-                                            includeVoid: false,
-                                          ),
-                                    builder: (context, snapshot) {
-                                      if (snapshot.hasError)
-                                        return Text(
-                                          'An Error has Occured ${snapshot.error}',
-                                          style: kProductNameBigScreenTextStyle,
-                                        );
+                          Expanded(
+                            child: Consumer<GeneralProvider>(
+                              builder: (context, value, _) => FutureBuilder<
+                                      List<TransactionOrder>>(
+                                  future: value.selectedDate.isEmpty
+                                      ? _firestoreServices
+                                          .getAllDocumentsWithoutVOID(
+                                              currentUser.shopName)
+                                      : _firestoreServices.getDocumentByDate(
+                                          currentUser.shopName,
+                                          value.selectedDate,
+                                          includeVoid: false,
+                                        ),
+                                  builder: (context, snapshot) {
+                                    if (snapshot.hasError)
+                                      return Text(
+                                        'An Error has Occured ${snapshot.error}',
+                                        style: kProductNameBigScreenTextStyle,
+                                      );
 
-                                      if (snapshot.connectionState ==
-                                              ConnectionState.waiting ||
-                                          !snapshot.hasData)
-                                        return CircularProgressIndicator();
+                                    if (snapshot.connectionState ==
+                                            ConnectionState.waiting ||
+                                        !snapshot.hasData)
+                                      return CircularProgressIndicator();
 
-                                      return Row(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.spaceAround,
-                                        children: <Widget>[
-                                          _headerCard(
-                                            'Total Penjualan',
-                                            Colors.lightGreen,
-                                            _getBruto(snapshot),
-                                          ),
-                                          FutureBuilder<String>(
-                                            future: _getNetto(snapshot),
-                                            builder: (_, dataSnapshot) {
-                                              if (!dataSnapshot.hasData)
-                                                return _headerCard(
-                                                    'Total Keuntungan',
-                                                    Colors.amber,
-                                                    'Loading...');
+                                    return Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceAround,
+                                      children: <Widget>[
+                                        _headerCard(
+                                          'Total Penjualan',
+                                          Colors.lightGreen,
+                                          _getBruto(snapshot),
+                                        ),
+                                        FutureBuilder<String>(
+                                          future: _getNetto(snapshot),
+                                          builder: (_, dataSnapshot) {
+                                            if (!dataSnapshot.hasData)
                                               return _headerCard(
                                                   'Total Keuntungan',
                                                   Colors.amber,
-                                                  dataSnapshot.data);
-                                            },
-                                          ),
-                                          _headerCard(
-                                            'Total Transaksi',
-                                            Colors.blue,
-                                            snapshot.data.length.toString(),
-                                          ),
-                                          _headerCard(
-                                            'Rata-Rata Nilai Transaksi',
-                                            Colors.red,
-                                            _getAverage(snapshot),
-                                          ),
-                                        ],
-                                      );
-                                    }),
+                                                  'Loading...');
+                                            return _headerCard(
+                                                'Total Keuntungan',
+                                                Colors.amber,
+                                                dataSnapshot.data);
+                                          },
+                                        ),
+                                        _headerCard(
+                                          'Total Transaksi',
+                                          Colors.blue,
+                                          snapshot.data.length.toString(),
+                                        ),
+                                        _headerCard(
+                                          'Rata-Rata Transaksi',
+                                          Colors.red,
+                                          _getAverage(snapshot),
+                                        ),
+                                      ],
+                                    );
+                                  }),
+                            ),
                           ),
-                          SizedBox(height: 20),
+                          SizedBox(height: 8),
                           Expanded(
+                            flex: 2,
                             child: Row(
                               children: <Widget>[
                                 Expanded(
@@ -472,44 +474,46 @@ class TransactionReport extends StatelessWidget {
   }
 
   Widget _headerCard(String title, Color color, String value) {
-    return Container(
-      width: 230,
-      height: 150,
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(10),
-        border: Border.all(color: Colors.grey),
-      ),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: <Widget>[
-          Padding(
-            padding: const EdgeInsets.all(10.0),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: <Widget>[
-                Text(
-                  title,
-                  style: kPriceTextStyle,
-                ),
-                SizedBox(height: 10),
-                Text(
-                  value,
-                  style: kProductNameBigScreenTextStyle,
-                ),
-              ],
+    return Expanded(
+      child: Container(
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(10),
+          border: Border.all(color: Colors.grey),
+        ),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: <Widget>[
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: <Widget>[
+                  Container(
+                    child: Text(
+                      title,
+                      style: kPriceTextStyle,
+                    ),
+                  ),
+                  SizedBox(height: 5),
+                  Text(
+                    value,
+                    style: kGrandTotalTextStyle,
+                  ),
+                ],
+              ),
             ),
-          ),
-          Container(
-            height: 20,
-            decoration: BoxDecoration(
-              color: color,
-              borderRadius: BorderRadius.only(
-                  bottomLeft: Radius.circular(10),
-                  bottomRight: Radius.circular(10)),
-            ),
-          )
-        ],
+            Container(
+              height: 20,
+              decoration: BoxDecoration(
+                color: color,
+                borderRadius: BorderRadius.only(
+                    bottomLeft: Radius.circular(10),
+                    bottomRight: Radius.circular(10)),
+              ),
+            )
+          ],
+        ),
       ),
     );
   }

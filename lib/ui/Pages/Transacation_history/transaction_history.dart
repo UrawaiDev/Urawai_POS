@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
+import 'package:responsive_builder/responsive_builder.dart';
 import 'package:urawai_pos/core/Models/transaction.dart';
 import 'package:urawai_pos/core/Models/users.dart';
 import 'package:urawai_pos/core/Provider/general_provider.dart';
@@ -22,10 +23,16 @@ class TransactionHistoryPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    var deviceScreenType = getDeviceType(MediaQuery.of(context).size);
     final generalProvider =
         Provider.of<GeneralProvider>(context, listen: false);
     final firebaseUser = Provider.of<FirebaseUser>(context);
     bool isLogin = firebaseUser != null;
+
+    TextStyle contentTextStyle = TextStyle(
+      fontSize: deviceScreenType == DeviceScreenType.tablet ? 17 : 14,
+      color: priceColor,
+    );
 
     return SafeArea(
         child: FutureBuilder<Users>(
@@ -158,7 +165,7 @@ class TransactionHistoryPage extends StatelessWidget {
                                       child: Row(
                                         children: <Widget>[
                                           Text(
-                                            'Jumlah List:',
+                                            'Jumlah Transaksi:',
                                             style:
                                                 kProductNameSmallScreenTextStyle,
                                           ),
@@ -253,7 +260,8 @@ class TransactionHistoryPage extends StatelessWidget {
                                           crossAxisCount: 4,
                                           children: snapshot.data
                                               .map((data) =>
-                                                  _buildCardFromFirestore(data))
+                                                  _buildCardFromFirestore(
+                                                      data, contentTextStyle))
                                               .toList(),
                                         ),
                                       );
@@ -272,7 +280,8 @@ class TransactionHistoryPage extends StatelessWidget {
             }));
   }
 
-  Container _buildCardFromFirestore(TransactionOrder item) {
+  Widget _buildCardFromFirestore(
+      TransactionOrder item, TextStyle contentTextStyle) {
     return Container(
       margin: EdgeInsets.symmetric(horizontal: 5, vertical: 10),
       decoration: BoxDecoration(
@@ -283,7 +292,7 @@ class TransactionHistoryPage extends StatelessWidget {
       child: Padding(
         padding: const EdgeInsets.symmetric(
           horizontal: 8.0,
-          vertical: 10,
+          vertical: 5,
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -294,11 +303,12 @@ class TransactionHistoryPage extends StatelessWidget {
               children: <Widget>[
                 Text(
                   'Order ID:',
-                  style: kPriceTextStyle,
+                  // style: kPriceTextStyle,
+                  style: contentTextStyle,
                 ),
                 Text(
                   item.id,
-                  style: kPriceTextStyle,
+                  style: contentTextStyle,
                 ),
               ],
             ),
@@ -307,11 +317,11 @@ class TransactionHistoryPage extends StatelessWidget {
               children: <Widget>[
                 Text(
                   'Waktu:',
-                  style: kPriceTextStyle,
+                  style: contentTextStyle,
                 ),
                 Text(
                   Formatter.dateFormat(item.date),
-                  style: kPriceTextStyle,
+                  style: contentTextStyle,
                 ),
               ],
             ),
@@ -320,11 +330,11 @@ class TransactionHistoryPage extends StatelessWidget {
               children: <Widget>[
                 Text(
                   'Status:',
-                  style: kPriceTextStyle,
+                  style: contentTextStyle,
                 ),
                 Text(
                   PaymentHelper.getPaymentStatus(item.paymentStatus),
-                  style: kPriceTextStyle,
+                  style: contentTextStyle,
                 ),
               ],
             ),
@@ -338,16 +348,16 @@ class TransactionHistoryPage extends StatelessWidget {
             ),
             Text(
               'Nama Kasir:',
-              style: kPriceTextStyle,
+              style: contentTextStyle,
             ),
             Text(
               item.cashierName ?? '[null]',
-              style: kPriceTextStyle,
+              style: contentTextStyle,
             ),
             SizedBox(height: 5),
             Text(
               'Transaksi:',
-              style: kPriceTextStyle,
+              style: contentTextStyle,
             ),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -363,7 +373,7 @@ class TransactionHistoryPage extends StatelessWidget {
                         child: Icon(
                           Icons.info,
                           color: Colors.blue,
-                          size: 25,
+                          size: 23,
                         ),
                         onTap: () => Navigator.pushNamed(
                           context,
