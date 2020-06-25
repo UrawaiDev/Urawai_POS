@@ -52,6 +52,18 @@ dependencies:
   #responsive ui
   responsive_builder: ^0.2.0+2
 
+  #auto Text
+  auto_size_text: ^2.1.0
+
+  device_preview: ^0.4.5
+
+  #Animation Floating button for Mobile UI
+  animated_floatactionbuttons: ^0.1.0
+
+  #validator Number
+  validators: ^2.0.0+1
+
+
 dev_dependencies:
   flutter_test:
     sdk: flutter
