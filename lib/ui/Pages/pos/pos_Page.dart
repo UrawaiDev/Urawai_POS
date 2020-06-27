@@ -843,6 +843,8 @@ class _POSPageState extends State<POSPage> with SingleTickerProviderStateMixin {
                           itemCount: boxOrder.length,
                           itemBuilder: (context, index) {
                             var item = boxOrder.getAt(index) as PostedOrder;
+                            int totalOrderlist = item.orderList.fold(
+                                0, (prev, current) => prev + current.quantity);
                             return ListTile(
                               contentPadding: EdgeInsets.all(8),
                               leading: CircleAvatar(
@@ -853,8 +855,7 @@ class _POSPageState extends State<POSPage> with SingleTickerProviderStateMixin {
                               subtitle: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: <Widget>[
-                                  Text(
-                                      'Jumlah Pesanan : ${item.orderList.length}',
+                                  Text('Jumlah Pesanan : $totalOrderlist',
                                       style: TextStyle(fontSize: 22)),
                                   Text(
                                       'Total Bayar ' +

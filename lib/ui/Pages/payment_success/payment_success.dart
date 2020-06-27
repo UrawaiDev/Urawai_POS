@@ -291,8 +291,10 @@ class _PaymentSuccessState extends State<PaymentSuccess> {
                                     stream: bluetoothManager.state,
                                     builder: (context, snapshot) {
                                       if (snapshot.hasError)
-                                        return Text(snapshot.error.toString(),
-                                            style: kPriceTextStyle);
+                                        return Flexible(
+                                          child: Text(snapshot.error.toString(),
+                                              style: kPriceTextStyle),
+                                        );
                                       if (!snapshot.hasData ||
                                           snapshot.connectionState ==
                                               ConnectionState.waiting)
