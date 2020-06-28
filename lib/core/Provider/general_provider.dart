@@ -6,10 +6,17 @@ class GeneralProvider with ChangeNotifier {
   bool _isLoading = false;
   List<DateTime> _selectedDate = List<DateTime>();
   PaymentType _paymentType = PaymentType.CASH;
+  PaymentStatus _paymentStatus = PaymentStatus.PENDING;
 
   PaymentType get paymentType => _paymentType;
   set paymentType(PaymentType newValue) {
     _paymentType = newValue;
+    notifyListeners();
+  }
+
+  PaymentStatus get paymentStatus => _paymentStatus;
+  set paymentStatus(PaymentStatus newValue) {
+    _paymentStatus = newValue;
     notifyListeners();
   }
 

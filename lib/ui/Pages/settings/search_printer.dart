@@ -44,25 +44,6 @@ class _SearchPrinterPageState extends State<SearchPrinterPage> {
       appBar: AppBar(
         title: Text('Pengaturan Bluetooth Printer'),
         actions: <Widget>[
-          // StreamBuilder<int>(
-          //     stream: _bluetoothManager.state,
-          //     builder: (context, snapshot) {
-          //       if (snapshot.hasError)
-          //         return Icon(
-          //           Icons.error,
-          //           color: Colors.red,
-          //         );
-          //       if (!snapshot.hasData ||
-          //           snapshot.connectionState == ConnectionState.waiting)
-          //         return CircularProgressIndicator();
-
-          //       connectionStatus = snapshot.data;
-
-          //       if (connectionStatus == BLUETOOTH_DISCONNECTED)
-          //         return Icon(Icons.bluetooth_disabled);
-          //       else
-          //         return Icon(Icons.bluetooth_connected);
-          //     }),
           IconButton(
             icon: Icon(Icons.print),
             onPressed: () async {
@@ -123,7 +104,7 @@ class _SearchPrinterPageState extends State<SearchPrinterPage> {
                         subtitle: Text(_devices[index].address),
                         trailing: RaisedButton(
                             child: Text(
-                              'Connect',
+                              'Set',
                               style: TextStyle(fontSize: 15),
                             ),
                             onPressed: () async {
@@ -141,8 +122,8 @@ class _SearchPrinterPageState extends State<SearchPrinterPage> {
                                 title: 'Informasi',
                                 contentText:
                                     'Printer telah di Set. \nNama Printer: ${_devices[index].name} \nSilahkan Tekan Icon Printer untuk Test Printer.',
-                                icon: Icons.info,
-                                iconColor: Colors.blue,
+                                icon: Icons.check_box,
+                                iconColor: Colors.green,
                                 onTap: () => Navigator.pop(context),
                               );
                             }),

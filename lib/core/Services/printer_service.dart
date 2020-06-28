@@ -56,6 +56,7 @@ class PrinterService {
     @required List<OrderList> itemList,
     @required double pembayaran,
     @required double kembali,
+    @required String paymentStatus,
   }) async {
     String _cashierName;
     DateTime _orderDate;
@@ -87,14 +88,14 @@ class PrinterService {
         ),
         linesAfter: 1);
 
-    //* ALAMAT TOKO
-    ticket.text('Griya Jasmine Rawageni',
-        styles: PosStyles(align: PosAlign.center));
-    ticket.text('Kp. Rawageni No. 5',
-        styles: PosStyles(align: PosAlign.center));
-    ticket.text('Depok, Jawa Barat', styles: PosStyles(align: PosAlign.center));
-    ticket.text('Web: www.warungmakyos.com',
-        styles: PosStyles(align: PosAlign.center), linesAfter: 1);
+    // //* ALAMAT TOKO
+    // ticket.text('Jl. Pinggir kali',
+    //     styles: PosStyles(align: PosAlign.center));
+    // ticket.text('Kp. Kali asin No. 5',
+    //     styles: PosStyles(align: PosAlign.center));
+    // ticket.text('Depok, Jawa Barat', styles: PosStyles(align: PosAlign.center));
+    // ticket.text('Web: www.warungmakyos.com',
+    //     styles: PosStyles(align: PosAlign.center), linesAfter: 1);
 
     ticket.hr();
 
@@ -167,6 +168,17 @@ class PrinterService {
           styles: PosStyles(align: PosAlign.right, width: PosTextSize.size1)),
     ]);
 
+    ticket.row([
+      PosColumn(
+          text: 'Keterangan',
+          width: 4,
+          styles: PosStyles(align: PosAlign.right, width: PosTextSize.size1)),
+      PosColumn(
+          text: '$paymentStatus',
+          width: 8,
+          styles: PosStyles(align: PosAlign.right, width: PosTextSize.size1)),
+    ]);
+
     ticket.feed(2);
     ticket.text('Terima Kasih.',
         styles: PosStyles(align: PosAlign.center, bold: true));
@@ -194,6 +206,7 @@ class PrinterService {
     @required PrinterBluetooth printer,
     @required DocumentSnapshot documents,
     @required String shopName,
+    @required String paymentStatus,
   }) async {
     PrinterBluetoothManager _printerBluetoothManager =
         PrinterBluetoothManager();
@@ -211,14 +224,14 @@ class PrinterService {
         ),
         linesAfter: 1);
 
-    //* ALAMAT TOKO
-    ticket.text('Griya Jasmine Rawageni',
-        styles: PosStyles(align: PosAlign.center));
-    ticket.text('Kp. Rawageni No. 5',
-        styles: PosStyles(align: PosAlign.center));
-    ticket.text('Depok, Jawa Barat', styles: PosStyles(align: PosAlign.center));
-    ticket.text('Web: www.warungmakyos.com',
-        styles: PosStyles(align: PosAlign.center), linesAfter: 1);
+    // //* ALAMAT TOKO
+    // ticket.text('Jl. Pinggir kali',
+    //     styles: PosStyles(align: PosAlign.center));
+    // ticket.text('Kp. Kali asin No. 5',
+    //     styles: PosStyles(align: PosAlign.center));
+    // ticket.text('Depok, Jawa Barat', styles: PosStyles(align: PosAlign.center));
+    // ticket.text('Web: www.warungmakyos.com',
+    //     styles: PosStyles(align: PosAlign.center), linesAfter: 1);
 
     ticket.hr();
 
@@ -287,6 +300,17 @@ class PrinterService {
           styles: PosStyles(align: PosAlign.right, width: PosTextSize.size1)),
       PosColumn(
           text: '\Rp. ${documents.data['change']}',
+          width: 8,
+          styles: PosStyles(align: PosAlign.right, width: PosTextSize.size1)),
+    ]);
+
+    ticket.row([
+      PosColumn(
+          text: 'Keterangan',
+          width: 4,
+          styles: PosStyles(align: PosAlign.right, width: PosTextSize.size1)),
+      PosColumn(
+          text: '$paymentStatus',
           width: 8,
           styles: PosStyles(align: PosAlign.right, width: PosTextSize.size1)),
     ]);

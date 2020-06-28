@@ -16,6 +16,7 @@ import 'package:urawai_pos/ui/Widgets/costum_button.dart';
 import 'package:urawai_pos/ui/Widgets/footer_OrderList.dart';
 import 'package:urawai_pos/ui/utils/constans/formatter.dart';
 import 'package:urawai_pos/ui/utils/constans/utils.dart';
+import 'package:urawai_pos/ui/utils/functions/paymentHelpers.dart';
 
 class PaymentSuccess extends StatefulWidget {
   final List<dynamic> itemList;
@@ -23,6 +24,7 @@ class PaymentSuccess extends StatefulWidget {
   final double kembali;
   final dynamic state;
   final PaymentType paymentType;
+  final PaymentStatus paymentStatus;
 
   PaymentSuccess({
     @required this.itemList,
@@ -30,6 +32,7 @@ class PaymentSuccess extends StatefulWidget {
     @required this.pembayaran,
     @required this.kembali,
     @required this.state,
+    @required this.paymentStatus,
   });
 
   @override
@@ -373,6 +376,8 @@ class _PaymentSuccessState extends State<PaymentSuccess> {
         itemList: widget.itemList,
         pembayaran: widget.pembayaran,
         kembali: widget.kembali,
+        paymentStatus: PaymentHelper.getPaymentStatusAsString(
+            widget.paymentStatus.toString()),
       );
     } else {
       CostumDialogBox.showDialogInformation(

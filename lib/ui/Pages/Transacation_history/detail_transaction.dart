@@ -266,10 +266,13 @@ class _DetailTransactionPageState extends State<DetailTransactionPage> {
     if (printer.name != null &&
         bluetoothStatus != BLUETOOTH_DISCONNECTED &&
         _shopName != null) {
+      print(documentSnapshot.data['paymentStatus'].toString());
       var result = PrinterService.printStruckDetailTransaction(
         printer: PrinterBluetooth(printer),
         documents: documentSnapshot,
         shopName: _shopName,
+        paymentStatus: PaymentHelper.getPaymentStatusAsString(
+            documentSnapshot.data['paymentStatus'].toString()),
       );
       return result;
     } else {

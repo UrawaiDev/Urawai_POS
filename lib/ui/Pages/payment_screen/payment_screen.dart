@@ -15,7 +15,6 @@ import 'package:urawai_pos/core/Provider/transactionOrder_provider.dart';
 import 'package:urawai_pos/core/Services/connectivity_service.dart';
 import 'package:urawai_pos/core/Services/firebase_auth.dart';
 import 'package:urawai_pos/ui/Pages/pos/pos_Page.dart';
-import 'package:urawai_pos/ui/Widgets/connection_status.dart';
 import 'package:urawai_pos/ui/Widgets/costum_DialogBox.dart';
 import 'package:urawai_pos/ui/Widgets/left_paymentScreen_OrderList.dart';
 import 'package:urawai_pos/ui/Widgets/left_paymentScreen_postedOrder.dart';
@@ -583,6 +582,12 @@ class _PaymentScreenState extends State<PaymentScreen> {
                                   'Pembayaran telah dilakukan dan Cetak Kwitansi, Lanjutkan?',
                               confirmButtonTitle: 'Proses',
                               onConfirmPressed: () async {
+                                final generalProvider =
+                                    Provider.of<GeneralProvider>(context,
+                                        listen: false);
+                                generalProvider.paymentStatus =
+                                    PaymentStatus.COMPLETED;
+
                                 final transactionProvider =
                                     Provider.of<TransactionOrderProvider>(
                                         context,
@@ -600,14 +605,16 @@ class _PaymentScreenState extends State<PaymentScreen> {
                                           listen: false)
                                       .addTransactionOrder(
                                     stateProvider: state,
-                                    paymentStatus: PaymentStatus.COMPLETED,
+                                    paymentStatus:
+                                        generalProvider.paymentStatus,
                                     paymentType: PaymentType.CASH,
                                   );
                                 } else {
                                   // add to Firestore DB when Online
                                   transactionProvider.addTransactionToFirestore(
                                       stateProvider: state,
-                                      paymentStatus: PaymentStatus.COMPLETED,
+                                      paymentStatus:
+                                          generalProvider.paymentStatus,
                                       paymentType: PaymentType.CASH,
                                       shopName: currentUser.shopName);
                                 }

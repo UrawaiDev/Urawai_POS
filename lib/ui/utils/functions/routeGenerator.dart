@@ -90,6 +90,7 @@ class RouteGenerator {
               pembayaran: args.finalPayment,
               kembali: args.finalPayment - args.grandTotal,
               paymentType: generalProvider.paymentType,
+              paymentStatus: generalProvider.paymentStatus,
             );
           } else if (args is OrderListProvider) {
             return PaymentSuccess(
@@ -98,6 +99,7 @@ class RouteGenerator {
               pembayaran: args.finalPayment,
               kembali: args.finalPayment - args.grandTotal,
               paymentType: generalProvider.paymentType,
+              paymentStatus: generalProvider.paymentStatus,
             );
           }
           return _onErrorRoute();
