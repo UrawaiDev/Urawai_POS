@@ -266,123 +266,98 @@ class _POSPageState extends State<POSPage> with SingleTickerProviderStateMixin {
                             flex: 2,
                             child: Padding(
                               padding: const EdgeInsets.only(left: 0, right: 0),
-                              child: SingleChildScrollView(
-                                child: Container(
-                                    color: Colors.white,
-                                    // width: MediaQuery.of(context).size.width * 0.6,
-                                    child: Column(
-                                      children: <Widget>[
-                                        Consumer<GeneralProvider>(
-                                          builder: (context, generalState, _) =>
-                                              Row(
-                                            children: <Widget>[
-                                              //drawer Menue
-                                              generalState.isDrawerShow
-                                                  ? listMenu(screenHeight)
-                                                  : Container(),
+                              child: Column(
+                                children: <Widget>[
+                                  Consumer<GeneralProvider>(
+                                    builder: (context, generalState, _) =>
+                                        Expanded(
+                                            flex: 1,
+                                            child: Container(
+                                              padding: EdgeInsets.all(10),
+                                              color: Color(0xFFfbfcfe),
+                                              height: screenHeight - 120,
+                                              child: FutureBuilder<
+                                                      List<Product>>(
+                                                  future: _textQuery
+                                                              .text.isEmpty ||
+                                                          _textQuery
+                                                                  .text.length <
+                                                              3
+                                                      ? _getProduct
+                                                      : _firestoreServices
+                                                          .getDocumentByProductName(
+                                                              currentUser
+                                                                  .shopName,
+                                                              _textQuery.text),
+                                                  builder: (context, snapshot) {
+                                                    if (snapshot.hasError)
+                                                      return Center(
+                                                        child: Text(
+                                                          'An Error has Occured ${snapshot.error}',
+                                                          style:
+                                                              kErrorTextStyle,
+                                                        ),
+                                                      );
 
-                                              //menu content
-                                              Expanded(
-                                                  flex: 2,
-                                                  child: Container(
-                                                    padding: EdgeInsets.all(10),
-                                                    color: Color(0xFFfbfcfe),
-                                                    // color: Colors.yellow,
-                                                    height: screenHeight - 120,
-                                                    child: FutureBuilder<
-                                                            List<Product>>(
-                                                        future: _textQuery.text
-                                                                    .isEmpty ||
-                                                                _textQuery
-                                                                        .text.length <
-                                                                    3
-                                                            ? _getProduct
-                                                            : _firestoreServices
-                                                                .getDocumentByProductName(
-                                                                    currentUser
-                                                                        .shopName,
-                                                                    _textQuery
-                                                                        .text),
-                                                        builder: (context,
-                                                            snapshot) {
-                                                          if (snapshot.hasError)
-                                                            return Center(
-                                                              child: Text(
-                                                                'An Error has Occured ${snapshot.error}',
-                                                                style:
-                                                                    kErrorTextStyle,
-                                                              ),
-                                                            );
+                                                    if (!snapshot.hasData ||
+                                                        snapshot.connectionState ==
+                                                            ConnectionState
+                                                                .waiting)
+                                                      return _shimmerLoading(
+                                                          generalState
+                                                              .isDrawerShow);
 
-                                                          if (!snapshot
-                                                                  .hasData ||
-                                                              snapshot.connectionState ==
-                                                                  ConnectionState
-                                                                      .waiting)
-                                                            return _shimmerLoading(
-                                                                generalState
-                                                                    .isDrawerShow);
+                                                    if (snapshot.data.isEmpty)
+                                                      return Container(
+                                                          alignment:
+                                                              Alignment.center,
+                                                          child: Center(
+                                                            child: Column(
+                                                              mainAxisAlignment:
+                                                                  MainAxisAlignment
+                                                                      .center,
+                                                              children: <
+                                                                  Widget>[
+                                                                Text(
+                                                                  'Belum Ada Produk.',
+                                                                  style:
+                                                                      kProductNameBigScreenTextStyle,
+                                                                ),
+                                                                SizedBox(
+                                                                    height: 30),
+                                                                CostumButton.squareButtonSmall(
+                                                                    'Tambah Produk',
+                                                                    onTap: () {
+                                                                  Navigator.pushNamed(
+                                                                      context,
+                                                                      RouteGenerator
+                                                                          .kRouteAddProductPage);
+                                                                },
+                                                                    prefixIcon:
+                                                                        Icons
+                                                                            .add),
+                                                              ],
+                                                            ),
+                                                          ));
 
-                                                          if (snapshot
-                                                              .data.isEmpty)
-                                                            return Container(
-                                                                alignment:
-                                                                    Alignment
-                                                                        .center,
-                                                                child: Center(
-                                                                  child: Column(
-                                                                    mainAxisAlignment:
-                                                                        MainAxisAlignment
-                                                                            .center,
-                                                                    children: <
-                                                                        Widget>[
-                                                                      Text(
-                                                                        'Belum Ada Produk.',
-                                                                        style:
-                                                                            kProductNameBigScreenTextStyle,
-                                                                      ),
-                                                                      SizedBox(
-                                                                          height:
-                                                                              30),
-                                                                      CostumButton.squareButtonSmall(
-                                                                          'Tambah Produk',
-                                                                          onTap:
-                                                                              () {
-                                                                        Navigator.pushNamed(
-                                                                            context,
-                                                                            RouteGenerator.kRouteAddProductPage);
-                                                                      },
-                                                                          prefixIcon:
-                                                                              Icons.add),
-                                                                    ],
-                                                                  ),
-                                                                ));
-
-                                                          return GridView.count(
-                                                            crossAxisCount:
-                                                                generalState
-                                                                        .isDrawerShow
-                                                                    ? 2
-                                                                    : 3,
-                                                            crossAxisSpacing:
-                                                                10,
-                                                            mainAxisSpacing: 10,
-                                                            children: snapshot
-                                                                .data
-                                                                .map((product) =>
-                                                                    _cardMenu(
-                                                                        product))
-                                                                .toList(),
-                                                          );
-                                                        }),
-                                                  )),
-
-                                              //menu in GridView
-                                            ],
-                                          ),
-                                        ),
-                                      ],
-                                    )),
+                                                    return GridView.count(
+                                                      crossAxisCount:
+                                                          generalState
+                                                                  .isDrawerShow
+                                                              ? 2
+                                                              : 3,
+                                                      crossAxisSpacing: 10,
+                                                      mainAxisSpacing: 10,
+                                                      children: snapshot.data
+                                                          .map((product) =>
+                                                              _cardMenu(
+                                                                  product))
+                                                          .toList(),
+                                                    );
+                                                  }),
+                                            )),
+                                  ),
+                                ],
                               ),
                             )),
                         //RIGHT SIDE MENU ORDER LIST
@@ -1102,225 +1077,6 @@ class _POSPageState extends State<POSPage> with SingleTickerProviderStateMixin {
         ),
       ),
       onTap: onTap,
-    );
-  }
-
-  Widget listMenu(double screenHeight) {
-    return Expanded(
-      child: Padding(
-        padding: const EdgeInsets.only(left: 8.0),
-        child: Container(
-          color: Colors.white,
-          height: screenHeight - 120,
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            children: <Widget>[
-              Container(
-                color: Color(0xFFebf2fd),
-                child: ListTile(
-                  leading: Icon(Icons.home),
-                  title: (Text(
-                    'Beranda',
-                    style: kMainMenuStyle,
-                  )),
-                  selected: true,
-                  onTap: () {},
-                ),
-              ),
-              ListTile(
-                  leading: FaIcon(FontAwesomeIcons.cashRegister),
-                  title: (Text(
-                    'Transaksi',
-                    style: kMainMenuStyle,
-                  ))),
-              ListTile(
-                leading: FaIcon(FontAwesomeIcons.clipboardList),
-                title: (Text(
-                  'Riwayat Transaksi',
-                  style: kMainMenuStyle,
-                )),
-                onTap: () => Navigator.pushNamed(
-                    context, RouteGenerator.kRouteTransactionHistory),
-              ),
-              ListTile(
-                leading: FaIcon(FontAwesomeIcons.book),
-                title: (Text(
-                  'Laporan',
-                  style: kMainMenuStyle,
-                )),
-                onTap: () => Navigator.pushNamed(
-                    context, RouteGenerator.kRouteTransactionReport),
-              ),
-              ExpansionTile(
-                title: Text(
-                  'Produk',
-                  style: kPriceTextStyle,
-                ),
-                leading: FaIcon(FontAwesomeIcons.instagram),
-                children: <Widget>[
-                  ListTile(
-                    leading: FaIcon(FontAwesomeIcons.cog),
-                    title: (Text(
-                      'Tambah Produk',
-                      style: kMainMenuStyle,
-                    )),
-                    onTap: () {
-                      Navigator.pop(context);
-                      Navigator.pushNamed(
-                          context, RouteGenerator.kRouteAddProductPage);
-                    },
-                  ),
-                  ListTile(
-                    leading: FaIcon(FontAwesomeIcons.instagram),
-                    title: (Text(
-                      'List Produk',
-                      style: kMainMenuStyle,
-                    )),
-                    onTap: () {
-                      Navigator.pop(context);
-                      Navigator.pushNamed(
-                          context, RouteGenerator.kRouteProductListPage);
-                    },
-                  ),
-                ],
-              ),
-              ListTile(
-                leading: FaIcon(FontAwesomeIcons.cog),
-                title: (Text(
-                  'Pengaturan',
-                  style: kMainMenuStyle,
-                )),
-                onTap: () => Navigator.pushNamed(
-                    context, RouteGenerator.kRouteSettingsPage),
-              ),
-              ListTile(
-                leading: FaIcon(FontAwesomeIcons.lifeRing),
-                title: (Text('Bantuan', style: kMainMenuStyle)),
-              ),
-              ListTile(
-                leading: FaIcon(FontAwesomeIcons.signOutAlt),
-                title: (Text('Keluar', style: kMainMenuStyle)),
-                onTap: () {
-                  CostumDialogBox.showCostumDialogBox(
-                      context: context,
-                      title: 'Konfirmasi',
-                      icon: FontAwesomeIcons.signOutAlt,
-                      iconColor: Colors.red,
-                      contentString: 'Keluar dari Aplikasi?',
-                      confirmButtonTitle: 'Keluar',
-                      onConfirmPressed: () async {
-                        await _auth.signOut();
-                        Navigator.pushNamedAndRemoveUntil(
-                            context,
-                            RouteGenerator.kRouteGateKeeper,
-                            ModalRoute.withName(
-                                RouteGenerator.kRouteGateKeeper));
-                      });
-                },
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget drawerMenu(double screenHeight) {
-    return Expanded(
-      child: Padding(
-        padding: const EdgeInsets.only(left: 10.0),
-        child: Container(
-          color: Colors.white,
-          height: screenHeight - 120,
-          child: ListView(
-            children: <Widget>[
-              Container(
-                child: Text(
-                  'MAIN DISH',
-                  style: TextStyle(
-                    color: Colors.blue,
-                    fontSize: 25,
-                    fontWeight: FontWeight.w700,
-                  ),
-                ),
-              ),
-              Container(
-                color: Color(0xFFebf2fd),
-                child: ListTile(
-                  leading: Icon(Icons.home),
-                  title: (Text('Bakmie')),
-                  selected: true,
-                  onTap: () {},
-                ),
-              ),
-              ListTile(
-                leading: Icon(Icons.hot_tub),
-                title: (Text('Nasi Goreng')),
-              ),
-              ListTile(
-                leading: Icon(Icons.http),
-                title: (Text('Beef Steak')),
-              ),
-              ListTile(
-                leading: Icon(Icons.import_export),
-                title: (Text('Bakso')),
-              ),
-              Container(
-                child: Text(
-                  'LIGHT BITES',
-                  style: TextStyle(
-                    color: Colors.blue,
-                    fontSize: 25,
-                    fontWeight: FontWeight.w700,
-                  ),
-                ),
-              ),
-              ListTile(
-                leading: Icon(Icons.home),
-                title: (Text('Crispy Chikens')),
-              ),
-              ListTile(
-                leading: Icon(Icons.hot_tub),
-                title: (Text('Roti Bakar')),
-              ),
-              ListTile(
-                leading: Icon(Icons.http),
-                title: (Text('French Fries Original')),
-              ),
-              ListTile(
-                leading: Icon(Icons.import_export),
-                title: (Text('Muffin')),
-              ),
-              Container(
-                child: Text(
-                  'DRINKS',
-                  style: TextStyle(
-                    color: Colors.blue,
-                    fontSize: 25,
-                    fontWeight: FontWeight.w700,
-                  ),
-                ),
-              ),
-              ListTile(
-                leading: Icon(Icons.home),
-                title: (Text('Hot Coffee')),
-              ),
-              ListTile(
-                leading: Icon(Icons.hot_tub),
-                title: (Text('Cappucino Hot/Cold')),
-              ),
-              ListTile(
-                leading: Icon(Icons.http),
-                title: (Text('Kopi Hitam')),
-              ),
-              ListTile(
-                leading: Icon(Icons.import_export),
-                title: (Text('Kopi Arang')),
-              ),
-            ],
-          ),
-        ),
-      ),
     );
   }
 }
