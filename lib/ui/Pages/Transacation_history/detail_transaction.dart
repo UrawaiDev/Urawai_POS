@@ -233,11 +233,12 @@ class _DetailTransactionPageState extends State<DetailTransactionPage> {
                                 SnackBar(content: Text(result.msg)));
                         },
                       ),
-                      SizedBox(height: 20),
-                      CostumButton.squareButtonSmall(
-                        'Kirim Kwitansi',
-                        prefixIcon: Icons.share,
-                      ),
+                      //* Hide For Now
+                      // SizedBox(height: 20),
+                      // CostumButton.squareButtonSmall(
+                      //   'Kirim Kwitansi',
+                      //   prefixIcon: Icons.share,
+                      // ),
                       SizedBox(height: 20),
                       CostumButton.squareButtonSmall(
                         'Kembali',

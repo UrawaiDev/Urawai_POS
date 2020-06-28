@@ -24,7 +24,7 @@ class CostumDialogBox {
                 color: iconColor,
               ),
               SizedBox(width: 10),
-              Text(contentText, style: kDialogTextStyle),
+              Flexible(child: Text(contentText, style: kDialogTextStyle)),
             ],
           ),
           actions: <Widget>[

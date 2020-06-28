@@ -133,10 +133,11 @@ class DrawerMenu extends StatelessWidget {
               ),
             ],
           ),
-          ListTile(
-            leading: FaIcon(FontAwesomeIcons.lifeRing),
-            title: (Text('Bantuan', style: kMainMenuStyle)),
-          ),
+          //* Hide for Now
+          // ListTile(
+          //   leading: FaIcon(FontAwesomeIcons.lifeRing),
+          //   title: (Text('Bantuan', style: kMainMenuStyle)),
+          // ),
           ListTile(
             leading: FaIcon(FontAwesomeIcons.signOutAlt),
             title: (Text('Keluar', style: kMainMenuStyle)),

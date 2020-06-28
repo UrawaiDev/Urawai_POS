@@ -160,7 +160,6 @@ class _POSPageState extends State<POSPage> with SingleTickerProviderStateMixin {
                       FloatingActionButtonLocation.centerFloat,
                   resizeToAvoidBottomPadding: false,
                   appBar: AppBar(
-                    // title: myAppBar(_textQuery, context),
                     title: Row(
                       children: <Widget>[
                         GestureDetector(
@@ -170,20 +169,8 @@ class _POSPageState extends State<POSPage> with SingleTickerProviderStateMixin {
                                 fontSize: 22,
                                 fontWeight: FontWeight.bold,
                               )),
-                          onDoubleTap: () {
-                            CostumDialogBox.showCostumDialogBox(
-                                context: context,
-                                title: 'Konfirmasi',
-                                icon: FontAwesomeIcons.signOutAlt,
-                                iconColor: Colors.red,
-                                contentString: 'Logout dari Akun Anda?',
-                                confirmButtonTitle: 'Keluar',
-                                onConfirmPressed: () async {
-                                  await _auth.signOut();
-                                  Navigator.pushNamed(
-                                      context, RouteGenerator.kRouteLoginPage);
-                                });
-                          },
+                          onDoubleTap: () => _logOut(context),
+                          onLongPress: () => _logOut(context),
                         ),
                         SizedBox(width: 30),
                         Expanded(
@@ -549,6 +536,20 @@ class _POSPageState extends State<POSPage> with SingleTickerProviderStateMixin {
             );
           }),
     );
+  }
+
+  Future<void> _logOut(BuildContext context) async {
+    CostumDialogBox.showCostumDialogBox(
+        context: context,
+        title: 'Konfirmasi',
+        icon: FontAwesomeIcons.signOutAlt,
+        iconColor: Colors.red,
+        contentString: 'Logout dari Akun Anda?',
+        confirmButtonTitle: 'Keluar',
+        onConfirmPressed: () async {
+          await _auth.signOut();
+          Navigator.pushNamed(context, RouteGenerator.kRouteLoginPage);
+        });
   }
 
   void _onSaveTap(OrderListProvider orderlistState) {
@@ -1322,60 +1323,4 @@ class _POSPageState extends State<POSPage> with SingleTickerProviderStateMixin {
       ),
     );
   }
-}
-
-Widget myAppBar(TextEditingController textController, BuildContext context) {
-  return Padding(
-    padding: const EdgeInsets.all(5),
-    child: Container(
-      // height: 50,
-      child: Row(
-        // mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: <Widget>[
-          Row(
-            children: <Widget>[
-              Text('Urawai POS',
-                  style: TextStyle(fontSize: 25, fontWeight: FontWeight.bold)),
-            ],
-          ),
-          SizedBox(width: 30),
-          Container(
-            width: MediaQuery.of(context).size.width * 0.35,
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(10),
-              color: Color(0xFFf0f5f6),
-            ),
-            child: Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: TextField(
-                controller: textController,
-                style: kPriceTextStyle,
-                decoration: InputDecoration(
-                  border: InputBorder.none,
-                  hintText: 'Cari menu, Makanan , dll',
-                  hintStyle: kPriceTextStyle,
-                  suffixIcon: textController.text.isEmpty
-                      ? IconButton(
-                          icon: Icon(Icons.search),
-                          onPressed: () {
-                            FocusScope.of(context)
-                                .requestFocus(new FocusNode());
-                            // state.isDrawerShow = false;
-                          },
-                        )
-                      : IconButton(
-                          icon: Icon(Icons.clear),
-                          onPressed: () {
-                            FocusScope.of(context).requestFocus(FocusNode());
-                            Future.microtask(() => textController.clear());
-                            // state.isDrawerShow = false;
-                          }),
-                ),
-              ),
-            ),
-          )
-        ],
-      ),
-    ),
-  );
 }

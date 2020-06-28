@@ -9,6 +9,8 @@ import 'package:urawai_pos/core/Models/users.dart';
 import 'package:urawai_pos/core/Provider/general_provider.dart';
 import 'package:urawai_pos/core/Services/error_handling.dart';
 import 'package:urawai_pos/core/Services/firebase_auth.dart';
+import 'package:urawai_pos/ui/Pages/authentication/reset_password.dart';
+import 'package:urawai_pos/ui/Widgets/costum_DialogBox.dart';
 import 'package:urawai_pos/ui/Widgets/costum_button.dart';
 import 'package:urawai_pos/ui/utils/constans/utils.dart';
 import 'package:urawai_pos/ui/utils/functions/routeGenerator.dart';
@@ -23,6 +25,7 @@ class _LoginPageState extends State<LoginPage> {
 
   final _textEmailSignIn = TextEditingController();
   final _textPasswordSignIn = TextEditingController();
+  final _textResetPassword = TextEditingController();
   final FirebaseAuthentication _auth = FirebaseAuthentication();
   String errorMessageSignIn = '';
 
@@ -32,6 +35,7 @@ class _LoginPageState extends State<LoginPage> {
 
     _textEmailSignIn.dispose();
     _textPasswordSignIn.dispose();
+    _textResetPassword.dispose();
   }
 
   @override
@@ -122,10 +126,7 @@ class _LoginPageState extends State<LoginPage> {
         padding: const EdgeInsets.all(8.0),
         child: Form(
           key: _formKey,
-          child: Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: _formSignIn(generalProvider, context),
-          ),
+          child: _formSignIn(generalProvider, context),
         ),
       ),
     );
@@ -198,7 +199,6 @@ class _LoginPageState extends State<LoginPage> {
         ),
         SizedBox(height: 10),
         Row(
-          mainAxisAlignment: MainAxisAlignment.spaceAround,
           children: <Widget>[
             CostumButton.squareButtonSmall('Masuk',
                 prefixIcon: FontAwesomeIcons.signInAlt, onTap: () async {
@@ -220,12 +220,6 @@ class _LoginPageState extends State<LoginPage> {
                 } else if (result is OnErrorState) {
                   errorMessageSignIn = result.message;
                 } else if (result is Users) {
-                  // TODO:will check the best option
-                  // Navigator.pushNamedAndRemoveUntil(
-                  //     context,
-                  //     RouteGenerator.kRouteGateKeeper,
-                  //     ModalRoute.withName(RouteGenerator.kRouteGateKeeper));
-
                   Navigator.pushNamed(context, RouteGenerator.kRoutePOSPage);
                 }
               }
@@ -239,7 +233,7 @@ class _LoginPageState extends State<LoginPage> {
                 child: AutoSizeText(
                   'Daftar disini',
                   style: TextStyle(
-                      fontSize: 22,
+                      fontSize: 20,
                       fontStyle: FontStyle.italic,
                       decoration: TextDecoration.underline),
                 ),
@@ -248,6 +242,23 @@ class _LoginPageState extends State<LoginPage> {
                   Navigator.pushNamed(context, RouteGenerator.kRouteSignUpPage),
             ),
           ],
+        ),
+        SizedBox(height: 10),
+        FlatButton(
+          child: Text(
+            'Lupa Password.',
+            style: TextStyle(
+              fontSize: 18,
+              fontStyle: FontStyle.italic,
+              decoration: TextDecoration.underline,
+            ),
+          ),
+          onPressed: () {
+            showDialog(
+                context: context,
+                barrierDismissible: false,
+                builder: (context) => ResetPasswordDialog());
+          },
         ),
       ],
     );

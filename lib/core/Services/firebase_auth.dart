@@ -24,6 +24,16 @@ class FirebaseAuthentication {
     await _auth.signOut();
   }
 
+  //Reset Password
+  Future<dynamic> resetPassword(String email) async {
+    try {
+      await _auth.sendPasswordResetEmail(email: email);
+      return true;
+    } catch (e) {
+      return e.message.toString();
+    }
+  }
+
   //SignUp with Email & Password
   Future<dynamic> signUpWithEmail(
       String email, String password, String username, String shopName) async {
