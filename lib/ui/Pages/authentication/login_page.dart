@@ -10,7 +10,6 @@ import 'package:urawai_pos/core/Provider/general_provider.dart';
 import 'package:urawai_pos/core/Services/error_handling.dart';
 import 'package:urawai_pos/core/Services/firebase_auth.dart';
 import 'package:urawai_pos/ui/Pages/authentication/reset_password.dart';
-import 'package:urawai_pos/ui/Widgets/costum_DialogBox.dart';
 import 'package:urawai_pos/ui/Widgets/costum_button.dart';
 import 'package:urawai_pos/ui/utils/constans/utils.dart';
 import 'package:urawai_pos/ui/utils/functions/routeGenerator.dart';

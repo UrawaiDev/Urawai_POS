@@ -50,9 +50,6 @@ class _PaymentScreenState extends State<PaymentScreen> {
   Widget build(BuildContext context) {
     final generalState = Provider.of<GeneralProvider>(context);
 
-    DeviceScreenType deviceScreenType =
-        getDeviceType(MediaQuery.of(context).size);
-
     return WillPopScope(
       onWillPop: () => Future.value(false),
       child: Container(
@@ -425,8 +422,6 @@ class _PaymentScreenState extends State<PaymentScreen> {
   }
 
   Widget keyPadArea(BuildContext context) {
-    var deviceScreenType = getDeviceType(MediaQuery.of(context).size);
-
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8.0),
       child: Container(

@@ -121,7 +121,7 @@ class CostumDialogBox {
                 color: iconColor,
               ),
               SizedBox(width: 20),
-              Expanded(
+              Flexible(
                 child: Text(
                   contentString,
                   style: kDialogTextStyle,

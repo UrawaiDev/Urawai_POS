@@ -87,18 +87,17 @@ class MyApp extends StatelessWidget {
         StreamProvider<ConnectivityResult>(
             create: (context) =>
                 ConnectivityService().networkStatusController.stream),
-
         StreamProvider(
             create: (context) => FirebaseAuth.instance.onAuthStateChanged),
-
-        // FutureProvider<Users>.value(value: CurrentUserLoggedIn.currentUser,catchError: ,),
       ],
       child: MaterialApp(
         debugShowCheckedModeBanner: false,
         title: 'Urawai POS',
         theme: ThemeData(
             fontFamily: 'Sen',
-            primaryColor: Color(0xFF408be5),
+            // primaryColor: Color(0xFF408be5),
+            primaryColor: Color(0xFF408BE5),
+            appBarTheme: AppBarTheme(color: Color(0xFF408BE5)),
             scaffoldBackgroundColor: Color(0xFFfbfcfe),
             textTheme: TextTheme(body1: TextStyle(color: Color(0xFF435c72)))),
         initialRoute: 'Login_Page',

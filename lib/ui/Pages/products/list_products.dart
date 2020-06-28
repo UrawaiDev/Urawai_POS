@@ -324,7 +324,7 @@ class _ProductListPageState extends State<ProductListPage> {
                                                             iconColor:
                                                                 Colors.red,
                                                             contentString:
-                                                                'Anda Akang Menghapus Produk?',
+                                                                'Anda Akan Menghapus Produk "${product.name}"?',
                                                             confirmButtonTitle:
                                                                 'Hapus',
                                                             onConfirmPressed:

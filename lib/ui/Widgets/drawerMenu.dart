@@ -105,10 +105,10 @@ class DrawerMenu extends StatelessWidget {
               'Produk',
               style: kPriceTextStyle,
             ),
-            leading: FaIcon(FontAwesomeIcons.instagram),
+            leading: FaIcon(FontAwesomeIcons.folder),
             children: <Widget>[
               ListTile(
-                leading: FaIcon(FontAwesomeIcons.cog),
+                leading: FaIcon(FontAwesomeIcons.plus),
                 title: (Text(
                   'Tambah Produk',
                   style: kMainMenuStyle,
@@ -120,7 +120,7 @@ class DrawerMenu extends StatelessWidget {
                 },
               ),
               ListTile(
-                leading: FaIcon(FontAwesomeIcons.instagram),
+                leading: FaIcon(FontAwesomeIcons.listAlt),
                 title: (Text(
                   'List Produk',
                   style: kMainMenuStyle,

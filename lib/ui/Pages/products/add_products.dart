@@ -7,6 +7,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
 import 'package:responsive_builder/responsive_builder.dart';
 import 'package:urawai_pos/core/Provider/general_provider.dart';
+import 'package:urawai_pos/ui/Widgets/costum_DialogBox.dart';
 import 'package:urawai_pos/ui/Widgets/costum_button.dart';
 import 'package:urawai_pos/ui/utils/constans/products.dart';
 import 'package:urawai_pos/ui/utils/constans/utils.dart';
@@ -404,8 +405,20 @@ class _AddProductPageState extends State<AddProductPage> {
                             _textDiscount.clear();
                             _imageFile = null;
                             _isPopular = false;
-                            setState(() {});
+
+                            //make sure to close if softkeyboar open.
+                            //prevent from overflow keyboard.
+                            FocusScope.of(context).unfocus();
+
+                            CostumDialogBox.showDialogInformation(
+                                context: context,
+                                icon: Icons.check_circle,
+                                iconColor: Colors.green,
+                                title: 'Informasi',
+                                contentText: 'Produk telah disimpan.',
+                                onTap: () => Navigator.pop(context));
                           }
+                          setState(() {}); // refresh Page.
                         }
                       }),
                     ],
