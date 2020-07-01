@@ -1,3 +1,6 @@
+import 'dart:io';
+
+import 'package:csv/csv.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
@@ -17,6 +20,7 @@ import 'package:urawai_pos/ui/utils/functions/getCurrentUser.dart';
 import 'package:urawai_pos/ui/utils/functions/paymentHelpers.dart';
 import 'package:date_range_picker/date_range_picker.dart' as dateRangePicker;
 import 'package:urawai_pos/ui/utils/functions/routeGenerator.dart';
+import 'package:path_provider/path_provider.dart' as path;
 
 class TransactionHistoryPage extends StatelessWidget {
   final FirestoreServices _firestoreServices = FirestoreServices();
@@ -57,6 +61,13 @@ class TransactionHistoryPage extends StatelessWidget {
               return Scaffold(
                 appBar: AppBar(
                   title: Text('Riwayat Transasksi'),
+                  actions: <Widget>[
+                    IconButton(
+                      onPressed: () => _exportToExcel(currentUser.shopName),
+                      icon: Icon(Icons.screen_share,
+                          color: Colors.white, size: 32),
+                    )
+                  ],
                 ),
                 drawer: Drawer(
                   child: DrawerMenu(currentUser),
@@ -419,5 +430,39 @@ class TransactionHistoryPage extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  void _exportToExcel(String shopName) async {
+    final appDirectory = await path.getApplicationSupportDirectory();
+    final transactions =
+        await _firestoreServices.getAllTransactionOrder(shopName);
+
+    List<List<dynamic>> rows = List<List<dynamic>>();
+
+    //* Add Header
+    rows.add([
+      'Order ID',
+      'Tanggal Order',
+      'Nama Kasir',
+      'Jumlah Pesanan',
+      'Total Bayar',
+    ]);
+
+    if (transactions.isNotEmpty) {
+      List<dynamic> row = List<dynamic>();
+      for (int i = 0; i < transactions.length; i++) {
+        row.add(transactions[i].id);
+        row.add(transactions[i].date);
+        row.add(transactions[i].cashierName);
+        row.add(transactions[i].itemList.length);
+        row.add(transactions[i].grandTotal);
+        rows.add(row);
+      }
+    }
+
+    String csv = ListToCsvConverter().convert(rows);
+
+    final fileCSV = await File('${appDirectory.path}\data.csv').create();
+    fileCSV.writeAsString(csv);
   }
 }

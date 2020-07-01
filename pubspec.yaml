@@ -40,6 +40,13 @@ dependencies:
   get_it: ^4.0.2
   charts_flutter: ^0.9.0
   flutter_phoenix: ^0.1.0
+  
+  #send email 
+  flutter_email_sender: ^3.0.1
+
+  
+  #export to CSV
+  csv: ^4.0.3
 
   #Printer Bluetooth
   esc_pos_bluetooth: ^0.2.8

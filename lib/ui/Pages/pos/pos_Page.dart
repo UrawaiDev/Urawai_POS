@@ -115,8 +115,6 @@ class _POSPageState extends State<POSPage> with SingleTickerProviderStateMixin {
 
     DeviceScreenType deviceType = getDeviceType(MediaQuery.of(context).size);
 
-    print(deviceType);
-
     return SafeArea(
       child: FutureBuilder<Users>(
           future: currentUser,
@@ -264,245 +262,11 @@ class _POSPageState extends State<POSPage> with SingleTickerProviderStateMixin {
                         //lefside - halaman menu
                         Expanded(
                             flex: 2,
-                            child: Padding(
-                              padding: const EdgeInsets.only(left: 0, right: 0),
-                              child: Column(
-                                children: <Widget>[
-                                  Consumer<GeneralProvider>(
-                                    builder: (context, generalState, _) =>
-                                        Expanded(
-                                            flex: 1,
-                                            child: Container(
-                                              padding: EdgeInsets.all(10),
-                                              color: Color(0xFFfbfcfe),
-                                              height: screenHeight - 120,
-                                              child: FutureBuilder<
-                                                      List<Product>>(
-                                                  future: _textQuery
-                                                              .text.isEmpty ||
-                                                          _textQuery
-                                                                  .text.length <
-                                                              3
-                                                      ? _getProduct
-                                                      : _firestoreServices
-                                                          .getDocumentByProductName(
-                                                              currentUser
-                                                                  .shopName,
-                                                              _textQuery.text),
-                                                  builder: (context, snapshot) {
-                                                    if (snapshot.hasError)
-                                                      return Center(
-                                                        child: Text(
-                                                          'An Error has Occured ${snapshot.error}',
-                                                          style:
-                                                              kErrorTextStyle,
-                                                        ),
-                                                      );
-
-                                                    if (!snapshot.hasData ||
-                                                        snapshot.connectionState ==
-                                                            ConnectionState
-                                                                .waiting)
-                                                      return _shimmerLoading(
-                                                          generalState
-                                                              .isDrawerShow);
-
-                                                    if (snapshot.data.isEmpty)
-                                                      return Container(
-                                                          alignment:
-                                                              Alignment.center,
-                                                          child: Center(
-                                                            child: Column(
-                                                              mainAxisAlignment:
-                                                                  MainAxisAlignment
-                                                                      .center,
-                                                              children: <
-                                                                  Widget>[
-                                                                Text(
-                                                                  'Belum Ada Produk.',
-                                                                  style:
-                                                                      kProductNameBigScreenTextStyle,
-                                                                ),
-                                                                SizedBox(
-                                                                    height: 30),
-                                                                CostumButton.squareButtonSmall(
-                                                                    'Tambah Produk',
-                                                                    onTap: () {
-                                                                  Navigator.pushNamed(
-                                                                      context,
-                                                                      RouteGenerator
-                                                                          .kRouteAddProductPage);
-                                                                },
-                                                                    prefixIcon:
-                                                                        Icons
-                                                                            .add),
-                                                              ],
-                                                            ),
-                                                          ));
-
-                                                    return GridView.count(
-                                                      crossAxisCount:
-                                                          generalState
-                                                                  .isDrawerShow
-                                                              ? 2
-                                                              : 3,
-                                                      crossAxisSpacing: 10,
-                                                      mainAxisSpacing: 10,
-                                                      children: snapshot.data
-                                                          .map((product) =>
-                                                              _cardMenu(
-                                                                  product))
-                                                          .toList(),
-                                                    );
-                                                  }),
-                                            )),
-                                  ),
-                                ],
-                              ),
-                            )),
+                            child: _productGridView(screenHeight, currentUser)),
                         //RIGHT SIDE MENU ORDER LIST
                         Expanded(
-                            child: Container(
-                                color: Colors.white,
-                                padding: EdgeInsets.fromLTRB(5, 0, 5, 10),
-                                child: Column(
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.spaceBetween,
-                                    children: <Widget>[
-                                      Column(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
-                                        children: <Widget>[_headerOrderList()],
-                                      ),
-                                      //ORDERED ITEM LIST
-                                      orderlistState.orderlist.isEmpty
-                                          ? Expanded(
-                                              child: Container(
-                                                alignment: Alignment.center,
-                                                child: Text(
-                                                  'Tidak Ada Pesanan',
-                                                  style: kPriceTextStyle,
-                                                ),
-                                              ),
-                                            )
-                                          : Expanded(
-                                              child: Padding(
-                                                padding:
-                                                    const EdgeInsets.symmetric(
-                                                        vertical: 5.0),
-                                                child: Container(
-                                                  child: Consumer<
-                                                      OrderListProvider>(
-                                                    builder: (context,
-                                                            orderlistState,
-                                                            _) =>
-                                                        ListView.builder(
-                                                            itemCount:
-                                                                orderlistState
-                                                                    .orderlist
-                                                                    .length,
-                                                            itemBuilder:
-                                                                (context,
-                                                                    index) {
-                                                              var currentOrderList =
-                                                                  orderlistState
-                                                                      .orderlist;
-                                                              final itemKey =
-                                                                  currentOrderList[
-                                                                      index];
-
-                                                              return Dismissible(
-                                                                key: ValueKey(
-                                                                    itemKey),
-                                                                background:
-                                                                    Container(
-                                                                  alignment:
-                                                                      Alignment
-                                                                          .center,
-                                                                  color: Colors
-                                                                      .red,
-                                                                  child: Text(
-                                                                    'Hapus',
-                                                                    style: TextStyle(
-                                                                        color: Colors
-                                                                            .white,
-                                                                        fontSize:
-                                                                            30,
-                                                                        fontWeight:
-                                                                            FontWeight.bold),
-                                                                  ),
-                                                                ),
-                                                                onDismissed:
-                                                                    (direction) {
-                                                                  orderlistState
-                                                                      .removeFromList(
-                                                                          index);
-                                                                },
-                                                                child:
-                                                                    DetailItemOrder(
-                                                                  itemList:
-                                                                      currentOrderList[
-                                                                          index],
-                                                                  onMinusButtonTap: () =>
-                                                                      orderlistState
-                                                                          .decrementQuantity(
-                                                                              index),
-                                                                  onPlusButtonTap: () =>
-                                                                      orderlistState
-                                                                          .incrementQuantity(
-                                                                              index),
-                                                                  onAddNoteTap:
-                                                                      () {
-                                                                    CostumDialogBox.showInputDialogBox(
-                                                                        formKey: _formKey,
-                                                                        context: context,
-                                                                        textEditingController: _textNote,
-                                                                        title: 'Catatan',
-                                                                        confirmButtonTitle: 'OK',
-                                                                        onConfirmPressed: () {
-                                                                          orderlistState.addNote(
-                                                                              _textNote.text,
-                                                                              index);
-                                                                          _textNote
-                                                                              .clear();
-
-                                                                          Navigator.pop(
-                                                                              context);
-                                                                        });
-                                                                  },
-                                                                  childWidget:
-                                                                      Container(),
-                                                                ),
-                                                              );
-                                                            }),
-                                                  ),
-                                                ),
-                                              ),
-                                            ),
-
-                                      deviceType == DeviceScreenType.tablet
-                                          ? Column(
-                                              children: <Widget>[
-                                                Container(
-                                                  child: FooterOrderList(
-                                                    dicount: orderlistState
-                                                        .discountTotal,
-                                                    grandTotal: orderlistState
-                                                        .grandTotal,
-                                                    subtotal:
-                                                        orderlistState.subTotal,
-                                                    vat:
-                                                        orderlistState.taxFinal,
-                                                  ),
-                                                ),
-                                                transactionButton(
-                                                    orderlistState, context),
-                                              ],
-                                            )
-                                          : Container()
-                                    ]))),
-
-                        //Right side -- menu penjuala
+                            child: _orderListSideBar(
+                                orderlistState, deviceType, context)),
                       ],
                     ),
                   ),
@@ -510,6 +274,175 @@ class _POSPageState extends State<POSPage> with SingleTickerProviderStateMixin {
               ),
             );
           }),
+    );
+  }
+
+  Widget _orderListSideBar(OrderListProvider orderlistState,
+      DeviceScreenType deviceType, BuildContext context) {
+    return Container(
+        color: Colors.white,
+        padding: EdgeInsets.fromLTRB(5, 0, 5, 10),
+        child: Column(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: <Widget>[
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: <Widget>[_headerOrderList()],
+              ),
+              //ORDERED ITEM LIST
+              orderlistState.orderlist.isEmpty
+                  ? Expanded(
+                      child: Container(
+                        alignment: Alignment.center,
+                        child: Text(
+                          'Tidak Ada Pesanan',
+                          style: kPriceTextStyle,
+                        ),
+                      ),
+                    )
+                  : Expanded(
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 5.0),
+                        child: Container(
+                          child: Consumer<OrderListProvider>(
+                            builder: (context, orderlistState, _) =>
+                                ListView.builder(
+                                    itemCount: orderlistState.orderlist.length,
+                                    itemBuilder: (context, index) {
+                                      var currentOrderList =
+                                          orderlistState.orderlist;
+                                      final itemKey = currentOrderList[index];
+
+                                      return Dismissible(
+                                        key: ValueKey(itemKey),
+                                        background: Container(
+                                          alignment: Alignment.center,
+                                          color: Colors.red,
+                                          child: Text(
+                                            'Hapus',
+                                            style: TextStyle(
+                                                color: Colors.white,
+                                                fontSize: 30,
+                                                fontWeight: FontWeight.bold),
+                                          ),
+                                        ),
+                                        onDismissed: (direction) {
+                                          orderlistState.removeFromList(index);
+                                        },
+                                        child: DetailItemOrder(
+                                          itemList: currentOrderList[index],
+                                          onMinusButtonTap: () => orderlistState
+                                              .decrementQuantity(index),
+                                          onPlusButtonTap: () => orderlistState
+                                              .incrementQuantity(index),
+                                          onAddNoteTap: () {
+                                            CostumDialogBox.showInputDialogBox(
+                                                formKey: _formKey,
+                                                context: context,
+                                                textEditingController:
+                                                    _textNote,
+                                                title: 'Catatan',
+                                                confirmButtonTitle: 'OK',
+                                                onConfirmPressed: () {
+                                                  orderlistState.addNote(
+                                                      _textNote.text, index);
+                                                  _textNote.clear();
+
+                                                  Navigator.pop(context);
+                                                });
+                                          },
+                                          childWidget: Container(),
+                                        ),
+                                      );
+                                    }),
+                          ),
+                        ),
+                      ),
+                    ),
+
+              deviceType == DeviceScreenType.tablet
+                  ? Column(
+                      children: <Widget>[
+                        Container(
+                          child: FooterOrderList(
+                            dicount: orderlistState.discountTotal,
+                            grandTotal: orderlistState.grandTotal,
+                            subtotal: orderlistState.subTotal,
+                            vat: orderlistState.taxFinal,
+                          ),
+                        ),
+                        transactionButton(orderlistState, context),
+                      ],
+                    )
+                  : Container()
+            ]));
+  }
+
+  Widget _productGridView(double screenHeight, Users currentUser) {
+    return Padding(
+      padding: const EdgeInsets.only(left: 0, right: 0),
+      child: Column(
+        children: <Widget>[
+          Consumer<GeneralProvider>(
+            builder: (context, generalState, _) => Expanded(
+                flex: 1,
+                child: Container(
+                  padding: EdgeInsets.all(10),
+                  color: Color(0xFFfbfcfe),
+                  height: screenHeight - 120,
+                  child: FutureBuilder<List<Product>>(
+                      future:
+                          _textQuery.text.isEmpty || _textQuery.text.length < 3
+                              ? _getProduct
+                              : _firestoreServices.getDocumentByProductName(
+                                  currentUser.shopName, _textQuery.text),
+                      builder: (context, snapshot) {
+                        if (snapshot.hasError)
+                          return Center(
+                            child: Text(
+                              'An Error has Occured ${snapshot.error}',
+                              style: kErrorTextStyle,
+                            ),
+                          );
+
+                        if (!snapshot.hasData ||
+                            snapshot.connectionState == ConnectionState.waiting)
+                          return _shimmerLoading(generalState.isDrawerShow);
+
+                        if (snapshot.data.isEmpty)
+                          return Container(
+                              alignment: Alignment.center,
+                              child: Center(
+                                child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: <Widget>[
+                                    Text(
+                                      'Belum Ada Produk.',
+                                      style: kProductNameBigScreenTextStyle,
+                                    ),
+                                    SizedBox(height: 30),
+                                    CostumButton.squareButtonSmall(
+                                        'Tambah Produk', onTap: () {
+                                      Navigator.pushNamed(context,
+                                          RouteGenerator.kRouteAddProductPage);
+                                    }, prefixIcon: Icons.add),
+                                  ],
+                                ),
+                              ));
+
+                        return GridView.count(
+                          crossAxisCount: generalState.isDrawerShow ? 2 : 3,
+                          crossAxisSpacing: 10,
+                          mainAxisSpacing: 10,
+                          children: snapshot.data
+                              .map((product) => _cardMenu(product))
+                              .toList(),
+                        );
+                      }),
+                )),
+          ),
+        ],
+      ),
     );
   }
 
