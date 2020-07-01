@@ -50,6 +50,9 @@ class _PaymentScreenState extends State<PaymentScreen> {
   Widget build(BuildContext context) {
     final generalState = Provider.of<GeneralProvider>(context);
 
+    DeviceScreenType deviceScreenType =
+        getDeviceType(MediaQuery.of(context).size);
+
     return WillPopScope(
       onWillPop: () => Future.value(false),
       child: Container(
