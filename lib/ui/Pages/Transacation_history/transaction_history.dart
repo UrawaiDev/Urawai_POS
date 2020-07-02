@@ -3,10 +3,12 @@ import 'dart:io';
 import 'package:csv/csv.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_email_sender/flutter_email_sender.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:responsive_builder/responsive_builder.dart';
+import 'package:urawai_pos/core/Models/orderList.dart';
 import 'package:urawai_pos/core/Models/transaction.dart';
 import 'package:urawai_pos/core/Models/users.dart';
 import 'package:urawai_pos/core/Provider/general_provider.dart';
@@ -63,7 +65,9 @@ class TransactionHistoryPage extends StatelessWidget {
                   title: Text('Riwayat Transasksi'),
                   actions: <Widget>[
                     IconButton(
-                      onPressed: () => _exportToExcel(currentUser.shopName),
+                      tooltip: 'Kirim Laporan via Email atau Whatsapp.',
+                      onPressed: () => _exportToExcel(
+                          currentUser.shopName, currentUser.email),
                       icon: Icon(Icons.screen_share,
                           color: Colors.white, size: 32),
                     )
@@ -432,10 +436,12 @@ class TransactionHistoryPage extends StatelessWidget {
     );
   }
 
-  void _exportToExcel(String shopName) async {
+  void _exportToExcel(String shopName, String ownerEmail) async {
     final appDirectory = await path.getApplicationSupportDirectory();
     final transactions =
         await _firestoreServices.getAllTransactionOrder(shopName);
+
+    String date = DateFormat('d-MMM-yyyy').format(DateTime.now());
 
     List<List<dynamic>> rows = List<List<dynamic>>();
 
@@ -444,25 +450,48 @@ class TransactionHistoryPage extends StatelessWidget {
       'Order ID',
       'Tanggal Order',
       'Nama Kasir',
-      'Jumlah Pesanan',
-      'Total Bayar',
+      'Nama Produk',
+      'Harga Satuan',
+      'Jumlah Order',
+      'Subtotal Bayar',
+      'Metode Bayar',
+      'Status',
     ]);
 
     if (transactions.isNotEmpty) {
-      List<dynamic> row = List<dynamic>();
       for (int i = 0; i < transactions.length; i++) {
-        row.add(transactions[i].id);
-        row.add(transactions[i].date);
-        row.add(transactions[i].cashierName);
-        row.add(transactions[i].itemList.length);
-        row.add(transactions[i].grandTotal);
-        rows.add(row);
+        for (int x = 0; x < transactions[i].itemList.length; x++) {
+          var orderList = transactions[i].itemList[x] as OrderList;
+
+          rows.add([
+            transactions[i].id,
+            transactions[i].date,
+            transactions[i].cashierName,
+            orderList.productName,
+            orderList.price,
+            orderList.quantity,
+            transactions[i].subtotal,
+            PaymentHelper.getPaymentType(transactions[i].paymentType),
+            PaymentHelper.getPaymentStatus(transactions[i].paymentStatus),
+          ]);
+        }
       }
     }
 
     String csv = ListToCsvConverter().convert(rows);
 
-    final fileCSV = await File('${appDirectory.path}\data.csv').create();
+    final fileCSV =
+        await File('${appDirectory.path}/Laporan Penjualan $date.csv').create();
     fileCSV.writeAsString(csv);
+
+    //* Send Email
+    final Email email = Email(
+      subject: 'Laporan Transaksi - $date',
+      recipients: [ownerEmail],
+      attachmentPaths: [fileCSV.path],
+      body: 'Terlampir Laporan Penjualan $shopName sampai dengan $date',
+    );
+
+    await FlutterEmailSender.send(email);
   }
 }
