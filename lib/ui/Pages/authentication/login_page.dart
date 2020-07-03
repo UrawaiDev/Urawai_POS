@@ -1,10 +1,10 @@
-import 'package:auto_size_text/auto_size_text.dart';
+import 'package:animations/animations.dart';
+import 'package:carousel_slider/carousel_slider.dart';
 import 'package:email_validator/email_validator.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:provider/provider.dart';
-import 'package:responsive_builder/responsive_builder.dart';
 import 'package:urawai_pos/core/Models/users.dart';
 import 'package:urawai_pos/core/Provider/general_provider.dart';
 import 'package:urawai_pos/core/Services/error_handling.dart';
@@ -28,6 +28,16 @@ class _LoginPageState extends State<LoginPage> {
   final FirebaseAuthentication _auth = FirebaseAuthentication();
   String errorMessageSignIn = '';
 
+  int _current = 0;
+
+  final List<String> imageUrl = [
+    'assets/images/bakmi.jpg',
+    'assets/images/bakmi_ayam_pedas.jpg',
+    'assets/images/bakmi_ayam_spesial.png',
+    'assets/images/bakso.jpg',
+    'assets/images/eskopi_susu.jpg',
+  ];
+
   @override
   dispose() {
     super.dispose();
@@ -47,7 +57,7 @@ class _LoginPageState extends State<LoginPage> {
       child: GestureDetector(
         onTap: () => FocusScope.of(context).unfocus(),
         child: Scaffold(
-          backgroundColor: Color(0xFFfeffff),
+          backgroundColor: Color(0xFFf8fafb),
           // body: _viewPage(context, generalProvider),
           body: Stack(
             fit: StackFit.expand,
@@ -80,22 +90,50 @@ class _LoginPageState extends State<LoginPage> {
                             ),
                             SizedBox(height: 10),
                             SizedBox.fromSize(
-                              child: ScreenTypeLayout(
-                                mobile: Container(
-                                  width: 200,
-                                  height: 200,
-                                  child: Image.asset(
-                                    'assets/images/login_image.jpg',
-                                    fit: BoxFit.fill,
-                                  ),
-                                ),
-                                tablet: Container(
-                                  width: 400,
-                                  height: 400,
-                                  child: Image.asset(
-                                    'assets/images/login_image.jpg',
-                                    fit: BoxFit.fill,
-                                  ),
+                              child: Container(
+                                child: Column(
+                                  children: <Widget>[
+                                    CarouselSlider(
+                                      options: CarouselOptions(
+                                          autoPlay: true,
+                                          enableInfiniteScroll: true,
+                                          viewportFraction: 1,
+                                          autoPlayCurve: Curves.easeInToLinear,
+                                          onPageChanged: (index, reason) {
+                                            setState(() {
+                                              _current = index;
+                                            });
+                                          }),
+                                      items: imageUrl
+                                          .map((data) => Container(
+                                                child: Image.asset(
+                                                  data,
+                                                  fit: BoxFit.cover,
+                                                ),
+                                              ))
+                                          .toList(),
+                                    ),
+                                    Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
+                                      children: imageUrl.map((url) {
+                                        int index = imageUrl.indexOf(url);
+                                        return Container(
+                                          width: 8.0,
+                                          height: 8.0,
+                                          margin: EdgeInsets.symmetric(
+                                              vertical: 10.0, horizontal: 2.0),
+                                          decoration: BoxDecoration(
+                                            shape: BoxShape.circle,
+                                            color: _current == index
+                                                ? Color.fromRGBO(
+                                                    56, 130, 254, 1.0)
+                                                : Color.fromRGBO(0, 0, 0, 0.4),
+                                          ),
+                                        );
+                                      }).toList(),
+                                    ),
+                                  ],
                                 ),
                               ),
                             ),
@@ -169,7 +207,7 @@ class _LoginPageState extends State<LoginPage> {
             return null;
           },
         ),
-        SizedBox(height: 20),
+        SizedBox(height: 10),
         TextFormField(
           controller: _textPasswordSignIn,
           autocorrect: false,
@@ -182,7 +220,7 @@ class _LoginPageState extends State<LoginPage> {
             counterText: '',
             errorStyle: kErrorTextStyle,
           ),
-          style: TextStyle(fontSize: 25),
+          style: kPriceTextStyle,
           maxLength: 6,
           keyboardType: TextInputType.number,
           obscureText: true,
@@ -191,73 +229,42 @@ class _LoginPageState extends State<LoginPage> {
             return null;
           },
         ),
+        SizedBox(height: 5),
+        GestureDetector(
+          child: Container(
+              alignment: Alignment.centerRight,
+              child: Text(
+                'Lupa Password?',
+                style: kPriceTextStyle,
+              )),
+          onTap: () {
+            showModal(
+                context: context,
+                configuration: FadeScaleTransitionConfiguration(
+                  barrierDismissible: false,
+                  transitionDuration: Duration(milliseconds: 400),
+                ),
+                // barrierDismissible: false,
+                builder: (context) => ResetPasswordDialog());
+          },
+        ),
         SizedBox(height: 10),
         Text(
           errorMessageSignIn.isEmpty ? '' : errorMessageSignIn,
           style: kErrorTextStyle,
         ),
-        SizedBox(height: 10),
         Row(
           children: <Widget>[
-            CostumButton.squareButtonSmall('Masuk',
-                prefixIcon: FontAwesomeIcons.signInAlt, onTap: () async {
-              //Make sure to close softkeyboard
-              FocusScope.of(context).unfocus();
-
-              if (_formKey.currentState.validate()) {
-                //show loading
-                generalProvider.isLoading = true;
-                Future.delayed(Duration(seconds: 1));
-
-                var result = await _auth.signInWithEmailandPassword(
-                    _textEmailSignIn.text, _textPasswordSignIn.text);
-
-                //stop loading
-                generalProvider.isLoading = false;
-                if (result == null) {
-                  print('hasilnya $result');
-                } else if (result is OnErrorState) {
-                  errorMessageSignIn = result.message;
-                } else if (result is Users) {
-                  Navigator.pushNamed(context, RouteGenerator.kRoutePOSPage);
-                }
-              }
-            }),
+            CostumButton.buttonLoginPage('Masuk', Color(0xFF3882fe),
+                Colors.white, () => _onLoginTap(generalProvider)),
             SizedBox(width: 10),
-            GestureDetector(
-              child: Container(
-                alignment: Alignment.center,
-                width: 130,
-                height: 40,
-                child: AutoSizeText(
-                  'Daftar disini',
-                  style: TextStyle(
-                      fontSize: 20,
-                      fontStyle: FontStyle.italic,
-                      decoration: TextDecoration.underline),
-                ),
-              ),
-              onTap: () =>
-                  Navigator.pushNamed(context, RouteGenerator.kRouteSignUpPage),
-            ),
+            CostumButton.buttonLoginPage(
+                'Daftar',
+                Color(0xFFeef1f4),
+                Colors.grey,
+                () => Navigator.pushNamed(
+                    context, RouteGenerator.kRouteSignUpPage)),
           ],
-        ),
-        SizedBox(height: 10),
-        FlatButton(
-          child: Text(
-            'Lupa Password.',
-            style: TextStyle(
-              fontSize: 18,
-              fontStyle: FontStyle.italic,
-              decoration: TextDecoration.underline,
-            ),
-          ),
-          onPressed: () {
-            showDialog(
-                context: context,
-                barrierDismissible: false,
-                builder: (context) => ResetPasswordDialog());
-          },
         ),
       ],
     );
@@ -266,8 +273,6 @@ class _LoginPageState extends State<LoginPage> {
   Widget _showLoading(BuildContext context) {
     return Positioned.fill(
       child: Container(
-        // width: MediaQuery.of(context).size.width,
-        // height: MediaQuery.of(context).size.height,
         color: Colors.grey.withOpacity(0.6),
         child: Align(
           alignment: Alignment.center,
@@ -293,9 +298,36 @@ class _LoginPageState extends State<LoginPage> {
     );
   }
 
+  Future<void> _onLoginTap(GeneralProvider generalProvider) async {
+    //Make sure to close softkeyboard
+    FocusScope.of(context).unfocus();
+
+    if (_formKey.currentState.validate()) {
+      //show loading
+      generalProvider.isLoading = true;
+      Future.delayed(Duration(seconds: 1));
+
+      var result = await _auth.signInWithEmailandPassword(
+          _textEmailSignIn.text, _textPasswordSignIn.text);
+
+      //stop loading
+      generalProvider.isLoading = false;
+      if (result == null) {
+        print('hasilnya $result');
+      } else if (result is OnErrorState) {
+        errorMessageSignIn = result.message;
+      } else if (result is Users) {
+        Navigator.pushNamed(context, RouteGenerator.kRoutePOSPage);
+      }
+    }
+  }
+
   Future<bool> _isBackButtonPressed(BuildContext context) {
-    return showDialog(
-        barrierDismissible: false,
+    return showModal(
+        configuration: FadeScaleTransitionConfiguration(
+          barrierDismissible: false,
+          transitionDuration: Duration(milliseconds: 500),
+        ),
         context: context,
         builder: (context) => AlertDialog(
               title: Text(

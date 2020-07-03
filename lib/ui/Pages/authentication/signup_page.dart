@@ -1,3 +1,4 @@
+import 'package:carousel_slider/carousel_slider.dart';
 import 'package:email_validator/email_validator.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -28,6 +29,16 @@ class _SignUpPageState extends State<SignUpPage> {
   final FirebaseAuthentication _auth = FirebaseAuthentication();
   String errorMessageSignUp = '';
 
+  int _current = 0;
+
+  final List<String> imageUrl = [
+    'assets/images/bakmi.jpg',
+    'assets/images/bakmi_ayam_pedas.jpg',
+    'assets/images/bakmi_ayam_spesial.png',
+    'assets/images/bakso.jpg',
+    'assets/images/eskopi_susu.jpg',
+  ];
+
   @override
   dispose() {
     super.dispose();
@@ -48,7 +59,7 @@ class _SignUpPageState extends State<SignUpPage> {
       child: GestureDetector(
         onTap: () => FocusScope.of(context).unfocus(),
         child: Scaffold(
-          backgroundColor: Color(0xFFfeffff),
+          backgroundColor: Color(0xFFf8fafb),
           // body: _viewPage(context, generalProvider),
           body: Stack(
             fit: StackFit.expand,
@@ -58,11 +69,11 @@ class _SignUpPageState extends State<SignUpPage> {
                   padding: const EdgeInsets.all(10.0),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceAround,
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: <Widget>[
                       //* LEFT SIDE
                       Expanded(
                         child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
                           children: <Widget>[
                             Text(
                               'Selamat Datang.',
@@ -78,13 +89,52 @@ class _SignUpPageState extends State<SignUpPage> {
                                   color: Colors.black,
                                   fontStyle: FontStyle.italic),
                             ),
-                            SizedBox(height: 50),
-                            Container(
-                              width: 400,
-                              height: 400,
-                              child: Image.asset(
-                                'assets/images/login_image.jpg',
-                                fit: BoxFit.fill,
+                            SizedBox(height: 10),
+                            SizedBox.fromSize(
+                              child: Container(
+                                child: Column(
+                                  children: <Widget>[
+                                    CarouselSlider(
+                                      options: CarouselOptions(
+                                          autoPlay: true,
+                                          enableInfiniteScroll: true,
+                                          viewportFraction: 1,
+                                          autoPlayCurve: Curves.easeInToLinear,
+                                          onPageChanged: (index, reason) {
+                                            setState(() {
+                                              _current = index;
+                                            });
+                                          }),
+                                      items: imageUrl
+                                          .map((data) => Container(
+                                                child: Image.asset(
+                                                  data,
+                                                  fit: BoxFit.cover,
+                                                ),
+                                              ))
+                                          .toList(),
+                                    ),
+                                    Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
+                                      children: imageUrl.map((url) {
+                                        int index = imageUrl.indexOf(url);
+                                        return Container(
+                                          width: 8.0,
+                                          height: 8.0,
+                                          margin: EdgeInsets.symmetric(
+                                              vertical: 10.0, horizontal: 2.0),
+                                          decoration: BoxDecoration(
+                                            shape: BoxShape.circle,
+                                            color: _current == index
+                                                ? Color.fromRGBO(0, 0, 0, 0.9)
+                                                : Color.fromRGBO(0, 0, 0, 0.4),
+                                          ),
+                                        );
+                                      }).toList(),
+                                    ),
+                                  ],
+                                ),
                               ),
                             ),
                           ],
@@ -165,7 +215,7 @@ class _SignUpPageState extends State<SignUpPage> {
             return null;
           },
         ),
-        SizedBox(height: 20),
+        SizedBox(height: 10),
         TextFormField(
           controller: _textUserName,
           autocorrect: false,
@@ -183,7 +233,7 @@ class _SignUpPageState extends State<SignUpPage> {
           validator: (value) =>
               value.isEmpty ? 'Username Tidak Boleh Kosong' : null,
         ),
-        SizedBox(height: 20),
+        SizedBox(height: 10),
         TextFormField(
           controller: _textEmail,
           autocorrect: false,
@@ -207,7 +257,7 @@ class _SignUpPageState extends State<SignUpPage> {
             return null;
           },
         ),
-        SizedBox(height: 20),
+        SizedBox(height: 10),
         TextFormField(
           controller: _textPassword,
           autocorrect: false,
@@ -220,7 +270,7 @@ class _SignUpPageState extends State<SignUpPage> {
             counterText: '',
             errorStyle: kErrorTextStyle,
           ),
-          style: TextStyle(fontSize: 25),
+          style: kPriceTextStyle,
           maxLength: 6,
           keyboardType: TextInputType.number,
           obscureText: true,
@@ -232,7 +282,7 @@ class _SignUpPageState extends State<SignUpPage> {
             return null;
           },
         ),
-        SizedBox(height: 20),
+        SizedBox(height: 10),
         TextFormField(
           controller: _textReconfirmPassword,
           autocorrect: false,
@@ -245,7 +295,7 @@ class _SignUpPageState extends State<SignUpPage> {
             counterText: '',
             errorStyle: kErrorTextStyle,
           ),
-          style: TextStyle(fontSize: 25),
+          style: kPriceTextStyle,
           maxLength: 6,
           keyboardType: TextInputType.number,
           obscureText: true,
@@ -260,47 +310,44 @@ class _SignUpPageState extends State<SignUpPage> {
         SizedBox(height: 20),
         Row(
           children: <Widget>[
-            CostumButton.squareButtonSmall('Daftar',
-                prefixIcon: FontAwesomeIcons.userPlus, onTap: () async {
-              //Make sure to close softkeyboard
-              FocusScope.of(context).unfocus();
-
-              if (_formKey.currentState.validate()) {
-                generalProvider.isLoading = true;
-                Future.delayed(Duration(seconds: 1));
-                var result = await _auth.signUpWithEmail(
-                  _textEmail.text,
-                  _textPassword.text,
-                  _textUserName.text,
-                  _textshopName.text,
-                );
-
-                //stop loading animation
-                generalProvider.isLoading = false;
-
-                if (result is Users) {
-                  Navigator.pushNamed(context, RouteGenerator.kRoutePOSPage);
-                } else if (result is OnErrorState) {
-                  errorMessageSignUp = result.message;
-                }
-              }
-            }),
-            SizedBox(width: 20),
-            GestureDetector(
-              child: Text(
-                'Login disini',
-                style: TextStyle(
-                    fontSize: 22,
-                    fontStyle: FontStyle.italic,
-                    decoration: TextDecoration.underline),
-              ),
-              onTap: () =>
-                  Navigator.pushNamed(context, RouteGenerator.kRouteLoginPage),
-            ),
+            CostumButton.buttonLoginPage('Daftar', Color(0xFF3882fe),
+                Colors.white, () => _onSignUpTap(generalProvider)),
+            SizedBox(width: 10),
+            CostumButton.buttonLoginPage(
+                'Login',
+                Color(0xFFeef1f4),
+                Colors.grey,
+                () => Navigator.pushNamed(
+                    context, RouteGenerator.kRouteLoginPage)),
           ],
         ),
       ],
     );
+  }
+
+  Future<void> _onSignUpTap(GeneralProvider generalProvider) async {
+    //Make sure to close softkeyboard
+    FocusScope.of(context).unfocus();
+
+    if (_formKey.currentState.validate()) {
+      generalProvider.isLoading = true;
+      Future.delayed(Duration(seconds: 1));
+      var result = await _auth.signUpWithEmail(
+        _textEmail.text,
+        _textPassword.text,
+        _textUserName.text,
+        _textshopName.text,
+      );
+
+      //stop loading animation
+      generalProvider.isLoading = false;
+
+      if (result is Users) {
+        Navigator.pushNamed(context, RouteGenerator.kRoutePOSPage);
+      } else if (result is OnErrorState) {
+        errorMessageSignUp = result.message;
+      }
+    }
   }
 
   Widget _showLoading(BuildContext context) {
