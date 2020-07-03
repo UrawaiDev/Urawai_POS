@@ -98,4 +98,26 @@ class CostumButton {
       ),
     );
   }
+
+  static Widget buttonLoginPage(
+      String title, Color bgColor, Color textColor, Function onTap) {
+    return GestureDetector(
+      child: Container(
+        width: 170,
+        height: 60,
+        alignment: Alignment.center,
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(50),
+          color: bgColor,
+        ),
+        child: Text(title,
+            style: TextStyle(
+              fontSize: 20,
+              color: textColor,
+              fontWeight: FontWeight.bold,
+            )),
+      ),
+      onTap: onTap,
+    );
+  }
 }

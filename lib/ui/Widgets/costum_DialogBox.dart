@@ -1,3 +1,4 @@
+import 'package:animations/animations.dart';
 import 'package:flutter/material.dart';
 import 'package:urawai_pos/ui/utils/constans/utils.dart';
 
@@ -10,9 +11,12 @@ class CostumDialogBox {
     String contentText,
     Function onTap,
   }) {
-    showDialog(
-      barrierDismissible: false,
-      child: WillPopScope(
+    showModal(
+      configuration: FadeScaleTransitionConfiguration(
+        barrierDismissible: false,
+        transitionDuration: Duration(milliseconds: 500),
+      ),
+      builder: (context) => WillPopScope(
         onWillPop: () => Future.value(false),
         child: AlertDialog(
           title: Text(title, style: kDialogTextStyle),
@@ -46,55 +50,57 @@ class CostumDialogBox {
     String hint = '',
     Function onConfirmPressed,
   }) {
-    showDialog(
+    showModal(
         context: context,
-        barrierDismissible: false,
-        child: AlertDialog(
-          title: Text(
-            title,
-            style: kDialogTextStyle,
-          ),
-          content: Form(
-            key: formKey,
-            child: TextFormField(
-              controller: textEditingController,
-              autofocus: true,
-              autocorrect: false,
-              maxLength: 20,
-              style: kPriceTextStyle,
-              textInputAction: TextInputAction.done,
-              textCapitalization: TextCapitalization.sentences,
-              decoration: InputDecoration(
-                hintStyle: kPriceTextStyle,
-                hintText: hint,
-                errorStyle: kErrorTextStyle,
-                counterText: '',
-              ),
-              validator: (value) {
-                if (value.isEmpty)
-                  return 'Rereferensi tidak boleh kosong.';
-                else if (value.length < 3) return 'Minimal 3 Karakter.';
-                return null;
-              },
-            ),
-          ),
-          actions: <Widget>[
-            FlatButton(
-              child: Text(
-                'Batal',
+        configuration: FadeScaleTransitionConfiguration(
+          barrierDismissible: false,
+          transitionDuration: Duration(milliseconds: 500),
+        ),
+        builder: (contex) => AlertDialog(
+              title: Text(
+                title,
                 style: kDialogTextStyle,
               ),
-              onPressed: () => Navigator.pop(context),
-            ),
-            FlatButton(
-              child: Text(
-                confirmButtonTitle,
-                style: kDialogTextStyle,
+              content: Form(
+                key: formKey,
+                child: TextFormField(
+                  controller: textEditingController,
+                  autocorrect: false,
+                  maxLength: 20,
+                  style: kPriceTextStyle,
+                  textInputAction: TextInputAction.done,
+                  textCapitalization: TextCapitalization.sentences,
+                  decoration: InputDecoration(
+                    hintStyle: kPriceTextStyle,
+                    hintText: hint,
+                    errorStyle: kErrorTextStyle,
+                    counterText: '',
+                  ),
+                  validator: (value) {
+                    if (value.isEmpty)
+                      return 'Rereferensi tidak boleh kosong.';
+                    else if (value.length < 3) return 'Minimal 3 Karakter.';
+                    return null;
+                  },
+                ),
               ),
-              onPressed: onConfirmPressed,
-            )
-          ],
-        ));
+              actions: <Widget>[
+                FlatButton(
+                  child: Text(
+                    'Batal',
+                    style: kDialogTextStyle,
+                  ),
+                  onPressed: () => Navigator.pop(context),
+                ),
+                FlatButton(
+                  child: Text(
+                    confirmButtonTitle,
+                    style: kDialogTextStyle,
+                  ),
+                  onPressed: onConfirmPressed,
+                )
+              ],
+            ));
   }
 
   static Future<void> showCostumDialogBox({
@@ -106,46 +112,49 @@ class CostumDialogBox {
     String confirmButtonTitle,
     Function onConfirmPressed,
   }) async {
-    return await showDialog(
+    return await showModal(
         context: context,
-        barrierDismissible: false,
-        child: AlertDialog(
-          title: Text(
-            title,
-            style: kDialogTextStyle,
-          ),
-          content: Row(
-            children: <Widget>[
-              Icon(
-                icon,
-                size: 30,
-                color: iconColor,
+        configuration: FadeScaleTransitionConfiguration(
+          barrierDismissible: false,
+          transitionDuration: Duration(milliseconds: 500),
+        ),
+        builder: (context) => AlertDialog(
+              title: Text(
+                title,
+                style: kDialogTextStyle,
               ),
-              SizedBox(width: 20),
-              Flexible(
-                child: Text(
-                  contentString,
-                  style: kDialogTextStyle,
+              content: Row(
+                children: <Widget>[
+                  Icon(
+                    icon,
+                    size: 30,
+                    color: iconColor,
+                  ),
+                  SizedBox(width: 20),
+                  Flexible(
+                    child: Text(
+                      contentString,
+                      style: kDialogTextStyle,
+                    ),
+                  ),
+                ],
+              ),
+              actions: <Widget>[
+                FlatButton(
+                  child: Text(
+                    'Batal',
+                    style: kDialogTextStyle,
+                  ),
+                  onPressed: () => Navigator.pop(context),
                 ),
-              ),
-            ],
-          ),
-          actions: <Widget>[
-            FlatButton(
-              child: Text(
-                'Batal',
-                style: kDialogTextStyle,
-              ),
-              onPressed: () => Navigator.pop(context),
-            ),
-            FlatButton(
-              child: Text(
-                confirmButtonTitle,
-                style: kDialogTextStyle,
-              ),
-              onPressed: onConfirmPressed,
-            )
-          ],
-        ));
+                FlatButton(
+                  child: Text(
+                    confirmButtonTitle,
+                    style: kDialogTextStyle,
+                  ),
+                  onPressed: onConfirmPressed,
+                )
+              ],
+            ));
   }
 }

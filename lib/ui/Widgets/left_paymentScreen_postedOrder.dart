@@ -1,3 +1,4 @@
+import 'package:animations/animations.dart';
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:connectivity/connectivity.dart';
 import 'package:flutter/material.dart';
@@ -270,9 +271,12 @@ class _PaymentScreenLeftPostedOrderState
                             }),
                       ),
                       GestureDetector(
-                        onTap: () => showDialog(
+                        onTap: () => showModal(
                           context: context,
-                          barrierDismissible: false,
+                          configuration: FadeScaleTransitionConfiguration(
+                            barrierDismissible: false,
+                            transitionDuration: Duration(milliseconds: 500),
+                          ),
                           builder: (context) =>
                               ExtraDiscoutDialog(postedOrderProvider),
                         ),

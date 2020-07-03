@@ -44,6 +44,14 @@ dependencies:
   #send email 
   flutter_email_sender: ^3.0.1
 
+  #image slider
+  carousel_slider: ^2.2.1
+
+  #Animations
+  animations: ^1.1.1
+
+  
+
   
   #export to CSV
   csv: ^4.0.3

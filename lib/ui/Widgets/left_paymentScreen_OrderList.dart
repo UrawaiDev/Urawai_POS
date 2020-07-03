@@ -1,3 +1,4 @@
+import 'package:animations/animations.dart';
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:connectivity/connectivity.dart';
 import 'package:flutter/material.dart';
@@ -259,9 +260,12 @@ class _PaymentScreenLeftOrderListState
                             }),
                       ),
                       GestureDetector(
-                        onTap: () => showDialog(
+                        onTap: () => showModal(
+                          configuration: FadeScaleTransitionConfiguration(
+                            barrierDismissible: false,
+                            transitionDuration: Duration(milliseconds: 500),
+                          ),
                           context: context,
-                          barrierDismissible: false,
                           builder: (context) =>
                               ExtraDiscoutDialog(orderListProvider),
                         ),
