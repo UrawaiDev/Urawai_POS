@@ -7,7 +7,6 @@ import 'package:provider/provider.dart';
 import 'package:responsive_builder/responsive_builder.dart';
 import 'package:urawai_pos/core/Models/postedOrder.dart';
 import 'package:urawai_pos/core/Models/transaction.dart';
-import 'package:urawai_pos/core/Models/users.dart';
 import 'package:urawai_pos/core/Provider/general_provider.dart';
 import 'package:urawai_pos/core/Provider/orderList_provider.dart';
 import 'package:urawai_pos/core/Provider/postedOrder_provider.dart';
@@ -49,9 +48,6 @@ class _PaymentScreenState extends State<PaymentScreen> {
   @override
   Widget build(BuildContext context) {
     final generalState = Provider.of<GeneralProvider>(context);
-
-    DeviceScreenType deviceScreenType =
-        getDeviceType(MediaQuery.of(context).size);
 
     return WillPopScope(
       onWillPop: () => Future.value(false),
@@ -209,12 +205,15 @@ class _PaymentScreenState extends State<PaymentScreen> {
                         color: Colors.white,
                       ),
                     ),
-                    Text(
-                      Formatter.currencyFormat(state.grandTotal),
-                      style: TextStyle(
-                        fontSize: 27,
-                        color: Colors.white,
-                        fontWeight: FontWeight.bold,
+                    Flexible(
+                      child: Text(
+                        Formatter.currencyFormat(state.grandTotal),
+                        style: TextStyle(
+                          fontSize: 27,
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                        ),
+                        overflow: TextOverflow.ellipsis,
                       ),
                     ),
                   ],
@@ -236,54 +235,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
                 GeneralProvider generalProvider =
                     Provider.of<GeneralProvider>(context, listen: false);
 
-                CostumDialogBox.showCostumDialogBox(
-                  context: context,
-                  title: 'Konfirmasi',
-                  icon: Icons.receipt,
-                  iconColor: Colors.blue,
-                  contentString:
-                      'Pembayaran telah dilakukan dan Cetak Kwitansi, Lanjutkan?',
-                  confirmButtonTitle: 'Proses',
-                  onConfirmPressed: () async {
-                    final transactionProvider =
-                        Provider.of<TransactionOrderProvider>(context,
-                            listen: false);
-                    final connectionStatus =
-                        Provider.of<ConnectivityResult>(context, listen: false);
-                    final currentUser =
-                        Provider.of<Users>(context, listen: false);
-
-                    if (connectionStatus == ConnectivityResult.none) {
-                      //Add Transaction to HIVE DB when offline
-                      Provider.of<TransactionOrderProvider>(context,
-                              listen: false)
-                          .addTransactionOrder(
-                        stateProvider: state,
-                        paymentStatus: PaymentStatus.COMPLETED,
-                        paymentType: generalProvider.paymentType,
-                      );
-                    } else {
-                      // Add Transaction to Firestore When Online
-                      transactionProvider.addTransactionToFirestore(
-                        stateProvider: state,
-                        paymentStatus: PaymentStatus.COMPLETED,
-                        paymentType: generalProvider.paymentType,
-                        shopName: currentUser.shopName,
-                      );
-                    }
-
-                    //delete Posted Order
-                    if (widget.itemList is PostedOrder) {
-                      Hive.box<PostedOrder>(POSPage.postedBoxName)
-                          .delete(state.postedOrder.id);
-                    }
-
-                    //Navigate to Payment Success Screen
-                    Navigator.pushNamed(
-                        context, RouteGenerator.kRoutePaymentSuccessPage,
-                        arguments: state);
-                  },
-                );
+                _proceedPayment(state, generalProvider.paymentType);
               }),
         ],
       );
@@ -571,64 +523,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
                         onTap: () {
                           if (state.finalPayment != 0 &&
                               state.finalPayment >= state.grandTotal) {
-                            CostumDialogBox.showCostumDialogBox(
-                              context: context,
-                              title: 'Konfirmasi',
-                              icon: Icons.receipt,
-                              iconColor: Colors.blue,
-                              contentString:
-                                  'Pembayaran telah dilakukan dan Cetak Kwitansi, Lanjutkan?',
-                              confirmButtonTitle: 'Proses',
-                              onConfirmPressed: () async {
-                                final generalProvider =
-                                    Provider.of<GeneralProvider>(context,
-                                        listen: false);
-                                generalProvider.paymentStatus =
-                                    PaymentStatus.COMPLETED;
-
-                                final transactionProvider =
-                                    Provider.of<TransactionOrderProvider>(
-                                        context,
-                                        listen: false);
-                                final connectionStatus =
-                                    Provider.of<ConnectivityResult>(context,
-                                        listen: false);
-
-                                final currentUser =
-                                    await locatorAuth.currentUserXXX;
-                                if (connectionStatus ==
-                                    ConnectivityResult.none) {
-                                  //Add Transaction to Hive DB when Offline
-                                  Provider.of<TransactionOrderProvider>(context,
-                                          listen: false)
-                                      .addTransactionOrder(
-                                    stateProvider: state,
-                                    paymentStatus:
-                                        generalProvider.paymentStatus,
-                                    paymentType: PaymentType.CASH,
-                                  );
-                                } else {
-                                  // add to Firestore DB when Online
-                                  transactionProvider.addTransactionToFirestore(
-                                      stateProvider: state,
-                                      paymentStatus:
-                                          generalProvider.paymentStatus,
-                                      paymentType: PaymentType.CASH,
-                                      shopName: currentUser.shopName);
-                                }
-
-                                //delete Posted Order
-                                if (widget.itemList is PostedOrder) {
-                                  Hive.box<PostedOrder>(POSPage.postedBoxName)
-                                      .delete(state.postedOrder.id);
-                                }
-
-                                //Navigate to Payment Success Screen
-                                Navigator.pushNamed(context,
-                                    RouteGenerator.kRoutePaymentSuccessPage,
-                                    arguments: state);
-                              },
-                            );
+                            _proceedPayment(state, PaymentType.CASH);
                           } else {
                             print('Pastikan sudah di bayar');
                             CostumDialogBox.showDialogInformation(
@@ -717,6 +612,55 @@ class _PaymentScreenState extends State<PaymentScreen> {
               fontWeight: FontWeight.bold,
             )),
       ),
+    );
+  }
+
+  void _proceedPayment(dynamic state, PaymentType paymentType) {
+    CostumDialogBox.showCostumDialogBox(
+      context: context,
+      title: 'Konfirmasi',
+      icon: Icons.receipt,
+      iconColor: Colors.blue,
+      contentString: 'Lanjutkan Proses ?',
+      confirmButtonTitle: 'Proses',
+      onConfirmPressed: () async {
+        final generalProvider =
+            Provider.of<GeneralProvider>(context, listen: false);
+        generalProvider.paymentStatus = PaymentStatus.COMPLETED;
+
+        final transactionProvider =
+            Provider.of<TransactionOrderProvider>(context, listen: false);
+        final connectionStatus =
+            Provider.of<ConnectivityResult>(context, listen: false);
+
+        final currentUser = await locatorAuth.currentUserXXX;
+        if (connectionStatus == ConnectivityResult.none) {
+          //Add Transaction to Hive DB when Offline
+          Provider.of<TransactionOrderProvider>(context, listen: false)
+              .addTransactionOrder(
+            stateProvider: state,
+            paymentStatus: generalProvider.paymentStatus,
+            paymentType: paymentType,
+          );
+        } else {
+          // add to Firestore DB when Online
+          transactionProvider.addTransactionToFirestore(
+              stateProvider: state,
+              paymentStatus: generalProvider.paymentStatus,
+              paymentType: paymentType,
+              shopName: currentUser.shopName);
+        }
+
+        //delete Posted Order
+        if (widget.itemList is PostedOrder) {
+          Hive.box<PostedOrder>(POSPage.postedBoxName)
+              .delete(state.postedOrder.id);
+        }
+
+        //Navigate to Payment Success Screen
+        Navigator.pushNamed(context, RouteGenerator.kRoutePaymentSuccessPage,
+            arguments: state);
+      },
     );
   }
 }

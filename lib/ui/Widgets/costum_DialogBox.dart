@@ -68,6 +68,7 @@ class CostumDialogBox {
                 hintStyle: kPriceTextStyle,
                 hintText: hint,
                 errorStyle: kErrorTextStyle,
+                counterText: '',
               ),
               validator: (value) {
                 if (value.isEmpty)

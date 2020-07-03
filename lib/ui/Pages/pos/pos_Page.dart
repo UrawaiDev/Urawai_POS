@@ -161,12 +161,18 @@ class _POSPageState extends State<POSPage> with SingleTickerProviderStateMixin {
                     title: Row(
                       children: <Widget>[
                         GestureDetector(
-                          child: AutoSizeText(currentUser.shopName ?? '[null]',
+                          child: Container(
+                            width: MediaQuery.of(context).size.width * 0.25,
+                            child: AutoSizeText(
+                              currentUser.shopName ?? '[null]',
                               style: TextStyle(
                                 color: Colors.white,
                                 fontSize: 22,
                                 fontWeight: FontWeight.bold,
-                              )),
+                              ),
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
                           onDoubleTap: () => _logOut(context),
                           onLongPress: () => _logOut(context),
                         ),
@@ -232,13 +238,16 @@ class _POSPageState extends State<POSPage> with SingleTickerProviderStateMixin {
                       Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: <Widget>[
-                          Container(
-                            alignment: Alignment.centerRight,
-                            child: Text(
-                              'Kasir: ${currentUser.username}',
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 20,
+                          Flexible(
+                            child: Container(
+                              alignment: Alignment.centerRight,
+                              child: Text(
+                                'Kasir: ${currentUser.username}',
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 20,
+                                ),
+                                overflow: TextOverflow.ellipsis,
                               ),
                             ),
                           ),

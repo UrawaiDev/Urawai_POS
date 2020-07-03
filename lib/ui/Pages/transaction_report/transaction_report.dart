@@ -493,12 +493,16 @@ class TransactionReport extends StatelessWidget {
                     child: Text(
                       title,
                       style: kPriceTextStyle,
+                      overflow: TextOverflow.ellipsis,
                     ),
                   ),
                   SizedBox(height: 5),
-                  Text(
-                    value,
-                    style: kGrandTotalTextStyle,
+                  Container(
+                    child: Text(
+                      value,
+                      style: kGrandTotalTextStyle,
+                      overflow: TextOverflow.ellipsis,
+                    ),
                   ),
                 ],
               ),

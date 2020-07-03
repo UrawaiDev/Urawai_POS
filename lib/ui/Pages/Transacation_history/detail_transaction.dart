@@ -113,26 +113,32 @@ class _DetailTransactionPageState extends State<DetailTransactionPage> {
                                             mainAxisAlignment:
                                                 MainAxisAlignment.spaceBetween,
                                             children: <Widget>[
-                                              Container(
-                                                child: Row(
-                                                  children: <Widget>[
-                                                    AutoSizeText(
-                                                      'x${itemList.quantity}',
-                                                      style: kPriceTextStyle,
-                                                    ),
-                                                    SizedBox(width: 5),
-                                                    Container(
-                                                      width: 200,
-                                                      child: AutoSizeText(
-                                                        itemList.productName,
+                                              Expanded(
+                                                child: Container(
+                                                  child: Row(
+                                                    children: <Widget>[
+                                                      AutoSizeText(
+                                                        'x${itemList.quantity}',
                                                         style: kPriceTextStyle,
                                                       ),
-                                                    ),
-                                                  ],
+                                                      SizedBox(width: 5),
+                                                      Flexible(
+                                                        child: Text(
+                                                          itemList.productName,
+                                                          style:
+                                                              kPriceTextStyle,
+                                                          overflow: TextOverflow
+                                                              .ellipsis,
+                                                        ),
+                                                      ),
+                                                    ],
+                                                  ),
                                                 ),
                                               ),
                                               Expanded(
                                                 child: Container(
+                                                  alignment:
+                                                      Alignment.centerRight,
                                                   child: AutoSizeText(
                                                     Formatter.currencyFormat(
                                                         itemList.price *
@@ -412,11 +418,14 @@ class _DetailTransactionPageState extends State<DetailTransactionPage> {
                               style: kPriceTextStyle,
                             ),
                             SizedBox(width: 8),
-                            Text(
-                              PaymentHelper.getPaymentTypeAsString(
-                                      data['paymentType']) ??
-                                  '[null]',
-                              style: kPriceTextStyle,
+                            Flexible(
+                              child: Text(
+                                PaymentHelper.getPaymentTypeAsString(
+                                        data['paymentType']) ??
+                                    '[null]',
+                                style: kPriceTextStyle,
+                                overflow: TextOverflow.ellipsis,
+                              ),
                             ),
                           ],
                         ),

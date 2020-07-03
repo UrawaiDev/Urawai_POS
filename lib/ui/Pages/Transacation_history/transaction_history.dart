@@ -68,8 +68,11 @@ class TransactionHistoryPage extends StatelessWidget {
                       tooltip: 'Kirim Laporan via Email atau Whatsapp.',
                       onPressed: () => _exportToExcel(
                           currentUser.shopName, currentUser.email),
-                      icon: Icon(Icons.screen_share,
-                          color: Colors.white, size: 32),
+                      icon: FaIcon(
+                        FontAwesomeIcons.fileExport,
+                        color: Colors.white,
+                        size: 26,
+                      ),
                     )
                   ],
                 ),
@@ -377,9 +380,12 @@ class TransactionHistoryPage extends StatelessWidget {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: <Widget>[
-                Text(
-                  Formatter.currencyFormat(item.grandTotal),
-                  style: kProductNameBigScreenTextStyle,
+                Flexible(
+                  child: Text(
+                    Formatter.currencyFormat(item.grandTotal),
+                    style: kProductNameBigScreenTextStyle,
+                    overflow: TextOverflow.ellipsis,
+                  ),
                 ),
                 Builder(
                   builder: (context) => Row(

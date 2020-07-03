@@ -55,7 +55,7 @@ class _PaymentSuccessState extends State<PaymentSuccess> {
     });
 
     locatorAuth.currentUserXXX.then((data) {
-      printStruck(data.shopName);
+      _doPrinting(data.shopName);
     });
   }
 
@@ -170,27 +170,36 @@ class _PaymentSuccessState extends State<PaymentSuccess> {
                                         mainAxisAlignment:
                                             MainAxisAlignment.spaceBetween,
                                         children: <Widget>[
-                                          Row(
-                                            children: <Widget>[
-                                              AutoSizeText(
-                                                'x${widget.itemList[index].quantity}',
-                                              ),
-                                              SizedBox(width: 15),
-                                              Container(
-                                                width: 250,
-                                                child: AutoSizeText(
-                                                  widget.itemList[index]
-                                                      .productName,
-                                                ),
-                                              ),
-                                            ],
-                                          ),
-                                          Container(
-                                            child: AutoSizeText(
-                                              Formatter.currencyFormat(
-                                                  widget.itemList[index].price *
+                                          Expanded(
+                                            flex: 2,
+                                            child: Container(
+                                              alignment: Alignment.centerLeft,
+                                              child: Row(
+                                                children: <Widget>[
+                                                  AutoSizeText(
+                                                    'x${widget.itemList[index].quantity}',
+                                                  ),
+                                                  SizedBox(width: 10),
+                                                  Flexible(
+                                                    child: AutoSizeText(
                                                       widget.itemList[index]
-                                                          .quantity),
+                                                          .productName,
+                                                    ),
+                                                  ),
+                                                ],
+                                              ),
+                                            ),
+                                          ),
+                                          Expanded(
+                                            flex: 1,
+                                            child: Container(
+                                              alignment: Alignment.centerRight,
+                                              child: AutoSizeText(
+                                                Formatter.currencyFormat(widget
+                                                        .itemList[index].price *
+                                                    widget.itemList[index]
+                                                        .quantity),
+                                              ),
                                             ),
                                           ),
                                         ],
@@ -340,7 +349,8 @@ class _PaymentSuccessState extends State<PaymentSuccess> {
                                     CostumButton.squareButtonSmall(
                                         'Cetak Kwitansi',
                                         prefixIcon: Icons.print,
-                                        onTap: () => printStruck(_shopName)),
+                                        onTap: () =>
+                                            printStruckWithFeedback(_shopName)),
                                     SizedBox(height: 10),
                                     CostumButton.squareButtonSmall(
                                       'Selesai',
@@ -365,7 +375,7 @@ class _PaymentSuccessState extends State<PaymentSuccess> {
     );
   }
 
-  Future<void> printStruck(String shopName) async {
+  Future<bool> _doPrinting(String shopName) async {
     var printer = await PrinterService.loadPrinterDevice();
     //* Print if printer has set and bluetooth is active
     if (printer.name != null && bluetoothStatus != BLUETOOTH_DISCONNECTED) {
@@ -379,7 +389,16 @@ class _PaymentSuccessState extends State<PaymentSuccess> {
         paymentStatus: PaymentHelper.getPaymentStatusAsString(
             widget.paymentStatus.toString()),
       );
+      return true;
     } else {
+      return false;
+    }
+  }
+
+  Future<void> printStruckWithFeedback(String shopName) async {
+    bool result = await _doPrinting(shopName);
+
+    if (result == false) {
       CostumDialogBox.showDialogInformation(
         context: context,
         title: 'Informasi',
@@ -389,8 +408,6 @@ class _PaymentSuccessState extends State<PaymentSuccess> {
         iconColor: Colors.blue,
         onTap: () => Navigator.pop(context),
       );
-      print(
-          'Something when wrong with the printer, please check connection and make sure you have set the printer.');
     }
   }
 

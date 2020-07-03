@@ -47,9 +47,12 @@ class FooterOrderList extends StatelessWidget {
                 'Total',
                 style: kGrandTotalTextStyle,
               ),
-              Text(
-                Formatter.currencyFormat(grandTotal),
-                style: kGrandTotalTextStyle,
+              Flexible(
+                child: Text(
+                  Formatter.currencyFormat(grandTotal),
+                  style: kGrandTotalTextStyle,
+                  overflow: TextOverflow.ellipsis,
+                ),
               ),
             ],
           ),
@@ -67,9 +70,12 @@ class FooterOrderList extends StatelessWidget {
           title,
           style: kPriceTextStyle,
         ),
-        Text(
-          value,
-          style: kPriceTextStyle,
+        Flexible(
+          child: Text(
+            value,
+            style: kPriceTextStyle,
+            overflow: TextOverflow.ellipsis,
+          ),
         ),
       ],
     );

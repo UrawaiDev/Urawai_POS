@@ -56,7 +56,7 @@ TextStyle kNoteTextStyle = TextStyle(
 );
 
 TextStyle kDialogTextStyle = TextStyle(
-  fontSize: 20,
+  fontSize: 17,
 );
 
 TextStyle kStruckTextStyle = TextStyle(
