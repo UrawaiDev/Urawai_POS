@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:animations/animations.dart';
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:connectivity/connectivity.dart';
 import 'package:flutter/material.dart';
@@ -492,9 +493,12 @@ class _POSPageState extends State<POSPage> with SingleTickerProviderStateMixin {
 
   void _onDiscountTap(OrderListProvider orderlistState) {
     if (orderlistState.orderlist.isNotEmpty) {
-      showDialog(
+      showModal(
+          configuration: FadeScaleTransitionConfiguration(
+            barrierDismissible: false,
+            transitionDuration: Duration(milliseconds: 500),
+          ),
           context: context,
-          barrierDismissible: false,
           builder: (context) => ExtraDiscoutDialog(orderlistState));
     }
   }
@@ -727,9 +731,12 @@ class _POSPageState extends State<POSPage> with SingleTickerProviderStateMixin {
   }
 
   Future _showPostedOrderList(BuildContext context, boxOrder) {
-    return showDialog(
+    return showModal(
       context: context,
-      child: Dialog(
+      configuration: FadeScaleTransitionConfiguration(
+        transitionDuration: Duration(milliseconds: 500),
+      ),
+      builder: (context) => Dialog(
         child: Container(
           width: 500,
           height: 500,
