@@ -211,64 +211,68 @@ class _PaymentScreenLeftPostedOrderState
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: <Widget>[
-                      GestureDetector(
-                        child: Container(
-                          alignment: Alignment.center,
-                          height: 50,
-                          width:
-                              (MediaQuery.of(context).size.width * 0.4) * 0.6,
-                          decoration: BoxDecoration(
-                            color: Colors.red,
-                            border: Border.all(color: Colors.grey),
+                      Expanded(
+                        child: GestureDetector(
+                          child: Container(
+                            alignment: Alignment.center,
+                            height: 50,
+                            decoration: BoxDecoration(
+                              color: Colors.red,
+                              border: Border.all(color: Colors.grey),
+                            ),
+                            child: AutoSizeText('Void Traksaksi',
+                                style: TextStyle(
+                                  fontSize: 25,
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.bold,
+                                )),
                           ),
-                          child: AutoSizeText('Void Traksaksi',
-                              style: TextStyle(
-                                fontSize: 25,
-                                color: Colors.white,
-                                fontWeight: FontWeight.bold,
-                              )),
-                        ),
-                        onTap: () => CostumDialogBox.showCostumDialogBox(
-                            context: context,
-                            icon: Icons.delete,
-                            iconColor: Colors.red,
-                            title: 'Konfirmasi',
-                            contentString: 'Anda akan menghapus transaksi ini?',
-                            confirmButtonTitle: 'Hapus',
-                            onConfirmPressed: () async {
-                              var currentUser =
-                                  await CurrentUserLoggedIn.currentUser;
-                              final transactionProvider =
+                          onTap: () => CostumDialogBox.showCostumDialogBox(
+                              context: context,
+                              icon: Icons.delete,
+                              iconColor: Colors.red,
+                              title: 'Konfirmasi',
+                              contentString:
+                                  'Anda akan menghapus transaksi ini?',
+                              confirmButtonTitle: 'Hapus',
+                              onConfirmPressed: () async {
+                                var currentUser =
+                                    await CurrentUserLoggedIn.currentUser;
+                                final transactionProvider =
+                                    Provider.of<TransactionOrderProvider>(
+                                        context,
+                                        listen: false);
+                                final connectionStatus =
+                                    Provider.of<ConnectivityResult>(context,
+                                        listen: false);
+
+                                if (connectionStatus ==
+                                    ConnectivityResult.none) {
+                                  // add to HIVE db When Offline
                                   Provider.of<TransactionOrderProvider>(context,
-                                      listen: false);
-                              final connectionStatus =
-                                  Provider.of<ConnectivityResult>(context,
-                                      listen: false);
+                                          listen: false)
+                                      .addTransactionOrder(
+                                          stateProvider: stateProvider,
+                                          paymentStatus: PaymentStatus.VOID,
+                                          paymentType: PaymentType.CASH);
+                                } else {
+                                  //Add to cloud FireStore when Online
+                                  transactionProvider.addTransactionToFirestore(
+                                    stateProvider: stateProvider,
+                                    paymentStatus: PaymentStatus.VOID,
+                                    paymentType: PaymentType.CASH,
+                                    shopName: currentUser.shopName,
+                                  );
+                                }
 
-                              if (connectionStatus == ConnectivityResult.none) {
-                                // add to HIVE db When Offline
-                                Provider.of<TransactionOrderProvider>(context,
-                                        listen: false)
-                                    .addTransactionOrder(
-                                        stateProvider: stateProvider,
-                                        paymentStatus: PaymentStatus.VOID,
-                                        paymentType: PaymentType.CASH);
-                              } else {
-                                //Add to cloud FireStore when Online
-                                transactionProvider.addTransactionToFirestore(
-                                  stateProvider: stateProvider,
-                                  paymentStatus: PaymentStatus.VOID,
-                                  paymentType: PaymentType.CASH,
-                                  shopName: currentUser.shopName,
-                                );
-                              }
-
-                              stateProvider.deletePostedOrder(
-                                  stateProvider.postedOrder.id);
-                              stateProvider.resetFinalPayment();
-                              Navigator.pop(context); //close dialogBOx
-                              Navigator.pop(context); //Back to HomePage Screen
-                            }),
+                                stateProvider.deletePostedOrder(
+                                    stateProvider.postedOrder.id);
+                                stateProvider.resetFinalPayment();
+                                Navigator.pop(context); //close dialogBOx
+                                Navigator.pop(
+                                    context); //Back to HomePage Screen
+                              }),
+                        ),
                       ),
                       GestureDetector(
                         onTap: () => showModal(

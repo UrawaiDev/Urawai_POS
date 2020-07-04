@@ -1,7 +1,6 @@
 import 'package:connectivity/connectivity.dart';
-// import 'package:device_preview/device_preview.dart';
+import 'package:device_preview/device_preview.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-// import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_phoenix/flutter_phoenix.dart';
@@ -53,7 +52,7 @@ void main() async {
   //   builder: (BuildContext context) => Phoenix(child: MyApp()),
   // ));
 
-  // //* Default MODE
+  //* Default MODE
   runApp(
     Phoenix(child: MyApp()),
   );
@@ -63,7 +62,7 @@ void _loadAppConfig() async {
   SharedPreferences _prefs = await SharedPreferences.getInstance();
   if (_prefs.getBool('vat') == null) _prefs.setBool('vat', false);
 
-  print(' VAT from MAIN ${_prefs.getBool('vat')}');
+  print(' VAT status: ${_prefs.getBool('vat')}');
 }
 
 void _removePrinterSet() async {
@@ -95,13 +94,11 @@ class MyApp extends StatelessWidget {
         title: 'Urawai POS',
         theme: ThemeData(
             fontFamily: 'Sen',
-            // primaryColor: Color(0xFF408be5),
             primaryColor: Color(0xFF408BE5),
             appBarTheme: AppBarTheme(color: Color(0xFF408BE5)),
             scaffoldBackgroundColor: Color(0xFFfbfcfe),
             textTheme: TextTheme(body1: TextStyle(color: Color(0xFF435c72)))),
         initialRoute: 'Login_Page',
-        // initialRoute: 'Settings_Page',
         onGenerateRoute: RouteGenerator.onGenerate,
       ),
     );

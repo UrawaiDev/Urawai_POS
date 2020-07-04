@@ -1,9 +1,11 @@
+import 'package:animated_text_kit/animated_text_kit.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:email_validator/email_validator.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:provider/provider.dart';
+import 'package:urawai_pos/core/Models/carousel_intro.dart';
 import 'package:urawai_pos/core/Models/users.dart';
 import 'package:urawai_pos/core/Provider/general_provider.dart';
 import 'package:urawai_pos/core/Services/error_handling.dart';
@@ -28,16 +30,13 @@ class _SignUpPageState extends State<SignUpPage> {
 
   final FirebaseAuthentication _auth = FirebaseAuthentication();
   String errorMessageSignUp = '';
+  List<CarouselIntro> carouselIntro = List<CarouselIntro>();
 
-  int _current = 0;
-
-  final List<String> imageUrl = [
-    'assets/images/bakmi.jpg',
-    'assets/images/bakmi_ayam_pedas.jpg',
-    'assets/images/bakmi_ayam_spesial.png',
-    'assets/images/bakso.jpg',
-    'assets/images/eskopi_susu.jpg',
-  ];
+  @override
+  void initState() {
+    super.initState();
+    carouselIntro = CarouselIntro().getDefaultValue();
+  }
 
   @override
   dispose() {
@@ -59,8 +58,8 @@ class _SignUpPageState extends State<SignUpPage> {
       child: GestureDetector(
         onTap: () => FocusScope.of(context).unfocus(),
         child: Scaffold(
-          backgroundColor: Color(0xFFf8fafb),
-          // body: _viewPage(context, generalProvider),
+          // backgroundColor: Color(0xFFf8fafb),
+          backgroundColor: Color(0xFFFFFFFF),
           body: Stack(
             fit: StackFit.expand,
             children: <Widget>[
@@ -75,16 +74,20 @@ class _SignUpPageState extends State<SignUpPage> {
                       Expanded(
                         child: Column(
                           children: <Widget>[
-                            Text(
-                              'Selamat Datang.',
-                              style: TextStyle(
+                            TypewriterAnimatedTextKit(
+                              speed: Duration(milliseconds: 800),
+                              repeatForever: true,
+                              text: ['Selamat Datang.'],
+                              textStyle: TextStyle(
                                 fontSize: 40,
                                 color: Colors.blueAccent,
                               ),
                             ),
-                            Text(
-                              'Urawai POS (Point of Sales)',
-                              style: TextStyle(
+                            FadeAnimatedTextKit(
+                              duration: Duration(milliseconds: 1200),
+                              repeatForever: true,
+                              text: ['Urawai POS (Point of Sales)'],
+                              textStyle: TextStyle(
                                   fontSize: 18,
                                   color: Colors.black,
                                   fontStyle: FontStyle.italic),
@@ -101,24 +104,59 @@ class _SignUpPageState extends State<SignUpPage> {
                                           viewportFraction: 1,
                                           autoPlayCurve: Curves.easeInToLinear,
                                           onPageChanged: (index, reason) {
-                                            setState(() {
-                                              _current = index;
-                                            });
+                                            generalProvider
+                                                .carouselCurrentIndex = index;
                                           }),
-                                      items: imageUrl
-                                          .map((data) => Container(
-                                                child: Image.asset(
-                                                  data,
-                                                  fit: BoxFit.cover,
-                                                ),
+                                      items: carouselIntro
+                                          .map((data) => Stack(
+                                                children: <Widget>[
+                                                  Container(
+                                                    child: Image.asset(
+                                                      data.imgUrl,
+                                                      fit: BoxFit.cover,
+                                                    ),
+                                                  ),
+                                                  Positioned(
+                                                    bottom: 0,
+                                                    left: 0,
+                                                    right: 0,
+                                                    child: Container(
+                                                      alignment:
+                                                          Alignment.centerLeft,
+                                                      padding:
+                                                          EdgeInsets.all(8.0),
+                                                      height: 50,
+                                                      decoration: BoxDecoration(
+                                                        borderRadius:
+                                                            BorderRadius.only(
+                                                                topLeft: Radius
+                                                                    .circular(
+                                                                        20),
+                                                                topRight: Radius
+                                                                    .circular(
+                                                                        20)),
+                                                        color: Colors.grey
+                                                            .withOpacity(0.2),
+                                                      ),
+                                                      child: Text(data.quote,
+                                                          style: TextStyle(
+                                                            fontSize: 17,
+                                                            color: Colors
+                                                                .grey[700],
+                                                            fontWeight:
+                                                                FontWeight.bold,
+                                                          )),
+                                                    ),
+                                                  )
+                                                ],
                                               ))
                                           .toList(),
                                     ),
                                     Row(
                                       mainAxisAlignment:
                                           MainAxisAlignment.center,
-                                      children: imageUrl.map((url) {
-                                        int index = imageUrl.indexOf(url);
+                                      children: carouselIntro.map((url) {
+                                        int index = carouselIntro.indexOf(url);
                                         return Container(
                                           width: 8.0,
                                           height: 8.0,
@@ -126,7 +164,9 @@ class _SignUpPageState extends State<SignUpPage> {
                                               vertical: 10.0, horizontal: 2.0),
                                           decoration: BoxDecoration(
                                             shape: BoxShape.circle,
-                                            color: _current == index
+                                            color: generalProvider
+                                                        .carouselCurrentIndex ==
+                                                    index
                                                 ? Color.fromRGBO(0, 0, 0, 0.9)
                                                 : Color.fromRGBO(0, 0, 0, 0.4),
                                           ),
@@ -210,7 +250,7 @@ class _SignUpPageState extends State<SignUpPage> {
             if (value.isEmpty)
               return 'Nama Toko Tidak Boleh Kosong.';
             else if (value.contains('/'))
-              return 'Tidak Boleh mengandung karakter \'/\'';
+              return 'Karakter \'/\' tidak dibolehkan.';
 
             return null;
           },
@@ -308,7 +348,8 @@ class _SignUpPageState extends State<SignUpPage> {
           },
         ),
         SizedBox(height: 20),
-        Row(
+        Wrap(
+          spacing: 5,
           children: <Widget>[
             CostumButton.buttonLoginPage('Daftar', Color(0xFF3882fe),
                 Colors.white, () => _onSignUpTap(generalProvider)),
