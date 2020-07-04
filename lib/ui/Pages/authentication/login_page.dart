@@ -1,4 +1,3 @@
-import 'package:animated_text_kit/animated_text_kit.dart';
 import 'package:animations/animations.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:email_validator/email_validator.dart';
@@ -30,21 +29,12 @@ class _LoginPageState extends State<LoginPage> {
   final FirebaseAuthentication _auth = FirebaseAuthentication();
   String errorMessageSignIn = '';
 
-<<<<<<< HEAD
   int _currentIndex = 0;
   List<CarouselIntro> carouselIntroList = List<CarouselIntro>();
   @override
   void initState() {
     super.initState();
     carouselIntroList = CarouselIntro().getDefaultValue();
-=======
-  List<CarouselIntro> carouselIntro = List<CarouselIntro>();
-
-  @override
-  void initState() {
-    super.initState();
-    carouselIntro = CarouselIntro().getDefaultValue();
->>>>>>> fad176828588cf8752bc406579b8cff33c2eba72
   }
 
   @override
@@ -66,10 +56,6 @@ class _LoginPageState extends State<LoginPage> {
       child: GestureDetector(
         onTap: () => FocusScope.of(context).unfocus(),
         child: Scaffold(
-<<<<<<< HEAD
-=======
-          // backgroundColor: Color(0xFFf8fafb),
->>>>>>> fad176828588cf8752bc406579b8cff33c2eba72
           backgroundColor: Color(0xFFFFFFFF),
           body: Stack(
             fit: StackFit.expand,
@@ -86,20 +72,16 @@ class _LoginPageState extends State<LoginPage> {
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: <Widget>[
-                            TypewriterAnimatedTextKit(
-                              speed: Duration(milliseconds: 800),
-                              repeatForever: true,
-                              text: ['Selamat Datang.'],
-                              textStyle: TextStyle(
+                            Text(
+                              'Selamat Datang.',
+                              style: TextStyle(
                                 fontSize: 40,
                                 color: Colors.blueAccent,
                               ),
                             ),
-                            FadeAnimatedTextKit(
-                              duration: Duration(milliseconds: 1200),
-                              repeatForever: true,
-                              text: ['Urawai POS (Point of Sales)'],
-                              textStyle: TextStyle(
+                            Text(
+                              'Urawai POS (Point of Sales)',
+                              style: TextStyle(
                                   fontSize: 18,
                                   color: Colors.black,
                                   fontStyle: FontStyle.italic),
@@ -116,18 +98,11 @@ class _LoginPageState extends State<LoginPage> {
                                           viewportFraction: 1,
                                           autoPlayCurve: Curves.easeInToLinear,
                                           onPageChanged: (index, reason) {
-<<<<<<< HEAD
                                             setState(() {
                                               _currentIndex = index;
                                             });
                                           }),
                                       items: carouselIntroList
-=======
-                                            generalProvider
-                                                .carouselCurrentIndex = index;
-                                          }),
-                                      items: carouselIntro
->>>>>>> fad176828588cf8752bc406579b8cff33c2eba72
                                           .map((data) => Stack(
                                                 children: <Widget>[
                                                   Container(
@@ -137,7 +112,6 @@ class _LoginPageState extends State<LoginPage> {
                                                     ),
                                                   ),
                                                   Positioned(
-<<<<<<< HEAD
                                                       left: 0,
                                                       right: 0,
                                                       bottom: 0,
@@ -161,44 +135,10 @@ class _LoginPageState extends State<LoginPage> {
                                                                     FontWeight
                                                                         .bold)),
                                                       ))
-=======
-                                                    bottom: 0,
-                                                    left: 0,
-                                                    right: 0,
-                                                    child: Container(
-                                                      alignment:
-                                                          Alignment.centerLeft,
-                                                      padding:
-                                                          EdgeInsets.all(8.0),
-                                                      height: 50,
-                                                      decoration: BoxDecoration(
-                                                        borderRadius:
-                                                            BorderRadius.only(
-                                                                topLeft: Radius
-                                                                    .circular(
-                                                                        20),
-                                                                topRight: Radius
-                                                                    .circular(
-                                                                        20)),
-                                                        color: Colors.grey
-                                                            .withOpacity(0.2),
-                                                      ),
-                                                      child: Text(data.quote,
-                                                          style: TextStyle(
-                                                            fontSize: 17,
-                                                            color: Colors
-                                                                .grey[700],
-                                                            fontWeight:
-                                                                FontWeight.bold,
-                                                          )),
-                                                    ),
-                                                  )
->>>>>>> fad176828588cf8752bc406579b8cff33c2eba72
                                                 ],
                                               ))
                                           .toList(),
                                     ),
-<<<<<<< HEAD
                                     Row(
                                       mainAxisAlignment:
                                           MainAxisAlignment.center,
@@ -219,34 +159,6 @@ class _LoginPageState extends State<LoginPage> {
                                           ),
                                         );
                                       }).toList(),
-=======
-                                    Consumer<GeneralProvider>(
-                                      builder: (_, generalProvider, __) => Row(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.center,
-                                        children: carouselIntro.map((url) {
-                                          int index =
-                                              carouselIntro.indexOf(url);
-                                          return Container(
-                                            width: 8.0,
-                                            height: 8.0,
-                                            margin: EdgeInsets.symmetric(
-                                                vertical: 10.0,
-                                                horizontal: 2.0),
-                                            decoration: BoxDecoration(
-                                              shape: BoxShape.circle,
-                                              color: generalProvider
-                                                          .carouselCurrentIndex ==
-                                                      index
-                                                  ? Color.fromRGBO(
-                                                      56, 130, 254, 1.0)
-                                                  : Color.fromRGBO(
-                                                      0, 0, 0, 0.4),
-                                            ),
-                                          );
-                                        }).toList(),
-                                      ),
->>>>>>> fad176828588cf8752bc406579b8cff33c2eba72
                                     ),
                                   ],
                                 ),
@@ -368,10 +280,6 @@ class _LoginPageState extends State<LoginPage> {
           style: kErrorTextStyle,
         ),
         Wrap(
-<<<<<<< HEAD
-=======
-          spacing: 5,
->>>>>>> fad176828588cf8752bc406579b8cff33c2eba72
           children: <Widget>[
             CostumButton.buttonLoginPage('Masuk', Color(0xFF3882fe),
                 Colors.white, () => _onLoginTap(generalProvider)),
