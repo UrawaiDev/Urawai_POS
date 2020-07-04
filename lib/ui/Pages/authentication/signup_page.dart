@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:provider/provider.dart';
+import 'package:urawai_pos/core/Models/carousel_intro.dart';
 import 'package:urawai_pos/core/Models/users.dart';
 import 'package:urawai_pos/core/Provider/general_provider.dart';
 import 'package:urawai_pos/core/Services/error_handling.dart';
@@ -31,13 +32,12 @@ class _SignUpPageState extends State<SignUpPage> {
 
   int _current = 0;
 
-  final List<String> imageUrl = [
-    'assets/images/bakmi.jpg',
-    'assets/images/bakmi_ayam_pedas.jpg',
-    'assets/images/bakmi_ayam_spesial.png',
-    'assets/images/bakso.jpg',
-    'assets/images/eskopi_susu.jpg',
-  ];
+  List<CarouselIntro> carouselIntroList = List<CarouselIntro>();
+  @override
+  void initState() {
+    super.initState();
+    carouselIntroList = CarouselIntro().getDefaultValue();
+  }
 
   @override
   dispose() {
@@ -59,8 +59,7 @@ class _SignUpPageState extends State<SignUpPage> {
       child: GestureDetector(
         onTap: () => FocusScope.of(context).unfocus(),
         child: Scaffold(
-          backgroundColor: Color(0xFFf8fafb),
-          // body: _viewPage(context, generalProvider),
+          backgroundColor: Color(0xFFFFFFFF),
           body: Stack(
             fit: StackFit.expand,
             children: <Widget>[
@@ -105,20 +104,49 @@ class _SignUpPageState extends State<SignUpPage> {
                                               _current = index;
                                             });
                                           }),
-                                      items: imageUrl
-                                          .map((data) => Container(
-                                                child: Image.asset(
-                                                  data,
-                                                  fit: BoxFit.cover,
-                                                ),
+                                      items: carouselIntroList
+                                          .map((data) => Stack(
+                                                children: <Widget>[
+                                                  Container(
+                                                    child: Image.asset(
+                                                      data.imgUrl,
+                                                      fit: BoxFit.cover,
+                                                    ),
+                                                  ),
+                                                  Positioned(
+                                                      left: 0,
+                                                      right: 0,
+                                                      bottom: 0,
+                                                      child: Container(
+                                                        padding:
+                                                            EdgeInsets.all(8),
+                                                        height: 50,
+                                                        alignment: Alignment
+                                                            .centerLeft,
+                                                        decoration:
+                                                            BoxDecoration(
+                                                          color: Colors.grey
+                                                              .withOpacity(0.3),
+                                                        ),
+                                                        child: Text(data.quote,
+                                                            style: TextStyle(
+                                                                fontSize: 20,
+                                                                color: Colors
+                                                                    .indigo,
+                                                                fontWeight:
+                                                                    FontWeight
+                                                                        .bold)),
+                                                      ))
+                                                ],
                                               ))
                                           .toList(),
                                     ),
                                     Row(
                                       mainAxisAlignment:
                                           MainAxisAlignment.center,
-                                      children: imageUrl.map((url) {
-                                        int index = imageUrl.indexOf(url);
+                                      children: carouselIntroList.map((url) {
+                                        int index =
+                                            carouselIntroList.indexOf(url);
                                         return Container(
                                           width: 8.0,
                                           height: 8.0,
@@ -127,7 +155,8 @@ class _SignUpPageState extends State<SignUpPage> {
                                           decoration: BoxDecoration(
                                             shape: BoxShape.circle,
                                             color: _current == index
-                                                ? Color.fromRGBO(0, 0, 0, 0.9)
+                                                ? Color.fromRGBO(
+                                                    56, 130, 254, 1.0)
                                                 : Color.fromRGBO(0, 0, 0, 0.4),
                                           ),
                                         );
@@ -197,20 +226,21 @@ class _SignUpPageState extends State<SignUpPage> {
           autocorrect: false,
           decoration: InputDecoration(
             hintStyle: kPriceTextStyle,
-            hintText: 'Nama Toko',
+            hintText: 'Nama Usaha',
             labelStyle: kPriceTextStyle,
-            labelText: 'Nama Toko',
+            labelText: 'Nama Usaha',
             border: OutlineInputBorder(),
             counterText: '',
             errorStyle: kErrorTextStyle,
           ),
           style: kPriceTextStyle,
           maxLength: 30,
+          textCapitalization: TextCapitalization.words,
           validator: (value) {
             if (value.isEmpty)
               return 'Nama Toko Tidak Boleh Kosong.';
             else if (value.contains('/'))
-              return 'Tidak Boleh mengandung karakter \'/\'';
+              return 'Karakter \'/\' tidak dibolehkan.';
 
             return null;
           },
@@ -229,6 +259,7 @@ class _SignUpPageState extends State<SignUpPage> {
             errorStyle: kErrorTextStyle,
           ),
           style: kPriceTextStyle,
+          textCapitalization: TextCapitalization.words,
           maxLength: 20,
           validator: (value) =>
               value.isEmpty ? 'Username Tidak Boleh Kosong' : null,
@@ -308,7 +339,7 @@ class _SignUpPageState extends State<SignUpPage> {
           },
         ),
         SizedBox(height: 20),
-        Row(
+        Wrap(
           children: <Widget>[
             CostumButton.buttonLoginPage('Daftar', Color(0xFF3882fe),
                 Colors.white, () => _onSignUpTap(generalProvider)),

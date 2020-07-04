@@ -8,14 +8,6 @@ class GeneralProvider with ChangeNotifier {
   PaymentType _paymentType = PaymentType.CASH;
   PaymentStatus _paymentStatus = PaymentStatus.PENDING;
 
-  int _carouselCurrentIndex = 0;
-
-  int get carouselCurrentIndex => _carouselCurrentIndex;
-  set carouselCurrentIndex(int newValue) {
-    _carouselCurrentIndex = newValue;
-    notifyListeners();
-  }
-
   PaymentType get paymentType => _paymentType;
   set paymentType(PaymentType newValue) {
     _paymentType = newValue;
