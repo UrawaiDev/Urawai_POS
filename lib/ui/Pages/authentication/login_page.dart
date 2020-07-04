@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:provider/provider.dart';
+import 'package:urawai_pos/core/Models/carousel_intro.dart';
 import 'package:urawai_pos/core/Models/users.dart';
 import 'package:urawai_pos/core/Provider/general_provider.dart';
 import 'package:urawai_pos/core/Services/error_handling.dart';
@@ -28,15 +29,13 @@ class _LoginPageState extends State<LoginPage> {
   final FirebaseAuthentication _auth = FirebaseAuthentication();
   String errorMessageSignIn = '';
 
-  int _current = 0;
-
-  final List<String> imageUrl = [
-    'assets/images/bakmi.jpg',
-    'assets/images/bakmi_ayam_pedas.jpg',
-    'assets/images/bakmi_ayam_spesial.png',
-    'assets/images/bakso.jpg',
-    'assets/images/eskopi_susu.jpg',
-  ];
+  int _currentIndex = 0;
+  List<CarouselIntro> carouselIntroList = List<CarouselIntro>();
+  @override
+  void initState() {
+    super.initState();
+    carouselIntroList = CarouselIntro().getDefaultValue();
+  }
 
   @override
   dispose() {
@@ -57,8 +56,7 @@ class _LoginPageState extends State<LoginPage> {
       child: GestureDetector(
         onTap: () => FocusScope.of(context).unfocus(),
         child: Scaffold(
-          backgroundColor: Color(0xFFf8fafb),
-          // body: _viewPage(context, generalProvider),
+          backgroundColor: Color(0xFFFFFFFF),
           body: Stack(
             fit: StackFit.expand,
             children: <Widget>[
@@ -101,23 +99,52 @@ class _LoginPageState extends State<LoginPage> {
                                           autoPlayCurve: Curves.easeInToLinear,
                                           onPageChanged: (index, reason) {
                                             setState(() {
-                                              _current = index;
+                                              _currentIndex = index;
                                             });
                                           }),
-                                      items: imageUrl
-                                          .map((data) => Container(
-                                                child: Image.asset(
-                                                  data,
-                                                  fit: BoxFit.cover,
-                                                ),
+                                      items: carouselIntroList
+                                          .map((data) => Stack(
+                                                children: <Widget>[
+                                                  Container(
+                                                    child: Image.asset(
+                                                      data.imgUrl,
+                                                      fit: BoxFit.cover,
+                                                    ),
+                                                  ),
+                                                  Positioned(
+                                                      left: 0,
+                                                      right: 0,
+                                                      bottom: 0,
+                                                      child: Container(
+                                                        padding:
+                                                            EdgeInsets.all(8),
+                                                        height: 50,
+                                                        alignment: Alignment
+                                                            .centerLeft,
+                                                        decoration:
+                                                            BoxDecoration(
+                                                          color: Colors.grey
+                                                              .withOpacity(0.3),
+                                                        ),
+                                                        child: Text(data.quote,
+                                                            style: TextStyle(
+                                                                fontSize: 20,
+                                                                color: Colors
+                                                                    .indigo,
+                                                                fontWeight:
+                                                                    FontWeight
+                                                                        .bold)),
+                                                      ))
+                                                ],
                                               ))
                                           .toList(),
                                     ),
                                     Row(
                                       mainAxisAlignment:
                                           MainAxisAlignment.center,
-                                      children: imageUrl.map((url) {
-                                        int index = imageUrl.indexOf(url);
+                                      children: carouselIntroList.map((url) {
+                                        int index =
+                                            carouselIntroList.indexOf(url);
                                         return Container(
                                           width: 8.0,
                                           height: 8.0,
@@ -125,7 +152,7 @@ class _LoginPageState extends State<LoginPage> {
                                               vertical: 10.0, horizontal: 2.0),
                                           decoration: BoxDecoration(
                                             shape: BoxShape.circle,
-                                            color: _current == index
+                                            color: _currentIndex == index
                                                 ? Color.fromRGBO(
                                                     56, 130, 254, 1.0)
                                                 : Color.fromRGBO(0, 0, 0, 0.4),
@@ -244,7 +271,6 @@ class _LoginPageState extends State<LoginPage> {
                   barrierDismissible: false,
                   transitionDuration: Duration(milliseconds: 400),
                 ),
-                // barrierDismissible: false,
                 builder: (context) => ResetPasswordDialog());
           },
         ),
@@ -253,7 +279,7 @@ class _LoginPageState extends State<LoginPage> {
           errorMessageSignIn.isEmpty ? '' : errorMessageSignIn,
           style: kErrorTextStyle,
         ),
-        Row(
+        Wrap(
           children: <Widget>[
             CostumButton.buttonLoginPage('Masuk', Color(0xFF3882fe),
                 Colors.white, () => _onLoginTap(generalProvider)),
