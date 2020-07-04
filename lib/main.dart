@@ -1,4 +1,8 @@
 import 'package:connectivity/connectivity.dart';
+<<<<<<< HEAD
+=======
+import 'package:device_preview/device_preview.dart';
+>>>>>>> fad176828588cf8752bc406579b8cff33c2eba72
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';

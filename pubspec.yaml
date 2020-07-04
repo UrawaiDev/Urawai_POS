@@ -43,14 +43,19 @@ dependencies:
   
   #send email 
   flutter_email_sender: ^3.0.1
+  
 
   #image slider
   carousel_slider: ^2.2.1
 
   #Animations
   animations: ^1.1.1
+<<<<<<< HEAD
 
 
+=======
+  animated_text_kit: ^2.2.0
+>>>>>>> fad176828588cf8752bc406579b8cff33c2eba72
   
   #export to CSV
   csv: ^4.0.3
@@ -100,9 +105,37 @@ flutter:
   # To add assets to your application, add an assets section, like this:
   assets:
    - assets/images/
+<<<<<<< HEAD
 
 
    
+=======
+  #  - assets/images/chef-hat.png
+  #  - assets/images/bakmi_ayam_spesial.png
+  #  - assets/images/bakmi_ayam_pedas.jpg
+  #  - assets/images/bakso.jpg
+  #  - assets/images/nasi_goreng.jpg
+  #  - assets/images/eskopi_susu.jpg
+  #  - assets/images/pizza_cheese.png
+  #  - assets/images/noimage.png
+  #  - assets/images/placeholder.gif
+  #  - assets/images/login_image.jpg
+  #  - assets/images/logo.png
+  #  - assets/images/rabbit_black.jpg
+  #  - images/a_dot_ham.jpeg
+
+  # An image asset can refer to one or more resolution-specific "variants", see
+  # https://flutter.dev/assets-and-images/#resolution-aware.
+
+  # For details regarding adding assets from package dependencies, see
+  # https://flutter.dev/assets-and-images/#from-packages
+
+  # To add custom fonts to your application, add a fonts section here,
+  # in this "flutter" section. Each entry in this list should have a
+  # "family" key with the font family name, and a "fonts" key with a
+  # list giving the asset and other descriptors for the font. For
+  # example:
+>>>>>>> fad176828588cf8752bc406579b8cff33c2eba72
   fonts:
     - family: Sen
       fonts:

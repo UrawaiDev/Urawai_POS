@@ -794,7 +794,7 @@ class _POSPageState extends State<POSPage> with SingleTickerProviderStateMixin {
                                 size: 35,
                                 color: Colors.blue,
                               ),
-                              onLongPress: () {
+                              onTap: () {
                                 Navigator.pop(context);
                                 Navigator.pushNamed(
                                     context, RouteGenerator.kRoutePaymentScreen,
