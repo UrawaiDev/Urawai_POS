@@ -485,7 +485,6 @@ class _POSPageState extends State<POSPage> with SingleTickerProviderStateMixin {
   }
 
   Future<void> _logOut(BuildContext context) async {
-    // TODO: Still run get Document once logout
     CostumDialogBox.showCostumDialogBox(
         context: context,
         title: 'Konfirmasi',

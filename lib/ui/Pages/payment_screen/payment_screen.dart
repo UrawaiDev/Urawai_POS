@@ -75,8 +75,6 @@ class _PaymentScreenState extends State<PaymentScreen> {
                           padding: const EdgeInsets.fromLTRB(20, 0, 20, 10),
                           child: Column(
                             children: <Widget>[
-                              //! will check best place for this widget
-                              // ConnectionStatusWidget(kPriceTextStyle),
                               Expanded(
                                   flex: 2,
                                   child: Container(
@@ -624,6 +622,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
       contentString: 'Lanjutkan Proses ?',
       confirmButtonTitle: 'Proses',
       onConfirmPressed: () async {
+        bool postedStatus;
         final generalProvider =
             Provider.of<GeneralProvider>(context, listen: false);
         generalProvider.paymentStatus = PaymentStatus.COMPLETED;
@@ -636,15 +635,16 @@ class _PaymentScreenState extends State<PaymentScreen> {
         final currentUser = await locatorAuth.currentUserXXX;
         if (connectionStatus == ConnectivityResult.none) {
           //Add Transaction to Hive DB when Offline
-          Provider.of<TransactionOrderProvider>(context, listen: false)
-              .addTransactionOrder(
+          postedStatus =
+              Provider.of<TransactionOrderProvider>(context, listen: false)
+                  .addTransactionOrder(
             stateProvider: state,
             paymentStatus: generalProvider.paymentStatus,
             paymentType: paymentType,
           );
         } else {
           // add to Firestore DB when Online
-          transactionProvider.addTransactionToFirestore(
+          postedStatus = await transactionProvider.addTransactionToFirestore(
               stateProvider: state,
               paymentStatus: generalProvider.paymentStatus,
               paymentType: paymentType,
@@ -657,9 +657,18 @@ class _PaymentScreenState extends State<PaymentScreen> {
               .delete(state.postedOrder.id);
         }
 
-        //Navigate to Payment Success Screen
-        Navigator.pushNamed(context, RouteGenerator.kRoutePaymentSuccessPage,
-            arguments: state);
+        if (postedStatus == true) {
+          String _orderID;
+
+          //Extract Order ID
+          if (state is PostedOrderProvider)
+            _orderID = state.postedOrder.id;
+          else if (state is OrderListProvider) _orderID = state.orderID;
+
+          //Navigate to Payment Success Screen
+          Navigator.pushNamed(context, RouteGenerator.kRoutePaymentSuccessPage,
+              arguments: _orderID);
+        }
       },
     );
   }

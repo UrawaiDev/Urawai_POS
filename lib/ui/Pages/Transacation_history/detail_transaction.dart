@@ -265,20 +265,21 @@ class _DetailTransactionPageState extends State<DetailTransactionPage> {
       print(status);
       bluetoothStatus = status;
     });
+    TransactionOrder _dataTransaction;
 
     var documentSnapshot = await _getDocumentbyID();
+    if (documentSnapshot != null) {
+      _dataTransaction = TransactionOrder.fromJson(documentSnapshot.data);
+    }
     var printer = await PrinterService.loadPrinterDevice();
 
     if (printer.name != null &&
         bluetoothStatus != BLUETOOTH_DISCONNECTED &&
         _shopName != null) {
-      print(documentSnapshot.data['paymentStatus'].toString());
-      var result = PrinterService.printStruckDetailTransaction(
+      var result = PrinterService.printStruck(
         printer: PrinterBluetooth(printer),
-        documents: documentSnapshot,
         shopName: _shopName,
-        paymentStatus: PaymentHelper.getPaymentStatusAsString(
-            documentSnapshot.data['paymentStatus'].toString()),
+        dataTransaction: _dataTransaction,
       );
       return result;
     } else {

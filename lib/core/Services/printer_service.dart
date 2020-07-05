@@ -5,9 +5,9 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_bluetooth_basic/flutter_bluetooth_basic.dart';
 import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:urawai_pos/core/Models/orderList.dart';
-import 'package:urawai_pos/core/Provider/orderList_provider.dart';
-import 'package:urawai_pos/core/Provider/postedOrder_provider.dart';
+import 'package:urawai_pos/core/Models/transaction.dart';
+import 'package:urawai_pos/ui/utils/constans/formatter.dart';
+import 'package:urawai_pos/ui/utils/functions/paymentHelpers.dart';
 
 class PrinterService {
   static Future<BluetoothDevice> loadPrinterDevice() async {
@@ -49,19 +49,11 @@ class PrinterService {
       print('printer is not set');
   }
 
-  static Future<void> printStruck({
+  static Future<PosPrintResult> printStruck({
     @required PrinterBluetooth printer,
-    @required dynamic state,
     @required String shopName,
-    @required List<OrderList> itemList,
-    @required double pembayaran,
-    @required double kembali,
-    @required String paymentStatus,
+    @required TransactionOrder dataTransaction,
   }) async {
-    String _cashierName;
-    DateTime _orderDate;
-    String _referenceOrder;
-
     PrinterBluetoothManager _printerBluetoothManager =
         PrinterBluetoothManager();
     _printerBluetoothManager.selectPrinter(printer);
@@ -69,21 +61,11 @@ class PrinterService {
 
     final Ticket ticket = Ticket(paper);
 
-    if (state is PostedOrderProvider) {
-      _cashierName = state.cashierName;
-      _orderDate = state.postedOrder.dateTime;
-      _referenceOrder = state.postedOrder.refernceOrder;
-    } else if (state is OrderListProvider) {
-      _cashierName = state.cashierName;
-      _orderDate = state.orderDate;
-      _referenceOrder = state.referenceOrder;
-    }
-
     //* NAMA TOKO
     ticket.text(shopName,
         styles: PosStyles(
           align: PosAlign.center,
-          height: PosTextSize.size2,
+          height: PosTextSize.size1,
           width: PosTextSize.size2,
         ),
         linesAfter: 1);
@@ -101,21 +83,26 @@ class PrinterService {
 
     //* HEADER LIST ORDER
     ticket.row([
-      PosColumn(text: 'Qty', width: 1),
-      PosColumn(text: 'Item', width: 7),
-      // PosColumn(
-      //     text: 'Harga', width: 2, styles: PosStyles(align: PosAlign.right)),
+      PosColumn(text: 'Qty', width: 2),
+      PosColumn(text: 'Harga', width: 6),
       PosColumn(
           text: 'Total', width: 4, styles: PosStyles(align: PosAlign.right)),
     ]);
 
+    ticket.hr();
+
     //* ITEM LIST ORDER
-    itemList.forEach((transaction) {
+    dataTransaction.itemList.forEach((transaction) {
       ticket.row([
-        PosColumn(text: transaction.quantity.toString(), width: 1),
-        PosColumn(text: transaction.productName, width: 7),
+        PosColumn(text: transaction.productName.toString(), width: 12),
+      ]);
+
+      ticket.row([
+        PosColumn(text: 'x${transaction.quantity}', width: 2),
+        PosColumn(text: Formatter.currencyFormat(transaction.price), width: 6),
         PosColumn(
-            text: (transaction.price * transaction.quantity).toString(),
+            text: Formatter.currencyFormat(
+                transaction.price * transaction.quantity),
             width: 4,
             styles: PosStyles(align: PosAlign.right)),
       ]);
@@ -123,19 +110,52 @@ class PrinterService {
 
     ticket.hr();
 
-    // double grandTotal =
-    //     _transactions.fold(0, (prev, curr) => prev + curr.grandTotal);
-
     ticket.row([
       PosColumn(
-          text: 'TOTAL',
+          text: 'DISKON',
           width: 3,
           styles: PosStyles(
             height: PosTextSize.size1,
             width: PosTextSize.size1,
           )),
       PosColumn(
-          text: '\Rp.${state.grandTotal}',
+          text: Formatter.currencyFormat(dataTransaction.discount),
+          width: 9,
+          styles: PosStyles(
+            align: PosAlign.right,
+            height: PosTextSize.size1,
+            width: PosTextSize.size1,
+          )),
+    ]);
+
+    ticket.row([
+      PosColumn(
+          text: 'PAJAK (PPN)',
+          width: 3,
+          styles: PosStyles(
+            height: PosTextSize.size1,
+            width: PosTextSize.size1,
+          )),
+      PosColumn(
+          text: Formatter.currencyFormat(dataTransaction.vat),
+          width: 9,
+          styles: PosStyles(
+            align: PosAlign.right,
+            height: PosTextSize.size1,
+            width: PosTextSize.size1,
+          )),
+    ]);
+
+    ticket.row([
+      PosColumn(
+          text: 'TOTAL BAYAR',
+          width: 3,
+          styles: PosStyles(
+            height: PosTextSize.size1,
+            width: PosTextSize.size1,
+          )),
+      PosColumn(
+          text: Formatter.currencyFormat(dataTransaction.grandTotal),
           width: 9,
           styles: PosStyles(
             align: PosAlign.right,
@@ -152,7 +172,7 @@ class PrinterService {
           width: 4,
           styles: PosStyles(align: PosAlign.right, width: PosTextSize.size1)),
       PosColumn(
-          text: '\Rp.$pembayaran',
+          text: Formatter.currencyFormat(dataTransaction.tender),
           width: 8,
           styles: PosStyles(align: PosAlign.right, width: PosTextSize.size1)),
     ]);
@@ -163,7 +183,18 @@ class PrinterService {
           width: 4,
           styles: PosStyles(align: PosAlign.right, width: PosTextSize.size1)),
       PosColumn(
-          text: '\Rp.$kembali',
+          text: Formatter.currencyFormat(dataTransaction.change),
+          width: 8,
+          styles: PosStyles(align: PosAlign.right, width: PosTextSize.size1)),
+    ]);
+
+    ticket.row([
+      PosColumn(
+          text: 'Jenis Bayar',
+          width: 4,
+          styles: PosStyles(align: PosAlign.right, width: PosTextSize.size1)),
+      PosColumn(
+          text: PaymentHelper.getPaymentType(dataTransaction.paymentType),
           width: 8,
           styles: PosStyles(align: PosAlign.right, width: PosTextSize.size1)),
     ]);
@@ -174,12 +205,12 @@ class PrinterService {
           width: 4,
           styles: PosStyles(align: PosAlign.right, width: PosTextSize.size1)),
       PosColumn(
-          text: '$paymentStatus',
+          text: PaymentHelper.getPaymentStatus(dataTransaction.paymentStatus),
           width: 8,
           styles: PosStyles(align: PosAlign.right, width: PosTextSize.size1)),
     ]);
 
-    ticket.feed(2);
+    ticket.feed(1);
     ticket.text('Terima Kasih.',
         styles: PosStyles(align: PosAlign.center, bold: true));
 
@@ -189,148 +220,10 @@ class PrinterService {
     ticket.text(timestamp,
         styles: PosStyles(align: PosAlign.center), linesAfter: 2);
 
-    ticket.feed(1);
-    ticket.cut();
-
-    final PosPrintResult res =
-        await _printerBluetoothManager.printTicket(ticket);
-    print(res);
-
-    // _scaffoldKey.currentState.showSnackBar(SnackBar(
-    //   content: Text(res.msg),
-    //   duration: Duration(seconds: 2),
-    // ));
-  }
-
-  static Future<PosPrintResult> printStruckDetailTransaction({
-    @required PrinterBluetooth printer,
-    @required DocumentSnapshot documents,
-    @required String shopName,
-    @required String paymentStatus,
-  }) async {
-    PrinterBluetoothManager _printerBluetoothManager =
-        PrinterBluetoothManager();
-    _printerBluetoothManager.selectPrinter(printer);
-    const PaperSize paper = PaperSize.mm58;
-
-    final Ticket ticket = Ticket(paper);
-
-    //* NAMA TOKO
-    ticket.text(shopName,
-        styles: PosStyles(
-          align: PosAlign.center,
-          height: PosTextSize.size2,
-          width: PosTextSize.size2,
-        ),
-        linesAfter: 1);
-
-    // //* ALAMAT TOKO
-    // ticket.text('Jl. Pinggir kali',
-    //     styles: PosStyles(align: PosAlign.center));
-    // ticket.text('Kp. Kali asin No. 5',
-    //     styles: PosStyles(align: PosAlign.center));
-    // ticket.text('Depok, Jawa Barat', styles: PosStyles(align: PosAlign.center));
-    // ticket.text('Web: www.warungmakyos.com',
-    //     styles: PosStyles(align: PosAlign.center), linesAfter: 1);
-
-    ticket.hr();
-
-    //* HEADER LIST ORDER
-    ticket.row([
-      PosColumn(text: 'Qty', width: 1),
-      PosColumn(text: 'Item', width: 7),
-      // PosColumn(
-      //     text: 'Harga', width: 2, styles: PosStyles(align: PosAlign.right)),
-      PosColumn(
-          text: 'Total', width: 4, styles: PosStyles(align: PosAlign.right)),
-    ]);
-
-    //* ITEM LIST ORDER
-    documents.data['orderlist'].forEach((transaction) {
-      print(transaction);
-      ticket.row([
-        PosColumn(text: transaction['quantity'].toString(), width: 1),
-        PosColumn(text: transaction['productName'], width: 7),
-        PosColumn(
-            text: ((transaction['price'] as double) *
-                    (transaction['quantity'] as int))
-                .toString(),
-            width: 4,
-            styles: PosStyles(align: PosAlign.right)),
-      ]);
-    });
-
-    ticket.hr();
-
-    ticket.row([
-      PosColumn(
-          text: 'TOTAL',
-          width: 3,
-          styles: PosStyles(
-            height: PosTextSize.size1,
-            width: PosTextSize.size1,
-          )),
-      PosColumn(
-          text: '\Rp. ${documents.data['subtotal']}',
-          width: 9,
-          styles: PosStyles(
-            align: PosAlign.right,
-            height: PosTextSize.size1,
-            width: PosTextSize.size1,
-          )),
-    ]);
-
-    ticket.hr(ch: '=', linesAfter: 1);
-
-    ticket.row([
-      PosColumn(
-          text: 'Bayar',
-          width: 4,
-          styles: PosStyles(align: PosAlign.right, width: PosTextSize.size1)),
-      PosColumn(
-          text: '\Rp. ${documents.data['tender']}',
-          width: 8,
-          styles: PosStyles(align: PosAlign.right, width: PosTextSize.size1)),
-    ]);
-
-    ticket.row([
-      PosColumn(
-          text: 'Kembali',
-          width: 4,
-          styles: PosStyles(align: PosAlign.right, width: PosTextSize.size1)),
-      PosColumn(
-          text: '\Rp. ${documents.data['change']}',
-          width: 8,
-          styles: PosStyles(align: PosAlign.right, width: PosTextSize.size1)),
-    ]);
-
-    ticket.row([
-      PosColumn(
-          text: 'Keterangan',
-          width: 4,
-          styles: PosStyles(align: PosAlign.right, width: PosTextSize.size1)),
-      PosColumn(
-          text: '$paymentStatus',
-          width: 8,
-          styles: PosStyles(align: PosAlign.right, width: PosTextSize.size1)),
-    ]);
-
-    ticket.feed(2);
-    ticket.text('Terima Kasih.',
-        styles: PosStyles(align: PosAlign.center, bold: true));
-
-    final now = DateTime.now();
-    final formatter = DateFormat('MM/dd/yyyy H:mm');
-    final String timestamp = formatter.format(now);
-    ticket.text(timestamp,
-        styles: PosStyles(align: PosAlign.center), linesAfter: 2);
-
-    ticket.feed(1);
     ticket.cut();
 
     final PosPrintResult result =
         await _printerBluetoothManager.printTicket(ticket);
-
     return result;
   }
 }

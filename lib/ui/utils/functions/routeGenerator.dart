@@ -1,8 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
-import 'package:urawai_pos/core/Provider/general_provider.dart';
-import 'package:urawai_pos/core/Provider/orderList_provider.dart';
-import 'package:urawai_pos/core/Provider/postedOrder_provider.dart';
 import 'package:urawai_pos/ui/Pages/Transacation_history/detail_transaction.dart';
 import 'package:urawai_pos/ui/Pages/Transacation_history/transaction_history.dart';
 import 'package:urawai_pos/ui/Pages/authentication/gateKeeper.dart';
@@ -81,28 +77,20 @@ class RouteGenerator {
         break;
       case kRoutePaymentSuccessPage:
         return MaterialPageRoute(builder: (context) {
-          var generalProvider = Provider.of<GeneralProvider>(context);
+          return PaymentSuccess(orderID: args);
 
-          if (args is PostedOrderProvider) {
-            return PaymentSuccess(
-              state: args,
-              itemList: args.postedOrder.orderList,
-              pembayaran: args.finalPayment,
-              kembali: args.finalPayment - args.grandTotal,
-              paymentType: generalProvider.paymentType,
-              paymentStatus: generalProvider.paymentStatus,
-            );
-          } else if (args is OrderListProvider) {
-            return PaymentSuccess(
-              state: args,
-              itemList: args.orderlist,
-              pembayaran: args.finalPayment,
-              kembali: args.finalPayment - args.grandTotal,
-              paymentType: generalProvider.paymentType,
-              paymentStatus: generalProvider.paymentStatus,
-            );
-          }
-          return _onErrorRoute();
+          // if (args is PostedOrderProvider) {
+          //   return PaymentSuccess(
+          //     orderID: args.postedOrder.id,
+
+          //   );
+          // } else if (args is OrderListProvider) {
+          //   return PaymentSuccess(
+          //     orderID: args.orderID,
+
+          //   );
+          // }
+          // return _onErrorRoute();
         });
 
         break;

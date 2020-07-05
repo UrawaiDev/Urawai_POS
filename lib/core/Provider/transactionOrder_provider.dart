@@ -6,7 +6,7 @@ import 'package:urawai_pos/core/Provider/orderList_provider.dart';
 import 'package:urawai_pos/core/Provider/postedOrder_provider.dart';
 
 class TransactionOrderProvider with ChangeNotifier {
-  addTransactionToFirestore({
+  Future<bool> addTransactionToFirestore({
     @required dynamic stateProvider,
     @required PaymentStatus paymentStatus,
     @required PaymentType paymentType,
@@ -59,16 +59,16 @@ class TransactionOrderProvider with ChangeNotifier {
           _firestore.document(docName).updateData(stateProvider.toJson());
         });
       }
+      return true;
     } catch (e) {
       print(e.toString());
-      // throw(e.toString());
-
+      return false;
     } finally {
       print('Pesanan berhasil di tambahkan ');
     }
   }
 
-  addTransactionOrder({
+  bool addTransactionOrder({
     @required dynamic stateProvider,
     @required PaymentStatus paymentStatus,
     @required PaymentType paymentType,
@@ -116,8 +116,11 @@ class TransactionOrderProvider with ChangeNotifier {
       }
       //Add to Hive Box
       box.put(_transactionOrder.id, _transactionOrder);
+
+      return true;
     } catch (e) {
-      throw Exception(e.toString());
+      print(e.toString());
+      return false;
     } finally {
       print(
           'Order ID : ${_transactionOrder.id} dgn jumlah item ${_transactionOrder.itemList.length} telah berhasil di tambahkan dgn status ${_transactionOrder.paymentStatus}');

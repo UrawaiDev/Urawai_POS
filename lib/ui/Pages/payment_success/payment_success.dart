@@ -1,38 +1,30 @@
 import 'package:auto_size_text/auto_size_text.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:esc_pos_bluetooth/esc_pos_bluetooth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bluetooth_basic/flutter_bluetooth_basic.dart';
 import 'package:get_it/get_it.dart';
 import 'package:provider/provider.dart';
+import 'package:urawai_pos/core/Models/orderList.dart';
 import 'package:urawai_pos/core/Models/transaction.dart';
-import 'package:urawai_pos/core/Models/users.dart';
 import 'package:urawai_pos/core/Provider/orderList_provider.dart';
 import 'package:urawai_pos/core/Provider/postedOrder_provider.dart';
 import 'package:urawai_pos/core/Services/firebase_auth.dart';
+import 'package:urawai_pos/core/Services/firestore_service.dart';
 import 'package:urawai_pos/core/Services/printer_service.dart';
-import 'package:urawai_pos/ui/Pages/pos/pos_Page.dart';
 import 'package:urawai_pos/ui/Widgets/costum_DialogBox.dart';
 import 'package:urawai_pos/ui/Widgets/costum_button.dart';
 import 'package:urawai_pos/ui/Widgets/footer_OrderList.dart';
 import 'package:urawai_pos/ui/utils/constans/formatter.dart';
 import 'package:urawai_pos/ui/utils/constans/utils.dart';
 import 'package:urawai_pos/ui/utils/functions/paymentHelpers.dart';
+import 'package:urawai_pos/ui/utils/functions/routeGenerator.dart';
 
 class PaymentSuccess extends StatefulWidget {
-  final List<dynamic> itemList;
-  final double pembayaran;
-  final double kembali;
-  final dynamic state;
-  final PaymentType paymentType;
-  final PaymentStatus paymentStatus;
+  final String orderID;
 
   PaymentSuccess({
-    @required this.itemList,
-    @required this.paymentType,
-    @required this.pembayaran,
-    @required this.kembali,
-    @required this.state,
-    @required this.paymentStatus,
+    @required this.orderID,
   });
 
   @override
@@ -41,10 +33,14 @@ class PaymentSuccess extends StatefulWidget {
 
 class _PaymentSuccessState extends State<PaymentSuccess> {
   final locatorAuth = GetIt.I<FirebaseAuthentication>();
+  final locatorFureStore = GetIt.I<FirestoreServices>();
 
   static const int BLUETOOTH_DISCONNECTED = 10;
   int bluetoothStatus;
   BluetoothManager bluetoothManager = BluetoothManager.instance;
+
+  String _shopName = '';
+  TransactionOrder _dataTransactionOrder;
 
   @override
   void initState() {
@@ -55,30 +51,13 @@ class _PaymentSuccessState extends State<PaymentSuccess> {
     });
 
     locatorAuth.currentUserXXX.then((data) {
-      _doPrinting(data.shopName);
+      _shopName = data.shopName;
+      _doPrinting(_shopName);
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    String _cashierName;
-    String _referenceOrder;
-    DateTime _orderDate;
-    String _shopName;
-
-    //Get header information
-    if (widget.state is OrderListProvider) {
-      var x = widget.state as OrderListProvider;
-      _cashierName = x.cashierName;
-      _referenceOrder = x.referenceOrder;
-      _orderDate = x.orderDate;
-    } else if (widget.state is PostedOrderProvider) {
-      var x = widget.state as PostedOrderProvider;
-      _cashierName = x.postedOrder.cashierName;
-      _referenceOrder = x.postedOrder.refernceOrder;
-      _orderDate = x.postedOrder.dateTime;
-    }
-
     return WillPopScope(
       onWillPop: () => _onTransactionComplete(context),
       child: SafeArea(
@@ -93,189 +72,17 @@ class _PaymentSuccessState extends State<PaymentSuccess> {
                   color: Colors.grey,
                 ),
                 SizedBox(width: 5),
-                Expanded(
-                  flex: 2,
-                  child: Container(
-                    // color: Colors.blue,
-                    padding: EdgeInsets.fromLTRB(10, 5, 5, 15),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: <Widget>[
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: <Widget>[
-                            FutureBuilder<Users>(
-                                future: locatorAuth.currentUserXXX,
-                                builder: (context, snapshot) {
-                                  if (!snapshot.hasData ||
-                                      snapshot.connectionState ==
-                                          ConnectionState.waiting)
-                                    return Text(
-                                      'Loading',
-                                      style: kPriceTextStyle,
-                                    );
-                                  _shopName =
-                                      snapshot.data.shopName.toUpperCase();
-                                  return Text(
-                                      snapshot.data.shopName.toUpperCase(),
-                                      style: TextStyle(
-                                        fontSize: 20,
-                                        fontWeight: FontWeight.bold,
-                                        color: Colors.blue,
-                                      ));
-                                }),
-                            Divider(
-                              thickness: 2,
-                            ),
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: <Widget>[
-                                Text('Ref. Order:'),
-                                SizedBox(width: 8),
-                                Text(_referenceOrder ?? '[null]'),
-                              ],
-                            ),
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: <Widget>[
-                                Text('Tanggal:'),
-                                SizedBox(width: 8),
-                                Text(Formatter.dateFormat(_orderDate)),
-                              ],
-                            ),
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: <Widget>[
-                                Text('Kasir:'),
-                                SizedBox(width: 8),
-                                Text(_cashierName ?? '[null]'),
-                              ],
-                            ),
-                            Divider(
-                              thickness: 2,
-                            )
-                          ],
-                        ),
-                        Expanded(
-                          child: Padding(
-                            padding: const EdgeInsets.symmetric(vertical: 5.0),
-                            child: Container(
-                              child: ListView.builder(
-                                  itemCount: widget.itemList.length,
-                                  itemBuilder: (context, index) {
-                                    return Padding(
-                                      padding: const EdgeInsets.symmetric(
-                                          vertical: 8.0, horizontal: 5),
-                                      child: Row(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.spaceBetween,
-                                        children: <Widget>[
-                                          Expanded(
-                                            flex: 2,
-                                            child: Container(
-                                              alignment: Alignment.centerLeft,
-                                              child: Row(
-                                                children: <Widget>[
-                                                  AutoSizeText(
-                                                    'x${widget.itemList[index].quantity}',
-                                                  ),
-                                                  SizedBox(width: 10),
-                                                  Flexible(
-                                                    child: AutoSizeText(
-                                                      widget.itemList[index]
-                                                          .productName,
-                                                    ),
-                                                  ),
-                                                ],
-                                              ),
-                                            ),
-                                          ),
-                                          Expanded(
-                                            flex: 1,
-                                            child: Container(
-                                              alignment: Alignment.centerRight,
-                                              child: AutoSizeText(
-                                                Formatter.currencyFormat(widget
-                                                        .itemList[index].price *
-                                                    widget.itemList[index]
-                                                        .quantity),
-                                              ),
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    );
-                                  }),
-                            ),
-                          ),
-                        ),
-                        Column(
-                          children: <Widget>[
-                            FooterOrderList(
-                              dicount: widget.state.discountTotal,
-                              grandTotal: widget.state.grandTotal,
-                              subtotal: widget.state.subTotal,
-                              vat: widget.state.taxFinal,
-                            ),
-                            Padding(
-                              padding:
-                                  const EdgeInsets.symmetric(horizontal: 8.0),
-                              child: Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
-                                children: <Widget>[
-                                  Text(
-                                    'Pembayaran',
-                                    style: kGrandTotalTextStyle,
-                                  ),
-                                  Text(
-                                    widget.paymentType == PaymentType.CASH
-                                        ? Formatter.currencyFormat(
-                                            widget.pembayaran)
-                                        : Formatter.currencyFormat(
-                                            widget.state.grandTotal),
-                                    style: kGrandTotalTextStyle,
-                                  ),
-                                ],
-                              ),
-                            ),
-                            Padding(
-                              padding:
-                                  const EdgeInsets.symmetric(horizontal: 8.0),
-                              child: Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
-                                children: <Widget>[
-                                  Text(
-                                    'Kembali',
-                                    style: kGrandTotalTextStyle,
-                                  ),
-                                  Text(
-                                    widget.paymentType == PaymentType.CASH
-                                        ? Formatter.currencyFormat(
-                                            widget.kembali)
-                                        : Formatter.currencyFormat(0),
-                                    style: kGrandTotalTextStyle,
-                                  ),
-                                ],
-                              ),
-                            ),
-                            Divider(
-                              thickness: 2,
-                            ),
-                            Text(
-                              'Terima Kasih Atas Kunjungan Anda',
-                              style: kStruckTextStyle,
-                            ),
-                            Divider(
-                              thickness: 2,
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
+
+                FutureBuilder(
+                    future: locatorAuth.currentUserXXX,
+                    builder: (context, snapshot) {
+                      if (!snapshot.hasData ||
+                          snapshot.connectionState == ConnectionState.waiting)
+                        return Center(child: CircularProgressIndicator());
+
+                      return _buildDetailTransactionFromFirestore(context);
+                    }),
+
                 SizedBox(width: 5),
                 Container(
                   width: 1.5,
@@ -347,10 +154,11 @@ class _PaymentSuccessState extends State<PaymentSuccess> {
                                 child: Column(
                                   children: <Widget>[
                                     CostumButton.squareButtonSmall(
-                                        'Cetak Kwitansi',
-                                        prefixIcon: Icons.print,
-                                        onTap: () =>
-                                            printStruckWithFeedback(_shopName)),
+                                      'Cetak Kwitansi',
+                                      prefixIcon: Icons.print,
+                                      onTap: () =>
+                                          printStruckWithFeedback(_shopName),
+                                    ),
                                     SizedBox(height: 10),
                                     CostumButton.squareButtonSmall(
                                       'Selesai',
@@ -377,17 +185,19 @@ class _PaymentSuccessState extends State<PaymentSuccess> {
 
   Future<bool> _doPrinting(String shopName) async {
     var printer = await PrinterService.loadPrinterDevice();
+    var _dataPrinting =
+        await locatorFureStore.getDocumentByID(_shopName, widget.orderID);
+
+    if (_dataPrinting != null) {
+      _dataTransactionOrder = TransactionOrder.fromJson(_dataPrinting.data);
+    }
+
     //* Print if printer has set and bluetooth is active
     if (printer.name != null && bluetoothStatus != BLUETOOTH_DISCONNECTED) {
       PrinterService.printStruck(
         printer: PrinterBluetooth(printer),
-        state: widget.state,
         shopName: shopName,
-        itemList: widget.itemList,
-        pembayaran: widget.pembayaran,
-        kembali: widget.kembali,
-        paymentStatus: PaymentHelper.getPaymentStatusAsString(
-            widget.paymentStatus.toString()),
+        dataTransaction: _dataTransactionOrder,
       );
       return true;
     } else {
@@ -419,12 +229,179 @@ class _PaymentSuccessState extends State<PaymentSuccess> {
     Provider.of<OrderListProvider>(context, listen: false).resetOrderList();
 
     //Navigate to Main Page
-    Navigator.pushAndRemoveUntil(
-      context,
-      MaterialPageRoute(builder: (context) => POSPage()),
-      ModalRoute.withName('/pos'),
-    );
+    Navigator.pushReplacementNamed(context, RouteGenerator.kRoutePOSPage);
 
     return null;
+  }
+
+  Widget _buildDetailTransactionFromFirestore(BuildContext context) {
+    return FutureBuilder<DocumentSnapshot>(
+        future: locatorFureStore.getDocumentByID(_shopName, widget.orderID),
+        builder: (context, document) {
+          if (!document.hasData ||
+              document.connectionState == ConnectionState.waiting)
+            return Center(child: CircularProgressIndicator());
+
+          if (document.data == null || document.data.data.isEmpty)
+            return Center(child: Text('Tidak Ada data..'));
+
+          var dataTransaction = TransactionOrder.fromJson(document.data.data);
+
+          int totalOrder = (dataTransaction.itemList.fold(0, (prev, element) {
+            return prev + element.quantity;
+          }));
+
+          return Expanded(
+            flex: 2,
+            child: Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Container(
+                padding: EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                    border: Border.all(
+                  width: 1.5,
+                  color: Colors.grey,
+                )),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: <Widget>[
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: <Widget>[
+                        Text(_shopName.toUpperCase(),
+                            style: TextStyle(
+                              fontSize: 20,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.blue,
+                            )),
+                        Divider(
+                          thickness: 2,
+                        ),
+                        _buildInfoHeader('Order ID: ', dataTransaction.id),
+                        _buildInfoHeader('Tanggal: ',
+                            Formatter.dateFormat(dataTransaction.date)),
+                        _buildInfoHeader(
+                            'Metode Pembayaran:',
+                            PaymentHelper.getPaymentType(
+                                dataTransaction.paymentType)),
+                        _buildInfoHeader(
+                            'Jumlah Pesanan:', totalOrder.toString()),
+                        Divider(
+                          thickness: 2,
+                        )
+                      ],
+                    ),
+                    Expanded(
+                      child: ListView.builder(
+                          itemCount: dataTransaction.itemList.length,
+                          itemBuilder: (context, index) {
+                            OrderList itemList =
+                                dataTransaction.itemList[index];
+                            return Padding(
+                              padding: const EdgeInsets.symmetric(
+                                  vertical: 5.0, horizontal: 5),
+                              child: Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: <Widget>[
+                                  Expanded(
+                                    child: Container(
+                                      child: Row(
+                                        children: <Widget>[
+                                          AutoSizeText(
+                                            'x${itemList.quantity}',
+                                            style: kPriceTextStyle,
+                                          ),
+                                          SizedBox(width: 5),
+                                          Flexible(
+                                            child: Text(
+                                              itemList.productName,
+                                              style: kPriceTextStyle,
+                                              overflow: TextOverflow.ellipsis,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+                                  Expanded(
+                                    child: Container(
+                                      alignment: Alignment.centerRight,
+                                      child: AutoSizeText(
+                                        Formatter.currencyFormat(
+                                            itemList.price * itemList.quantity),
+                                        style: kPriceTextStyle,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            );
+                          }),
+                    ),
+                    FooterOrderList(
+                      dicount: dataTransaction.discount,
+                      grandTotal: dataTransaction.grandTotal,
+                      subtotal: dataTransaction.subtotal,
+                      vat: dataTransaction.vat,
+                    ),
+                    Divider(
+                      thickness: 2,
+                    ),
+                    Column(
+                      children: <Widget>[
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                          child: _buildInfoHeader('Pembayaran',
+                              Formatter.currencyFormat(dataTransaction.tender)),
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: <Widget>[
+                              Text(
+                                'Kembali',
+                                style: kPriceTextStyle,
+                              ),
+                              Text(
+                                dataTransaction.paymentType.toString() ==
+                                        'PaymentType.CASH'
+                                    ? Formatter.currencyFormat(
+                                        dataTransaction.change)
+                                    : 'Rp. 0',
+                                style: kPriceTextStyle,
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          );
+        });
+  }
+
+  Widget _buildInfoHeader(String fieldName, String value) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: <Widget>[
+        Text(
+          fieldName,
+          style: kPriceTextStyle,
+        ),
+        SizedBox(width: 8),
+        Flexible(
+          child: Text(
+            value,
+            style: kPriceTextStyle,
+            overflow: TextOverflow.ellipsis,
+          ),
+        ),
+      ],
+    );
   }
 }

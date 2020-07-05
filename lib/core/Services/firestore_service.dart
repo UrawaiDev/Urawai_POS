@@ -148,11 +148,11 @@ class FirestoreServices {
   Future<DocumentSnapshot> getDocumentByID(
     String shopName,
     String id,
-  ) {
+  ) async {
     Future<DocumentSnapshot> result =
         _firestore.collection(shopName).document(id).get();
 
-    return result;
+    return await result;
   }
 
   // get Document by Product Name
