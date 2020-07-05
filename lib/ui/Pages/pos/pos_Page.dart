@@ -426,16 +426,44 @@ class _POSPageState extends State<POSPage> with SingleTickerProviderStateMixin {
                                 child: Column(
                                   mainAxisAlignment: MainAxisAlignment.center,
                                   children: <Widget>[
-                                    Text(
-                                      'Belum Ada Produk.',
-                                      style: kProductNameBigScreenTextStyle,
+                                    Flexible(
+                                      child: Container(
+                                          width: 300,
+                                          height: 300,
+                                          child: Image.asset(
+                                              'assets/images/empty_state.png')),
                                     ),
-                                    SizedBox(height: 30),
-                                    CostumButton.squareButtonSmall(
-                                        'Tambah Produk', onTap: () {
-                                      Navigator.pushNamed(context,
-                                          RouteGenerator.kRouteAddProductPage);
-                                    }, prefixIcon: Icons.add),
+                                    Flexible(
+                                      child: Text(
+                                        'Belum Ada Produk',
+                                        style: TextStyle(fontSize: 20),
+                                      ),
+                                    ),
+                                    SizedBox(height: 10),
+                                    Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
+                                      children: <Widget>[
+                                        CostumButton.squareButtonSmall(
+                                            'Tambah Produk', onTap: () {
+                                          Navigator.pushNamed(
+                                              context,
+                                              RouteGenerator
+                                                  .kRouteAddProductPage);
+                                        }, prefixIcon: Icons.add),
+                                        SizedBox(width: 8),
+                                        CostumButton.squareButtonSmall(
+                                          'Refresh',
+                                          onTap: () {
+                                            Navigator.pushReplacementNamed(
+                                                context,
+                                                RouteGenerator.kRoutePOSPage);
+                                          },
+                                          prefixIcon: Icons.sync,
+                                          borderColor: Colors.green,
+                                        ),
+                                      ],
+                                    )
                                   ],
                                 ),
                               ));
@@ -457,6 +485,7 @@ class _POSPageState extends State<POSPage> with SingleTickerProviderStateMixin {
   }
 
   Future<void> _logOut(BuildContext context) async {
+    // TODO: Still run get Document once logout
     CostumDialogBox.showCostumDialogBox(
         context: context,
         title: 'Konfirmasi',
@@ -466,7 +495,11 @@ class _POSPageState extends State<POSPage> with SingleTickerProviderStateMixin {
         confirmButtonTitle: 'Keluar',
         onConfirmPressed: () async {
           await _auth.signOut();
-          Navigator.pushNamed(context, RouteGenerator.kRouteLoginPage);
+          // Navigator.pushNamed(context, RouteGenerator.kRouteLoginPage);
+          Navigator.pushNamedAndRemoveUntil(
+              context,
+              RouteGenerator.kRouteLoginPage,
+              ModalRoute.withName(RouteGenerator.kRouteLoginPage));
         });
   }
 

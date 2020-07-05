@@ -343,7 +343,7 @@ class _LoginPageState extends State<LoginPage> {
       } else if (result is OnErrorState) {
         errorMessageSignIn = result.message;
       } else if (result is Users) {
-        Navigator.pushNamed(context, RouteGenerator.kRoutePOSPage);
+        Navigator.pushReplacementNamed(context, RouteGenerator.kRoutePOSPage);
       }
     }
   }

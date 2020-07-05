@@ -65,7 +65,8 @@ class DrawerMenu extends StatelessWidget {
             )),
             onTap: () {
               Navigator.pop(context);
-              Navigator.pushNamed(context, RouteGenerator.kRoutePOSPage);
+              Navigator.pushReplacementNamed(
+                  context, RouteGenerator.kRoutePOSPage);
             },
           ),
           ListTile(

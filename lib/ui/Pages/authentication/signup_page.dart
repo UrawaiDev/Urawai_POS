@@ -375,7 +375,7 @@ class _SignUpPageState extends State<SignUpPage> {
       generalProvider.isLoading = false;
 
       if (result is Users) {
-        Navigator.pushNamed(context, RouteGenerator.kRoutePOSPage);
+        Navigator.pushReplacementNamed(context, RouteGenerator.kRoutePOSPage);
       } else if (result is OnErrorState) {
         errorMessageSignUp = result.message;
       }

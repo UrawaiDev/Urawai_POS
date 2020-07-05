@@ -250,14 +250,10 @@ class _PaymentScreenLeftOrderListState
                                     onTap: () {
                                       //clear list
                                       stateProvider.resetOrderList();
-                                      //back to main page
-                                      Navigator.pushAndRemoveUntil(
-                                        context,
-                                        MaterialPageRoute(
-                                            builder: (context) => POSPage()),
-                                        ModalRoute.withName(
-                                            RouteGenerator.kRoutePOSPage),
-                                      );
+
+                                      //* Back to main page
+                                      Navigator.pushReplacementNamed(context,
+                                          RouteGenerator.kRoutePOSPage);
                                     });
                               }),
                         ),
