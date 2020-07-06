@@ -800,6 +800,7 @@ class _POSPageState extends State<POSPage> with SingleTickerProviderStateMixin {
                           itemCount: boxOrder.length,
                           itemBuilder: (context, index) {
                             var item = boxOrder.getAt(index) as PostedOrder;
+
                             int totalOrderlist = item.orderList.fold(
                                 0, (prev, current) => prev + current.quantity);
                             return ListTile(
@@ -807,8 +808,15 @@ class _POSPageState extends State<POSPage> with SingleTickerProviderStateMixin {
                               leading: CircleAvatar(
                                 child: Text((index + 1).toString()),
                               ),
-                              title: Text(item.refernceOrder ?? '-',
-                                  style: TextStyle(fontSize: 22)),
+                              title: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: <Widget>[
+                                  Text(item.id ?? '-',
+                                      style: TextStyle(fontSize: 22)),
+                                  Text(item.refernceOrder ?? '-',
+                                      style: TextStyle(fontSize: 22)),
+                                ],
+                              ),
                               subtitle: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: <Widget>[

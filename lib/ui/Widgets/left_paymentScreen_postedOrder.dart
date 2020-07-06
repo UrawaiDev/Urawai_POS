@@ -227,6 +227,21 @@ class _PaymentScreenLeftPostedOrderState
                                   fontWeight: FontWeight.bold,
                                 )),
                           ),
+                          onDoubleTap: () {
+                            print(
+                                'Order ID: ${postedOrderProvider.postedOrder.id}');
+                            print(
+                                'Reference ID: ${widget.postedOrder.refernceOrder}');
+
+                            postedOrderProvider.postedOrder.orderList
+                                .forEach((data) {
+                              print(
+                                  '${data.productName} dgn quantity ${data.quantity}');
+                            });
+                            print(
+                                'Diskon: ${postedOrderProvider.discountTotal}');
+                            print('Total: ${postedOrderProvider.grandTotal}');
+                          },
                           onTap: () => CostumDialogBox.showCostumDialogBox(
                               context: context,
                               icon: Icons.delete,

@@ -109,7 +109,7 @@ class PostedOrderProvider with ChangeNotifier {
       return prev + ((item.price * (item.discount / 100)) * item.quantity);
     });
 
-    return result + _extraDiscount;
+    return result + _extraDiscount + _postedOrder.discount;
     //just return value from db
     // return _postedOrder.discount;
   }
