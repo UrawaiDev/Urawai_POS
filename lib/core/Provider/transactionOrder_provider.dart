@@ -28,7 +28,9 @@ class TransactionOrderProvider with ChangeNotifier {
           'grandTotal': stateProvider.grandTotal,
           'paymentStatus': paymentStatus.toString(),
           'paymentType': paymentType.toString(),
-          'tender': stateProvider.finalPayment,
+          'tender': paymentType == PaymentType.CASH
+              ? stateProvider.finalPayment
+              : stateProvider.grandTotal,
           'vat': stateProvider.taxFinal,
           'change': paymentType == PaymentType.CASH &&
                   paymentStatus != PaymentStatus.VOID
@@ -49,7 +51,9 @@ class TransactionOrderProvider with ChangeNotifier {
           'grandTotal': stateProvider.grandTotal,
           'paymentStatus': paymentStatus.toString(),
           'paymentType': paymentType.toString(),
-          'tender': stateProvider.finalPayment,
+          'tender': paymentType == PaymentType.CASH
+              ? stateProvider.finalPayment
+              : stateProvider.grandTotal,
           'vat': stateProvider.taxFinal,
           'change': paymentType == PaymentType.CASH &&
                   paymentStatus != PaymentStatus.VOID
@@ -89,7 +93,9 @@ class TransactionOrderProvider with ChangeNotifier {
           itemList: stateProvider.postedOrder.orderList,
           paymentStatus: paymentStatus,
           paymentType: paymentType,
-          tender: stateProvider.finalPayment,
+          tender: paymentType == PaymentType.CASH
+              ? stateProvider.finalPayment
+              : stateProvider.grandTotal,
           vat: stateProvider.taxFinal,
           change: paymentType == PaymentType.CASH
               ? stateProvider.finalPayment - stateProvider.grandTotal
@@ -107,7 +113,9 @@ class TransactionOrderProvider with ChangeNotifier {
           itemList: stateProvider.orderlist.toList(),
           paymentStatus: paymentStatus,
           paymentType: paymentType,
-          tender: stateProvider.finalPayment,
+          tender: paymentType == PaymentType.CASH
+              ? stateProvider.finalPayment
+              : stateProvider.grandTotal,
           vat: stateProvider.vat,
           change: paymentType == PaymentType.CASH
               ? stateProvider.finalPayment - stateProvider.grandTotal

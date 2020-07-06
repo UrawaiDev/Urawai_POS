@@ -85,6 +85,7 @@ class PostedOrderProvider with ChangeNotifier {
   resetFinalPayment() {
     _totalPayment = '';
     _finalPayment = 0;
+    _extraDiscount = 0;
     //notifyListeners();
   }
 

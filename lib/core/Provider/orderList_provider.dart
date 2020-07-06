@@ -113,6 +113,7 @@ class OrderListProvider with ChangeNotifier {
   resetFinalPayment() {
     _totalPayment = '';
     _finalPayment = 0;
+    _extraDiscount = 0;
   }
 
   void addToList({Product item, String referenceOrder, bool vat = false}) {

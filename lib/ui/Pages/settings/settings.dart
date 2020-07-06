@@ -55,7 +55,6 @@ class _SettingPageState extends State<SettingPage> {
                 ),
               ],
             ),
-            // drawer: DrawerMenu(),
             body: Stack(
               children: <Widget>[
                 Padding(
@@ -165,65 +164,72 @@ class _SettingPageState extends State<SettingPage> {
                                 style: kPriceTextStyle,
                               ),
                               trailing: Consumer<ConnectivityResult>(
-                                builder: (_, connectionStatus, __) =>
-                                    RaisedButton.icon(
-                                  onPressed: () async {
-                                    if (hiveBox.length != 0 &&
-                                        connectionStatus !=
-                                            ConnectivityResult.none) {
-                                      generalProvider.isLoading = true;
+                                builder: (_, connectionStatus, __) {
+                                  bool isBtnDisable = ((connectionStatus ==
+                                          ConnectivityResult.none) ||
+                                      hiveBox.length == 0);
+                                  return RaisedButton.icon(
+                                    onPressed: isBtnDisable
+                                        ? null
+                                        : () async {
+                                            if (hiveBox.length != 0 &&
+                                                connectionStatus !=
+                                                    ConnectivityResult.none) {
+                                              generalProvider.isLoading = true;
 
-                                      var currentUser =
-                                          await _authentication.currentUserXXX;
-                                      if (currentUser != null) {
-                                        hiveBox.values
-                                            .forEach((transactionOrder) {
-                                          _firestoreServices.postTransaction(
-                                              currentUser.shopName,
-                                              transactionOrder);
-                                          hiveBox.delete(transactionOrder.id);
-                                        });
+                                              var currentUser =
+                                                  await _authentication
+                                                      .currentUserXXX;
+                                              if (currentUser != null) {
+                                                hiveBox.values.forEach(
+                                                    (transactionOrder) {
+                                                  _firestoreServices
+                                                      .postTransaction(
+                                                          currentUser.shopName,
+                                                          transactionOrder);
+                                                  hiveBox.delete(
+                                                      transactionOrder.id);
+                                                });
 
-                                        //* When Done.
-                                        print('All Done!!!');
-                                        generalProvider.isLoading = false;
-                                        CostumDialogBox.showDialogInformation(
-                                          context: context,
-                                          title: 'Informasi',
-                                          icon: Icons.check,
-                                          iconColor: Colors.green,
-                                          contentText: 'Sinkronisasi Berhasil.',
-                                          onTap: () => Navigator.pop(context),
-                                        );
-                                      }
-                                    }
-                                  },
-                                  icon: Icon(
-                                    Icons.sync,
-                                    size: 28,
-                                    color: ((connectionStatus ==
-                                                ConnectivityResult.none) ||
-                                            hiveBox.length == 0)
+                                                //* When Done.
+                                                print('All Done!!!');
+                                                generalProvider.isLoading =
+                                                    false;
+                                                CostumDialogBox
+                                                    .showDialogInformation(
+                                                  context: context,
+                                                  title: 'Informasi',
+                                                  icon: Icons.check,
+                                                  iconColor: Colors.green,
+                                                  contentText:
+                                                      'Sinkronisasi Berhasil.',
+                                                  onTap: () =>
+                                                      Navigator.pop(context),
+                                                );
+                                              }
+                                            }
+                                          },
+                                    icon: Icon(
+                                      Icons.sync,
+                                      size: 28,
+                                      color: isBtnDisable
+                                          ? Colors.white
+                                          : Colors.green,
+                                    ),
+                                    label: Text(
+                                      'Sinkronisasi',
+                                      style: isBtnDisable
+                                          ? TextStyle(
+                                              fontSize: 20,
+                                              color: Colors.white,
+                                            )
+                                          : kPriceTextStyle,
+                                    ),
+                                    color: isBtnDisable
                                         ? Colors.green
-                                        : Colors.white,
-                                  ),
-                                  label: Text(
-                                    'Sinkronisasi',
-                                    style: ((connectionStatus ==
-                                                ConnectivityResult.none) ||
-                                            hiveBox.length == 0)
-                                        ? kPriceTextStyle
-                                        : TextStyle(
-                                            fontSize: 20,
-                                            color: Colors.white,
-                                          ),
-                                  ),
-                                  color: ((connectionStatus ==
-                                              ConnectivityResult.none) ||
-                                          hiveBox.length == 0)
-                                      ? Colors.grey[350]
-                                      : Colors.green,
-                                ),
+                                        : Colors.grey[350],
+                                  );
+                                },
                               ),
                             ),
                             _bluetoothPrinter(),
@@ -272,28 +278,13 @@ class _SettingPageState extends State<SettingPage> {
                   ]),
             );
           }),
-      trailing: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: <Widget>[
-          RaisedButton(
-              onPressed: () async {
-                var printerDevice = await PrinterService.loadPrinterDevice();
-                if (printerDevice.name != null) PrinterService.testPrint();
-              },
-              child: Text(
-                'Test Print',
-                style: kPriceTextStyle,
-              )),
-          SizedBox(width: 20),
-          RaisedButton(
-              onPressed: () => Navigator.pushNamed(
-                  context, RouteGenerator.kRoutePrinterPage),
-              child: Text(
-                'Scan',
-                style: kPriceTextStyle,
-              )),
-        ],
-      ),
+      trailing: RaisedButton(
+          onPressed: () =>
+              Navigator.pushNamed(context, RouteGenerator.kRoutePrinterPage),
+          child: Text(
+            'Scan',
+            style: kPriceTextStyle,
+          )),
     );
   }
 }

@@ -8,7 +8,6 @@ import 'package:urawai_pos/core/Models/orderList.dart';
 import 'package:urawai_pos/core/Models/transaction.dart';
 import 'package:urawai_pos/core/Provider/orderList_provider.dart';
 import 'package:urawai_pos/core/Provider/transactionOrder_provider.dart';
-import 'package:urawai_pos/ui/Pages/pos/pos_Page.dart';
 import 'package:urawai_pos/ui/Widgets/costum_DialogBox.dart';
 import 'package:urawai_pos/ui/Widgets/extraDiscount.dart';
 import 'package:urawai_pos/ui/Widgets/footer_OrderList.dart';
