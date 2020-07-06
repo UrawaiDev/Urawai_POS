@@ -2,7 +2,6 @@ import 'package:auto_size_text/auto_size_text.dart';
 import 'package:connectivity/connectivity.dart';
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
-import 'package:hive/hive.dart';
 import 'package:provider/provider.dart';
 import 'package:responsive_builder/responsive_builder.dart';
 import 'package:urawai_pos/core/Models/postedOrder.dart';
@@ -13,7 +12,6 @@ import 'package:urawai_pos/core/Provider/postedOrder_provider.dart';
 import 'package:urawai_pos/core/Provider/transactionOrder_provider.dart';
 import 'package:urawai_pos/core/Services/connectivity_service.dart';
 import 'package:urawai_pos/core/Services/firebase_auth.dart';
-import 'package:urawai_pos/ui/Pages/pos/pos_Page.dart';
 import 'package:urawai_pos/ui/Widgets/costum_DialogBox.dart';
 import 'package:urawai_pos/ui/Widgets/left_paymentScreen_OrderList.dart';
 import 'package:urawai_pos/ui/Widgets/left_paymentScreen_postedOrder.dart';
@@ -673,8 +671,13 @@ class _PaymentScreenState extends State<PaymentScreen> {
 
         //delete Posted Order
         if (widget.itemList is PostedOrder) {
-          Hive.box<PostedOrder>(POSPage.postedBoxName)
-              .delete(state.postedOrder.id);
+          final postedOrderProvider =
+              Provider.of<PostedOrderProvider>(context, listen: false);
+          // Hive.box<PostedOrder>(POSPage.postedBoxName)
+          //     .delete(state.postedOrder.id);
+          print('Delete Posted Order: ${state.postedOrder.id}');
+          postedOrderProvider.deletePostedOrder(state.postedOrder.id);
+          postedOrderProvider.resetFinalPayment();
         }
 
         if (postedStatus == true) {

@@ -86,7 +86,6 @@ class PostedOrderProvider with ChangeNotifier {
     _totalPayment = '';
     _finalPayment = 0;
     _extraDiscount = 0;
-    //notifyListeners();
   }
 
   removeItemFromList(int index) {

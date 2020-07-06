@@ -32,6 +32,7 @@ class PaymentScreenLeftPostedOrder extends StatefulWidget {
 class _PaymentScreenLeftPostedOrderState
     extends State<PaymentScreenLeftPostedOrder> {
   TextEditingController _textNote = TextEditingController();
+  PostedOrderProvider postedOrderProvider;
 
   @override
   void dispose() {
@@ -40,12 +41,17 @@ class _PaymentScreenLeftPostedOrderState
   }
 
   @override
-  Widget build(BuildContext context) {
-    final postedOrderProvider =
-        Provider.of<PostedOrderProvider>(context, listen: false);
-
+  void initState() {
+    super.initState();
     //load Posted Order
+    postedOrderProvider =
+        Provider.of<PostedOrderProvider>(context, listen: false);
     postedOrderProvider.postedorder = widget.postedOrder;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    print(postedOrderProvider.postedOrder.id);
 
     //set VAT if tax is Activated.
     _setTaxPostedOrder(postedOrderProvider);
@@ -227,21 +233,6 @@ class _PaymentScreenLeftPostedOrderState
                                   fontWeight: FontWeight.bold,
                                 )),
                           ),
-                          onDoubleTap: () {
-                            print(
-                                'Order ID: ${postedOrderProvider.postedOrder.id}');
-                            print(
-                                'Reference ID: ${widget.postedOrder.refernceOrder}');
-
-                            postedOrderProvider.postedOrder.orderList
-                                .forEach((data) {
-                              print(
-                                  '${data.productName} dgn quantity ${data.quantity}');
-                            });
-                            print(
-                                'Diskon: ${postedOrderProvider.discountTotal}');
-                            print('Total: ${postedOrderProvider.grandTotal}');
-                          },
                           onTap: () => CostumDialogBox.showCostumDialogBox(
                               context: context,
                               icon: Icons.delete,
