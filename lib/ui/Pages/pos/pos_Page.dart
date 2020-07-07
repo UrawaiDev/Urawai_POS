@@ -623,7 +623,7 @@ class _POSPageState extends State<POSPage> with SingleTickerProviderStateMixin {
     CostumDialogBox.showCostumDialogBox(
       context: context,
       title: 'Information',
-      contentString: 'Pesanan Belum disimpan, \n Tetap Lanjut?',
+      contentString: 'Pesanan belum disimpan, \nTetap Lanjut?',
       icon: Icons.warning,
       iconColor: Colors.yellow,
       confirmButtonTitle: 'Ya',

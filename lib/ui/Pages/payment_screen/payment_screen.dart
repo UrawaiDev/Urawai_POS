@@ -120,8 +120,8 @@ class _PaymentScreenState extends State<PaymentScreen> {
                                                                     PaymentType
                                                                             .values[
                                                                         index]),
-                                                            size: 35),
-                                                        SizedBox(width: 5),
+                                                            size: 30),
+                                                        SizedBox(width: 10),
                                                         AutoSizeText(
                                                           PaymentHelper
                                                               .getPaymentType(
