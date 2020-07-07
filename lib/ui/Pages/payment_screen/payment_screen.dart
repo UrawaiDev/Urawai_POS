@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import 'package:provider/provider.dart';
 import 'package:responsive_builder/responsive_builder.dart';
+import 'package:urawai_pos/core/Models/orderList.dart';
 import 'package:urawai_pos/core/Models/postedOrder.dart';
 import 'package:urawai_pos/core/Models/transaction.dart';
 import 'package:urawai_pos/core/Provider/general_provider.dart';
@@ -188,10 +189,15 @@ class _PaymentScreenState extends State<PaymentScreen> {
     return Consumer2<PostedOrderProvider, OrderListProvider>(
         builder: (context, statePostedOrder, stateOrderList, _) {
       var state;
-      if (widget.itemList is PostedOrder)
+      List<OrderList> currentOrderList;
+      if (widget.itemList is PostedOrder) {
         state = statePostedOrder;
-      else
+        currentOrderList = statePostedOrder.postedOrder.orderList;
+      } else {
         state = stateOrderList;
+        currentOrderList = stateOrderList.orderlist;
+      }
+
       return Column(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: <Widget>[
@@ -245,8 +251,18 @@ class _PaymentScreenState extends State<PaymentScreen> {
               onTap: () {
                 GeneralProvider generalProvider =
                     Provider.of<GeneralProvider>(context, listen: false);
-
-                _proceedPayment(state, generalProvider.paymentType);
+                if (currentOrderList.isNotEmpty)
+                  _proceedPayment(state, generalProvider.paymentType);
+                else {
+                  CostumDialogBox.showDialogInformation(
+                      title: 'Informasi',
+                      context: context,
+                      contentText:
+                          'Pastikan pembayaran telah dilakukan & Pesanan tidak Kosong.',
+                      icon: Icons.warning,
+                      iconColor: Colors.yellow,
+                      onTap: () => Navigator.pop(context));
+                }
               }),
         ],
       );
@@ -479,10 +495,14 @@ class _PaymentScreenState extends State<PaymentScreen> {
           Consumer2<PostedOrderProvider, OrderListProvider>(
               builder: (context, statePostedOrder, stateOrderList, _) {
             var state;
-            if (widget.itemList is PostedOrder)
+            List<OrderList> currentOrderList;
+            if (widget.itemList is PostedOrder) {
               state = statePostedOrder;
-            else
+              currentOrderList = statePostedOrder.postedOrder.orderList;
+            } else {
               state = stateOrderList;
+              currentOrderList = stateOrderList.orderlist;
+            }
 
             return Expanded(
               child: Column(
@@ -533,15 +553,15 @@ class _PaymentScreenState extends State<PaymentScreen> {
                         ),
                         onTap: () {
                           if (state.finalPayment != 0 &&
-                              state.finalPayment >= state.grandTotal) {
+                              state.finalPayment >= state.grandTotal &&
+                              currentOrderList.isNotEmpty) {
                             _proceedPayment(state, PaymentType.CASH);
                           } else {
-                            print('Pastikan sudah di bayar');
                             CostumDialogBox.showDialogInformation(
                                 title: 'Informasi',
                                 context: context,
                                 contentText:
-                                    'Pastikan pembayaran telah dilakukan.',
+                                    'Pastikan pembayaran telah dilakukan & Pesanan tidak Kosong.',
                                 icon: Icons.warning,
                                 iconColor: Colors.yellow,
                                 onTap: () => Navigator.pop(context));
