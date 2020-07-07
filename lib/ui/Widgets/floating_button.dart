@@ -67,7 +67,7 @@ class FloatingButton extends StatelessWidget {
       heroTag: 'btnPay',
       tooltip: 'Proses Bayar',
       child: Icon(
-        Icons.payment,
+        Icons.shopping_cart,
       ),
       onPressed: onPayTap,
     );
