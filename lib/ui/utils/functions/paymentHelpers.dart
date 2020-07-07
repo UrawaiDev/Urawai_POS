@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:urawai_pos/core/Models/transaction.dart';
 
 class PaymentHelper {
@@ -43,16 +44,16 @@ class PaymentHelper {
   static IconData getPaymentTypeIcon(PaymentType paymentType) {
     switch (paymentType) {
       case PaymentType.CASH:
-        return Icons.money_off;
+        return FontAwesomeIcons.wallet;
         break;
       case PaymentType.CREDIT_CARD:
-        return Icons.mood;
+        return FontAwesomeIcons.creditCard;
         break;
       case PaymentType.DEBIT_CARD:
-        return Icons.card_giftcard;
+        return FontAwesomeIcons.ccVisa;
         break;
       case PaymentType.EMONEY:
-        return Icons.casino;
+        return FontAwesomeIcons.ccPaypal;
         break;
       default:
         return Icons.note;
