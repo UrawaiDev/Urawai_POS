@@ -26,6 +26,7 @@ import 'package:path_provider/path_provider.dart' as path;
 
 class TransactionHistoryPage extends StatelessWidget {
   final FirestoreServices _firestoreServices = FirestoreServices();
+  final _scaffodlKey = GlobalKey<ScaffoldState>();
 
   @override
   Widget build(BuildContext context) {
@@ -61,19 +62,38 @@ class TransactionHistoryPage extends StatelessWidget {
                 );
 
               return Scaffold(
+                key: _scaffodlKey,
                 appBar: AppBar(
                   title: Text('Riwayat Transasksi'),
                   actions: <Widget>[
-                    IconButton(
-                      tooltip: 'Kirim Laporan via Email atau Whatsapp.',
-                      onPressed: () => _exportToExcel(
-                          currentUser.shopName, currentUser.email),
-                      icon: FaIcon(
-                        FontAwesomeIcons.fileExport,
-                        color: Colors.white,
-                        size: 26,
+                    GestureDetector(
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: <Widget>[
+                          Icon(
+                            FontAwesomeIcons.fileExport,
+                            color: Colors.white,
+                            size: 26,
+                          ),
+                          SizedBox(width: 8),
+                          Text('Export Laporan'),
+                          SizedBox(width: 10),
+                        ],
                       ),
-                    )
+                      onTap: () async {
+                        var docLength = await _firestoreServices
+                            .getDocumentLength(currentUser.shopName);
+
+                        if (docLength.documents.isEmpty || docLength == null) {
+                          _scaffodlKey.currentState.showSnackBar(SnackBar(
+                            content: Text('Tidak ada Dokumen untuk di Export.'),
+                            duration: Duration(seconds: 2),
+                          ));
+                        } else
+                          _exportToExcel(
+                              currentUser.shopName, currentUser.email);
+                      },
+                    ),
                   ],
                 ),
                 drawer: Drawer(

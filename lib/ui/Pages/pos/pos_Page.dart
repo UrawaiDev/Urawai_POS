@@ -508,7 +508,7 @@ class _POSPageState extends State<POSPage> with SingleTickerProviderStateMixin {
       if (orderlistState.addPostedOrder(orderlistState)) {
         CostumDialogBox.showDialogInformation(
             title: 'Information',
-            contentText: 'Daftar sudah disimpan kedalam Draft',
+            contentText: 'Pesanan telah disimpan kedalam Draft',
             context: context,
             icon: Icons.info,
             iconColor: Colors.blue,
@@ -808,15 +808,8 @@ class _POSPageState extends State<POSPage> with SingleTickerProviderStateMixin {
                               leading: CircleAvatar(
                                 child: Text((index + 1).toString()),
                               ),
-                              title: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: <Widget>[
-                                  Text(item.id ?? '-',
-                                      style: TextStyle(fontSize: 22)),
-                                  Text(item.refernceOrder ?? '-',
-                                      style: TextStyle(fontSize: 22)),
-                                ],
-                              ),
+                              title: Text(item.refernceOrder ?? '-',
+                                  style: TextStyle(fontSize: 22)),
                               subtitle: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: <Widget>[
