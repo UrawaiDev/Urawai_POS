@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:urawai_pos/core/Provider/orderList_provider.dart';
-import 'package:urawai_pos/core/Provider/postedOrder_provider.dart';
+import 'package:urawai_pos/ui/Widgets/costum_DialogBox.dart';
 import 'package:urawai_pos/ui/utils/constans/utils.dart';
 
 class ExtraDiscoutDialog extends StatefulWidget {
@@ -16,7 +15,7 @@ class _ExtraDiscoutDialogState extends State<ExtraDiscoutDialog> {
   var _textExtraDiscount = TextEditingController();
 
   static const int DISCOUNT_WITH_PRICE = 0;
-  static const int DISCOUNT_WITH_PERCETAGE = 1;
+  static const int DISCOUNT_WITH_PERCENTAGE = 1;
 
   List<bool> _isSelected = [true, false];
   int _currentIndex = 0;
@@ -122,22 +121,23 @@ class _ExtraDiscoutDialogState extends State<ExtraDiscoutDialog> {
           onPressed: () {
             if (_formKey.currentState.validate()) {
               if (_currentIndex == DISCOUNT_WITH_PRICE) {
-                if (widget.state is OrderListProvider)
-                  widget.state.extraDicount =
-                      double.tryParse(_textExtraDiscount.text);
-                else if (widget.state is PostedOrderProvider)
-                  widget.state.extraDicount =
-                      double.tryParse(_textExtraDiscount.text);
-              } else if (_currentIndex == DISCOUNT_WITH_PERCETAGE) {
-                if (widget.state is OrderListProvider)
-                  widget.state.extraDicount = widget.state.subTotal *
-                      (double.tryParse(_textExtraDiscount.text) / 100);
-                else if (widget.state is PostedOrderProvider)
-                  widget.state.extraDicount = widget.state.subTotal *
-                      (double.tryParse(_textExtraDiscount.text) / 100);
+                double extraDiscount = double.tryParse(_textExtraDiscount.text);
+                if (extraDiscount > widget.state.grandTotal) {
+                  _showWarning();
+                } else
+                  _setExtraDiscount(extraDiscount);
+              } else if (_currentIndex == DISCOUNT_WITH_PERCENTAGE) {
+                double extraDiscount = widget.state.subTotal *
+                    (double.tryParse(_textExtraDiscount.text) / 100);
+
+                if (extraDiscount > widget.state.grandTotal) {
+                  _showWarning();
+                } else {
+                  _setExtraDiscount(extraDiscount);
+                }
               }
 
-              Navigator.pop(context);
+              // Navigator.pop(context);
             }
           },
         )
@@ -146,4 +146,20 @@ class _ExtraDiscoutDialogState extends State<ExtraDiscoutDialog> {
   }
 
   bool _isNumeric(String value) => num.tryParse(value) != null;
+
+  void _showWarning() {
+    CostumDialogBox.showDialogInformation(
+      context: context,
+      icon: Icons.warning,
+      iconColor: Colors.yellow,
+      title: 'Informasi',
+      contentText: 'Ups!!!. Diskon Melebihi Total Bayar.',
+      onTap: () => Navigator.pop(context),
+    );
+  }
+
+  void _setExtraDiscount(double extraDiscount) {
+    widget.state.extraDicount = extraDiscount;
+    Navigator.pop(context);
+  }
 }
