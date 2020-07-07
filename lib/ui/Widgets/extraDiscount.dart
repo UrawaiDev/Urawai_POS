@@ -15,6 +15,9 @@ class _ExtraDiscoutDialogState extends State<ExtraDiscoutDialog> {
   final _formKey = GlobalKey<FormState>();
   var _textExtraDiscount = TextEditingController();
 
+  static const int DISCOUNT_WITH_PRICE = 0;
+  static const int DISCOUNT_WITH_PERCETAGE = 1;
+
   List<bool> _isSelected = [true, false];
   int _currentIndex = 0;
 
@@ -118,14 +121,14 @@ class _ExtraDiscoutDialogState extends State<ExtraDiscoutDialog> {
           ),
           onPressed: () {
             if (_formKey.currentState.validate()) {
-              if (_currentIndex == 0) {
+              if (_currentIndex == DISCOUNT_WITH_PRICE) {
                 if (widget.state is OrderListProvider)
                   widget.state.extraDicount =
                       double.tryParse(_textExtraDiscount.text);
                 else if (widget.state is PostedOrderProvider)
                   widget.state.extraDicount =
                       double.tryParse(_textExtraDiscount.text);
-              } else if (_currentIndex == 1) {
+              } else if (_currentIndex == DISCOUNT_WITH_PERCETAGE) {
                 if (widget.state is OrderListProvider)
                   widget.state.extraDicount = widget.state.subTotal *
                       (double.tryParse(_textExtraDiscount.text) / 100);

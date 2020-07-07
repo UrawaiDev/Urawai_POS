@@ -54,21 +54,22 @@ class _POSPageState extends State<POSPage> with SingleTickerProviderStateMixin {
   final locatorFirestore = GetIt.I<FirestoreServices>();
 
   AnimationController _animationController;
-  Animation<double> _animationScale;
+  Animation<double> _scalebtnAdd;
   Future<Users> currentUser;
   Future _getProduct;
 
   @override
   void initState() {
     super.initState();
+
     _animationController = AnimationController(
       vsync: this,
-      value: 0.1,
-      duration: Duration(seconds: 1),
+      value: 0.5,
+      duration: Duration(milliseconds: 700),
     );
 
-    _animationScale = CurvedAnimation(
-        parent: _animationController, curve: Curves.bounceInOut);
+    _scalebtnAdd = CurvedAnimation(
+        parent: _animationController, curve: Curves.elasticInOut);
     _animationController.forward();
 
     currentUser = locatorAuth.currentUserXXX;
@@ -520,6 +521,8 @@ class _POSPageState extends State<POSPage> with SingleTickerProviderStateMixin {
       //set cashier name for PostedOrder Provider
       Provider.of<PostedOrderProvider>(context, listen: false).cashierName =
           orderlistState.cashierName;
+    } else if (orderlistState.orderlist.isEmpty) {
+      _dialogBoxOnEmptyList();
     }
   }
 
@@ -536,8 +539,8 @@ class _POSPageState extends State<POSPage> with SingleTickerProviderStateMixin {
   }
 
   void _onDeleteTap(OrderListProvider orderlistState) {
-    print('delete button Tapped');
-    if (orderlistState.orderlist.isNotEmpty) {
+    if (orderlistState.orderlist.isNotEmpty ||
+        orderlistState.orderID.isNotEmpty) {
       CostumDialogBox.showCostumDialogBox(
           context: context,
           title: 'Konfirmasi',
@@ -556,6 +559,20 @@ class _POSPageState extends State<POSPage> with SingleTickerProviderStateMixin {
     if (orderlistState.orderlist.isNotEmpty)
       Navigator.pushNamed(context, RouteGenerator.kRoutePaymentScreen,
           arguments: orderlistState.orderlist);
+    else if (orderlistState.orderlist.isEmpty) {
+      _dialogBoxOnEmptyList();
+    }
+  }
+
+  void _dialogBoxOnEmptyList() {
+    CostumDialogBox.showDialogInformation(
+      context: context,
+      title: 'Informasi',
+      icon: Icons.info,
+      iconColor: Colors.yellow,
+      contentText: 'List Pesanan Masih Kosong.',
+      onTap: () => Navigator.pop(context),
+    );
   }
 
   Row transactionButton(
@@ -601,6 +618,19 @@ class _POSPageState extends State<POSPage> with SingleTickerProviderStateMixin {
     );
   }
 
+  void _showDialogWarningUnsaveOrder(
+      OrderListProvider orderlistProvider, Function onOkTap) {
+    CostumDialogBox.showCostumDialogBox(
+      context: context,
+      title: 'Information',
+      contentString: 'Pesanan Belum disimpan, \n Tetap Lanjut?',
+      icon: Icons.warning,
+      iconColor: Colors.yellow,
+      confirmButtonTitle: 'Ya',
+      onConfirmPressed: onOkTap,
+    );
+  }
+
   Widget _headerOrderList() {
     var orderlistProvider = Provider.of<OrderListProvider>(context);
 
@@ -620,20 +650,11 @@ class _POSPageState extends State<POSPage> with SingleTickerProviderStateMixin {
                     iconSize: 25,
                     onPressed: () {
                       if (orderlistProvider.referenceOrder.isNotEmpty) {
-                        CostumDialogBox.showCostumDialogBox(
-                          context: context,
-                          title: 'Information',
-                          contentString:
-                              'Orderlist Sebelumnya belum disimpan, \n Tetap Lanjut?',
-                          icon: Icons.info,
-                          iconColor: Colors.blue,
-                          confirmButtonTitle: 'Ya',
-                          onConfirmPressed: () {
-                            Navigator.pop(context); //close dialogBox
-                            orderlistProvider.resetOrderList();
-                            _showPostedOrderList(context, boxOrder);
-                          },
-                        );
+                        _showDialogWarningUnsaveOrder(orderlistProvider, () {
+                          Navigator.pop(context); //close dialogBox
+                          orderlistProvider.resetOrderList();
+                          _showPostedOrderList(context, boxOrder);
+                        });
                       } else {
                         _showPostedOrderList(context, boxOrder);
                       }
@@ -667,7 +688,7 @@ class _POSPageState extends State<POSPage> with SingleTickerProviderStateMixin {
               );
             }),
             ScaleTransition(
-              scale: _animationScale,
+              scale: _scalebtnAdd,
               child: Padding(
                 padding: const EdgeInsets.only(left: 8.0),
                 child: Consumer<GeneralProvider>(
@@ -684,19 +705,11 @@ class _POSPageState extends State<POSPage> with SingleTickerProviderStateMixin {
                             if (orderlistProvider.orderlist.isEmpty) {
                               _createNewOrder(orderlistProvider);
                             } else if (orderlistProvider.orderlist.isNotEmpty) {
-                              CostumDialogBox.showCostumDialogBox(
-                                context: context,
-                                title: 'Information',
-                                contentString:
-                                    'Orderlist Sebelumnya belum disimpan, \nApakah akan tetap dibuatkan order List Baru?',
-                                icon: Icons.info,
-                                iconColor: Colors.blue,
-                                confirmButtonTitle: 'Ya',
-                                onConfirmPressed: () {
-                                  Navigator.pop(context); //close dialogBox
-                                  _createNewOrder(orderlistProvider);
-                                },
-                              );
+                              _showDialogWarningUnsaveOrder(orderlistProvider,
+                                  () {
+                                Navigator.pop(context); //close dialogBox
+                                _createNewOrder(orderlistProvider);
+                              });
                             }
                           },
                         ),
@@ -1016,6 +1029,10 @@ class _POSPageState extends State<POSPage> with SingleTickerProviderStateMixin {
             ],
           ),
         ),
+        onTap: () {
+          if (orderlistProvider.orderID.isEmpty)
+            _animationController.forward(from: 0.0);
+        },
         onLongPress: () => _addItemtoOrderList(
             orderlistProvider: orderlistProvider, product: product),
         onDoubleTap: () => _addItemtoOrderList(
@@ -1033,7 +1050,12 @@ class _POSPageState extends State<POSPage> with SingleTickerProviderStateMixin {
         vat: _prefs.getBool('vat'),
       );
     } else {
-      _animationController.forward();
+      _animationController.forward(from: 0.0);
+      // if (_animationController.isCompleted)
+      //   _animationController.reverse();
+      // else if (_animationController.isDismissed) _animationController.forward();
+
+      // print(_animationController.status);
     }
   }
 
