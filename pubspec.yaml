@@ -21,6 +21,7 @@ dependencies:
     sdk: flutter
   hive: ^1.4.1+1
   hive_flutter: ^0.3.0+2
+  
   path_provider: ^1.6.5
   font_awesome_flutter: ^8.8.1
   cupertino_icons: ^0.1.2
@@ -43,6 +44,7 @@ dependencies:
   
   #send email 
   flutter_email_sender: ^3.0.1
+  
   
 
   #image slider
@@ -82,7 +84,11 @@ dev_dependencies:
   flutter_test:
     sdk: flutter
   hive_generator: ^0.7.0+2
-  build_runner: ^1.8.1
+  build_runner: ^1.10.0
+dependency_overrides: 
+  path: 1.7.0
+  
+
   
 
 
