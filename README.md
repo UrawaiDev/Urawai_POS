@@ -5,7 +5,10 @@
 ![Flutter Version](https://img.shields.io/badge/flutter-1.19.0--4.3.pre-yellow)
 
 
-![Main Page](https://github.com/UrawaiDev/Urawai_POS/blob/master/assets/images/github_image.png?raw=true)
+![Banner](https://raw.githubusercontent.com/UrawaiDev/Urawai_POS/master/assets/images/banner_img.png)
+
+<a href='https://play.google.com/store/apps/details?id=com.urawai_dev.urawai_pos&hl=en&pcampaignid=pcampaignidMKT-Other-global-all-co-prtnr-py-PartBadge-Mar2515-1'><img alt='Get it on Google Play' src='https://play.google.com/intl/en_us/badges/static/images/badges/en_badge_web_generic.png' width="200" height="80"/></a>
+
 
 Aplikasi Kasir online GRATIS dan BEBAS IKLAN untuk kebutuhan usaha anda.
 
